@@ -2,9 +2,16 @@ package modcharting;
 
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxSprite;
-import Note;
 import flixel.FlxG;
+
+#if LEATHER
+import states.PlayState;
+import game.Note;
+
+#else 
 import PlayState;
+import Note;
+#end
 
 using StringTools;
 
@@ -16,25 +23,34 @@ class NoteMovement
     public static var arrowSize:Float = 112;
     public static var defaultStrumX:Array<Float> = [];
     public static var defaultStrumY:Array<Float> = [];
+    public static var defaultScale:Array<Float> = [];
+    public static var arrowSizes:Array<Float> = [];
     public static function getDefaultStrumPos(game:PlayState)
     {
         defaultStrumX = []; //reset
         defaultStrumY = []; 
-        for (i in game.strumLineNotes.members)
+        defaultScale = [];
+        keyCount = Math.floor(#if LEATHER PlayState.strumLineNotes.length/2 #else game.strumLineNotes.length/2 #end); //base game doesnt have opponent strums as group
+        playerKeyCount = #if LEATHER PlayState.playerStrums.length #else game.playerStrums.length #end;
+
+        for (i in #if LEATHER 0...PlayState.strumLineNotes.members.length #else 0...game.strumLineNotes.members.length #end)
         {
-            defaultStrumX.push(i.x);
-            defaultStrumY.push(i.y);
+            #if LEATHER 
+            var strum = PlayState.strumLineNotes.members[i];
+            #else 
+            var strum = game.strumLineNotes.members[i];
+            #end
+            defaultStrumX.push(strum.x);
+            defaultStrumY.push(strum.y);
+            #if LEATHER
+            var localKeyCount = (i < keyCount ? keyCount : playerKeyCount);
+            var s = Std.parseFloat(game.ui_Settings[0]) * (Std.parseFloat(game.ui_Settings[2]) - (Std.parseFloat(game.mania_size[localKeyCount-1])));
+            #else 
+            var s = 0.7;
+            #end
+            defaultScale.push(s);
+            arrowSizes.push(160*s);
         }
-        #if LEATHER
-        arrowScale = Std.parseFloat(game.ui_Settings[0]) * (Std.parseFloat(game.ui_Settings[2]) - (Std.parseFloat(game.mania_size[localKeyCount-1])));
-        #else 
-        arrowScale = 0.7;
-        #end
-
-        keyCount = Math.floor(game.strumLineNotes.length/2); //base game doesnt have opponent strums as group
-        playerKeyCount = game.playerStrums.length;
-        arrowSize = 160 * arrowScale;
-
     }
     public static function setNotePath(daNote:Note, lane:Int, scrollSpeed:Float, curPos:Float, noteDist:Float, incomingAngleX:Float, incomingAngleY:Float)
     {

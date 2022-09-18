@@ -4,6 +4,14 @@ import flixel.math.FlxAngle;
 import openfl.geom.Vector3D;
 import flixel.FlxG;
 
+#if LEATHER
+import states.PlayState;
+import game.Note;
+#else 
+import PlayState;
+import Note;
+#end
+
 class ModchartUtil
 {
     public static function getDownscroll(instance:PlayState)
@@ -33,6 +41,7 @@ class ModchartUtil
         #if (PSYCH || ANDROMEDA) 
         return instance.songSpeed;
         #elseif LEATHER
+        @:privateAccess
         return instance.speed;
         #elseif KADE 
         return PlayStateChangeables.scrollSpeed == 1 ? PlayState.SONG.speed : PlayStateChangeables.scrollSpeed;
@@ -41,6 +50,73 @@ class ModchartUtil
         #end
     }
 
+
+    public static function getIsPixelStage(instance:PlayState)
+    {
+        #if LEATHER
+        return PlayState.SONG.ui_Skin == 'pixel';
+        #else 
+        return PlayState.isPixelStage;
+        #end
+    }
+
+    public static function getNoteOffsetX(daNote:Note)
+    {
+        #if PSYCH
+        return daNote.offsetX;
+        #elseif LEATHER 
+        //fuck
+        var offset:Float = 0;
+        if (daNote.mustPress)
+        {
+            var instance = PlayState.instance;
+            var arrayVal = Std.string([daNote.noteData, daNote.arrow_Type, daNote.isSustainNote]);
+            var coolStrum = PlayState.playerStrums.members[Math.floor(Math.abs(daNote.noteData))];
+            if (!instance.prevPlayerXVals.exists(arrayVal))
+            {
+                var tempShit:Float = 0.0;
+
+                
+                var targetX = coolStrum.x;
+
+                while (Std.int(targetX + (daNote.width / 2)) != Std.int(coolStrum.x + (coolStrum.width / 2)))
+                {
+                    targetX += (targetX + daNote.width > coolStrum.x + coolStrum.width ? -0.1 : 0.1);
+                    tempShit += (targetX + daNote.width > coolStrum.x + coolStrum.width ? -0.1 : 0.1);
+                }
+
+                instance.prevPlayerXVals.set(arrayVal, tempShit);
+            }
+            offset = instance.prevPlayerXVals.get(arrayVal);
+        }
+        else 
+        {
+            var instance = PlayState.instance;
+            var arrayVal = Std.string([daNote.noteData, daNote.arrow_Type, daNote.isSustainNote]);
+            var coolStrum = PlayState.enemyStrums.members[Math.floor(Math.abs(daNote.noteData))];
+            if (!instance.prevEnemyXVals.exists(arrayVal))
+            {
+                var tempShit:Float = 0.0;
+
+                
+                var targetX = coolStrum.x;
+
+                while (Std.int(targetX + (daNote.width / 2)) != Std.int(coolStrum.x + (coolStrum.width / 2)))
+                {
+                    targetX += (targetX + daNote.width > coolStrum.x + coolStrum.width ? -0.1 : 0.1);
+                    tempShit += (targetX + daNote.width > coolStrum.x + coolStrum.width ? -0.1 : 0.1);
+                }
+
+                instance.prevEnemyXVals.set(arrayVal, tempShit);
+            }
+            offset = instance.prevEnemyXVals.get(arrayVal);
+        }
+        return offset;
+        #else 
+        return 37;
+        #end
+    }
+    
 
     static var currentFakeCrochet:Float = -1;
     static var lastBpm:Float = -1;

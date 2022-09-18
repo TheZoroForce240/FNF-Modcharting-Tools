@@ -18,9 +18,10 @@ using StringTools;
 //for psych lua
 class ModchartLuaFuncs
 {
-    #if PSYCH
+   
     public static function luaFunctionStuff()
     {
+        #if PSYCH
         #if LUA_ALLOWED
         for (funkin in PlayState.instance.luaArray)
         {
@@ -148,8 +149,13 @@ class ModchartLuaFuncs
         FunkinLua.haxeInterp.variables.set('NoteMovement', NoteMovement);
         FunkinLua.haxeInterp.variables.set('NotePositionData', PlayfieldRenderer.NotePositionData);
         #end
+
+
+        #elseif LEATHER
+
+        #end
     }
-    #end
+    
 }
 
 

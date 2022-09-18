@@ -3,6 +3,16 @@ package modcharting;
 import modcharting.PlayfieldRenderer.NotePositionData;
 import flixel.FlxG;
 
+#if LEATHER
+import states.PlayState;
+import game.Note;
+import game.StrumNote;
+import game.Conductor;
+#else 
+import PlayState;
+import Note;
+#end
+
 enum ModifierType
 {
     ALL;
@@ -21,6 +31,7 @@ class Modifier
     public var type:ModifierType = ALL;
     public var playfield:Int = -1;
     public var targetLane:Int = -1;
+    public var instance:PlayState = null;
 
     public function new(tag:String, ?type:ModifierType = ALL, ?playfield:Int = -1)
     {
@@ -203,8 +214,9 @@ class ReverseModifier extends Modifier
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
     {
         var scrollSwitch = 520;
-        if (ClientPrefs.downScroll)
-            scrollSwitch = -520;
+        if (instance != null)
+            if (ModchartUtil.getDownscroll(instance))
+                scrollSwitch = -520;
         noteData.y += scrollSwitch * currentValue;
     }
     override function noteDistMath(noteDist:Float, lane:Int, curPos:Float, pf:Int)
