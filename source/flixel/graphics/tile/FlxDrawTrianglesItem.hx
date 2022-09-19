@@ -12,6 +12,7 @@ import flixel.util.FlxColor;
 import openfl.display.Graphics;
 import openfl.display.TriangleCulling;
 import openfl.geom.ColorTransform;
+import openfl.Vector;
 
 typedef DrawData<T> = #if (flash || openfl >= "4.0.0") openfl.Vector<T> #else Array<T> #end;
 
@@ -127,7 +128,7 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 	}
 
 	public function addTriangles(vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>, ?position:FlxPoint,
-			?cameraBounds:FlxRect):Void
+			?cameraBounds:FlxRect, ?transform:ColorTransform):Void
 	{
 		if (position == null)
 			position = point.set();
@@ -199,38 +200,45 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 			indicesPosition += indicesLength;
 		}
 
-		for (i in 0...numberOfVertices)
+		for (i in 0...verticesLength)
 		{
-			if (colorMultipliers == null)
-				colorMultipliers = [];
 
-			if (colorOffsets == null)
-				colorOffsets = [];
-
-			alphas.push(1.0);
-			colorMultipliers.push(1);
-			colorMultipliers.push(1);
-			colorMultipliers.push(1);
-
-			colorOffsets.push(0);
-			colorOffsets.push(0);
-			colorOffsets.push(0);
-			colorOffsets.push(0);
-
-			colorMultipliers.push(1);
-
-			//doing it twice fixes it??????
-			alphas.push(1.0);
-			colorMultipliers.push(1);
-			colorMultipliers.push(1);
-			colorMultipliers.push(1);
+			alphas.push(transform != null ? transform.alphaMultiplier : 1.0);
+			if (colored || hasColorOffsets)
+			{
+				if (colorMultipliers == null)
+					colorMultipliers = [];
 	
-			colorOffsets.push(0);
-			colorOffsets.push(0);
-			colorOffsets.push(0);
-			colorOffsets.push(0);
+				if (colorOffsets == null)
+					colorOffsets = [];
+				
+				if (transform != null)
+				{
+					colorMultipliers.push(transform.redMultiplier);
+					colorMultipliers.push(transform.greenMultiplier);
+					colorMultipliers.push(transform.blueMultiplier);
 	
-			colorMultipliers.push(1);
+					colorOffsets.push(transform.redOffset);
+					colorOffsets.push(transform.greenOffset);
+					colorOffsets.push(transform.blueOffset);
+					colorOffsets.push(transform.alphaOffset);
+				}
+				else
+				{
+					colorMultipliers.push(1);
+					colorMultipliers.push(1);
+					colorMultipliers.push(1);
+	
+					colorOffsets.push(0);
+					colorOffsets.push(0);
+					colorOffsets.push(0);
+					colorOffsets.push(0);
+				}
+	
+				colorMultipliers.push(1);
+
+			}
+
 		}
 
 

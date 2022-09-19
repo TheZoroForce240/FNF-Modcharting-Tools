@@ -56,6 +56,7 @@ class NotePositionData //made it a class so hscript should work
     public var y:Float;
     public var z:Float;
     public var angle:Float;
+    public var alpha:Float;
     public var scaleX:Float;
     public var scaleY:Float;
     public var curPos:Float;
@@ -213,6 +214,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         strum.y = strumData.y;
         //strum.z = strumData.z;
         strum.angle = strumData.angle;
+        strum.alpha = strumData.alpha;
         strum.scale.x = strumData.scaleX;
         strum.scale.y = strumData.scaleY;
     }
@@ -237,6 +239,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
             strumData.y =  strumY + playfields[p].y;
             strumData.z = strumZ + playfields[p].z; 
             strumData.angle = strumAngle;
+            strumData.alpha = 1;
             strumData.scaleX = strumScaleX; 
             strumData.scaleY = strumScaleY; 
             strumData.index = i;
@@ -262,6 +265,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         daNote.y = noteData.y;
         daNote.z = noteData.z;
         daNote.angle = noteData.angle;
+        daNote.alpha = noteData.alpha;
         daNote.scale.x = noteData.scaleX;
         daNote.scale.y = noteData.scaleY;
     }
@@ -302,6 +306,14 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         noteData.y = noteY + playfields[playfieldIndex].y;
         noteData.z = noteZ + playfields[playfieldIndex].z; 
         noteData.angle = noteAngle;
+        #if PSYCH
+        noteData.alpha = notes.members[noteIndex].multAlpha;
+        #else 
+        if (notes.members[noteIndex].isSustainNote)
+            noteData.alpha = 0.6;
+        else 
+            noteData.alpha = 1;
+        #end
         noteData.scaleX = noteScaleX; 
         noteData.scaleY = noteScaleY; 
         noteData.index = noteIndex;
@@ -466,6 +478,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
 
                 if (daNote.mesh == null)
                 {
+                    daNote.alpha = 1;
                     daNote.mesh = new SustainMesh(0,0); //setup strip
                     daNote.mesh.loadGraphic(daNote.updateFramePixels());
                     daNote.mesh.shader = daNote.shader;
@@ -476,6 +489,8 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
                 }
                 daNote.mesh.x = 0;
                 daNote.mesh.y = 0;
+                daNote.alpha = noteData.alpha;
+                daNote.mesh.alpha = daNote.alpha;
 
                 var songSpeed = ModchartUtil.getScrollSpeed(instance);
                 var lane = noteData.lane;

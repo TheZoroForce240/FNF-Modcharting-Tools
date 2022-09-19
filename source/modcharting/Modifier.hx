@@ -402,3 +402,16 @@ class SpeedModifier extends Modifier
         return curPos * currentValue;
     }
 }
+
+
+class StealthModifier extends Modifier
+{
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        noteData.alpha *= 1-currentValue;
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteData.alpha *= 1-currentValue;
+    }
+}

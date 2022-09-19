@@ -141,13 +141,15 @@ class ModchartLuaFuncs
         }
         #end
         #if hscript
-
-        FunkinLua.haxeInterp.variables.set('Math', Math);
-        FunkinLua.haxeInterp.variables.set('PlayfieldRenderer', PlayfieldRenderer);
-        FunkinLua.haxeInterp.variables.set('ModchartUtil', ModchartUtil);
-        FunkinLua.haxeInterp.variables.set('Modifier', Modifier);
-        FunkinLua.haxeInterp.variables.set('NoteMovement', NoteMovement);
-        FunkinLua.haxeInterp.variables.set('NotePositionData', PlayfieldRenderer.NotePositionData);
+        if (FunkinLua.haxeInterp != null)
+        {
+            FunkinLua.haxeInterp.variables.set('Math', Math);
+            FunkinLua.haxeInterp.variables.set('PlayfieldRenderer', PlayfieldRenderer);
+            FunkinLua.haxeInterp.variables.set('ModchartUtil', ModchartUtil);
+            FunkinLua.haxeInterp.variables.set('Modifier', Modifier);
+            FunkinLua.haxeInterp.variables.set('NoteMovement', NoteMovement);
+            FunkinLua.haxeInterp.variables.set('NotePositionData', PlayfieldRenderer.NotePositionData);
+        }
         #end
 
 
