@@ -10,6 +10,14 @@ Just a thing I made to make modcharting easier, should be easy to add to most en
 ![](https://github.com/TheZoroForce240/FNF-Modcharting-Tools/blob/main/readme/playfields.gif)
 ### Custom Modifier Support via Hscript
 ![](https://github.com/TheZoroForce240/FNF-Modcharting-Tools/blob/main/readme/custommods.gif)
+### Support for multiple engines
+- Base Game (not tested)
+- [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine) (working 0.6.2, includes lua functions)
+- [Leather Engine](https://github.com/Leather128/LeatherEngine) (working 0.4.2)
+- [Kade Engine](https://github.com/KadeDev/Kade-Engine) (not tested)
+- [Yoshi Engine](https://github.com/YoshiCrafter29/YoshiCrafterEngine) (not tested)
+- [Forever Engine Legacy](https://github.com/Yoshubs/Forever-Engine-Legacy) (not tested)
+- [FPS Plus](https://github.com/ThatRozebudDude/FPS-Plus-Public) (not tested)
 
 
 ## Credits 
@@ -79,7 +87,15 @@ class Note extends FlxSprite
   public var z:Float = 0;
 
 ```
+- In Project.xml:
+```xml
+
+<define name="PSYCH" />
+
+```
+You need to define which engine you're using to fix compiling issues, or it would default to base game settings (downscroll won't work etc).
+Available ones: PSYCH, KADE, LEATHER, FOREVER_LEGACY, YOSHI, FPSPLUS
 
 
-
+3. Now if your game compiles successfully then you should be all good to go.
 
