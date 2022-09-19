@@ -30,7 +30,7 @@ class NoteMovement
         defaultStrumX = []; //reset
         defaultStrumY = []; 
         defaultScale = [];
-        keyCount = Math.floor(#if LEATHER PlayState.strumLineNotes.length/2 #else game.strumLineNotes.length/2 #end); //base game doesnt have opponent strums as group
+        keyCount = #if LEATHER PlayState.strumLineNotes.length-PlayState.playerStrums.length #else game.strumLineNotes.length-game.playerStrums.length #end; //base game doesnt have opponent strums as group
         playerKeyCount = #if LEATHER PlayState.playerStrums.length #else game.playerStrums.length #end;
 
         for (i in #if LEATHER 0...PlayState.strumLineNotes.members.length #else 0...game.strumLineNotes.members.length #end)
