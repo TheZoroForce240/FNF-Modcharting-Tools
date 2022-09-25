@@ -1,5 +1,6 @@
 package modcharting;
 
+import flixel.math.FlxMath;
 import modcharting.PlayfieldRenderer.NotePositionData;
 import flixel.FlxG;
 
@@ -412,6 +413,34 @@ class StealthModifier extends Modifier
     }
     override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
     {
-        noteData.alpha *= 1-currentValue;
+        noteMath(noteData, lane, 0, pf);
+    }
+}
+
+
+class InvertModifier extends Modifier
+{
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        noteData.x += NoteMovement.arrowSizes[lane] * (lane % 2 == 0 ? 1 : -1) * currentValue;
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteMath(noteData, lane, 0, pf);
+    }
+}
+
+class FlipModifier extends Modifier
+{
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        var nd = lane % NoteMovement.keyCount;
+        var newPos = FlxMath.remapToRange(nd, 0, NoteMovement.keyCount, NoteMovement.keyCount, -NoteMovement.keyCount);
+        noteData.x += NoteMovement.arrowSizes[lane] * newPos * currentValue;
+        noteData.x -= NoteMovement.arrowSizes[lane] * currentValue;
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteMath(noteData, lane, 0, pf);
     }
 }

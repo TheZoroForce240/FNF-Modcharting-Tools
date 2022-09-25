@@ -256,7 +256,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         return strumData;
     }
 
-
    
 
     private function addDataToNote(noteData:NotePositionData, daNote:Note)
