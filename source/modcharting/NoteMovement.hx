@@ -1,5 +1,6 @@
 package modcharting;
 
+import flixel.math.FlxMath;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxSprite;
 import flixel.FlxG;
@@ -90,6 +91,25 @@ class NoteMovement
         offsetThingy += 27.5 * ((lastBpm / 100) - 1) * (songSpeed - 1);
         //daNote.zScaledOffsetY += offsetThingy;
     }*/
+
+    public static function getLaneDiffFromCenter(lane:Int)
+    {
+        var col:Float = lane%4;
+        if ((col+1) > (keyCount*0.5))
+        {
+            col -= (keyCount*0.5)+1;
+        }
+        else 
+        {
+            col -= (keyCount*0.5);
+        }
+
+        //col = (col-col-col); //flip pos/negative
+
+        //trace(col);
+
+        return col;
+    }
 
 
 }

@@ -84,6 +84,19 @@ class ModchartLuaFuncs
                 PlayState.instance.playfieldRenderer.tweenModifierSubValue(modifier,subValue,val,time,ease);
             });
 
+            Lua_helper.add_callback(funkin.lua, 'setModEaseFunc', function(name:String, ease:String){
+                if (PlayState.instance.playfieldRenderer.modifiers.exists(name))
+                {
+                    var mod = PlayState.instance.playfieldRenderer.modifiers.get(name);
+                    if (Std.isOfType(mod, EaseCurveModifier))
+                    {
+                        var temp:Dynamic = mod;
+                        var castedMod:EaseCurveModifier = temp;
+                        castedMod.setEase(ease);
+                    }
+                }
+            });
+
 
 
             Lua_helper.add_callback(funkin.lua, 'set', function(beat:Float, argsAsString:String){

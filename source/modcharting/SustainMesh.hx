@@ -1,5 +1,6 @@
 package modcharting;
 
+import flixel.graphics.frames.FlxFrame.FlxFrameType;
 import flixel.FlxStrip;
 
 
@@ -10,7 +11,7 @@ class SustainMesh extends FlxStrip
 
     override public function draw():Void
     {
-        if (alpha == 0 || graphic == null || vertices == null)
+        if (alpha == 0 || graphic == null || _frame.type == FlxFrameType.EMPTY || vertices == null)
             return;
 
         for (camera in cameras)
@@ -19,7 +20,7 @@ class SustainMesh extends FlxStrip
                 continue;
 
             getScreenPosition(_point, camera).subtractPoint(offset);
-            camera.drawTriangles(graphic, vertices, indices, uvtData, colors, _point, colorTransform, blend, repeat, antialiasing, shader);
+            camera.drawTriangles(graphic, framePixels, vertices, indices, uvtData, colors, _point, colorTransform, blend, repeat, antialiasing, shader);
         }
     }
 }

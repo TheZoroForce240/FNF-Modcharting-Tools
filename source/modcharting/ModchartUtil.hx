@@ -1,5 +1,6 @@
 package modcharting;
 
+import flixel.math.FlxMath;
 import flixel.math.FlxAngle;
 import openfl.geom.Vector3D;
 import flixel.FlxG;
@@ -150,9 +151,10 @@ class ModchartUtil
 
         
         
+        
         var newz = pos.z - 1;
         var zRange = zNear - zFar;
-        var tanHalfFOV = Math.tan(FOV/2);
+        var tanHalfFOV = FlxMath.fastSin(FOV*0.5)/FlxMath.fastCos(FOV*0.5); //faster tan
         if (pos.z > 1) //if above 1000 z basically
             newz = 0; //should stop weird mirroring with high z values
 
@@ -162,21 +164,24 @@ class ModchartUtil
         //var m23 = 2 * zFar * zNear / zRange;
         //var m32 = 1;
 
-        var xOffsetToCenter = pos.x - FlxG.width/2; //so the perspective focuses on the center of the screen
-        var yOffsetToCenter = pos.y - FlxG.height/2;
+        var xOffsetToCenter = pos.x - (FlxG.width*0.5); //so the perspective focuses on the center of the screen
+        var yOffsetToCenter = pos.y - (FlxG.height*0.5);
 
         var zPerspectiveOffset = (newz+(2 * zFar * zNear / zRange));
 
-        xOffsetToCenter += (offsetX / (1/-zPerspectiveOffset));
-        yOffsetToCenter += (offsetY / (1/-zPerspectiveOffset));
+
+        //xOffsetToCenter += (offsetX / (1/-zPerspectiveOffset));
+        //yOffsetToCenter += (offsetY / (1/-zPerspectiveOffset));
+        xOffsetToCenter += (offsetX * -zPerspectiveOffset);
+        yOffsetToCenter += (offsetY * -zPerspectiveOffset);
 
         var xPerspective = xOffsetToCenter*(1/tanHalfFOV);
-        var yPerspective = yOffsetToCenter/(1/tanHalfFOV);
+        var yPerspective = yOffsetToCenter*tanHalfFOV;
         xPerspective /= -zPerspectiveOffset;
         yPerspective /= -zPerspectiveOffset;
 
-        pos.x = xPerspective+FlxG.width/2; //offset it back to normal
-        pos.y = yPerspective+FlxG.height/2;
+        pos.x = xPerspective+(FlxG.width*0.5); //offset it back to normal
+        pos.y = yPerspective+(FlxG.height*0.5);
         pos.z = zPerspectiveOffset;
 
         
@@ -198,9 +203,9 @@ class ModchartUtil
     {
         var pos:Vector3D = new Vector3D();
         var rad = FlxAngle.TO_RAD;
-        pos.x = Math.cos(theta*rad)*Math.sin(phi*rad);
-        pos.y = Math.cos(phi*rad);
-        pos.z =  Math.sin(theta*rad)*Math.sin(phi*rad);
+        pos.x = FlxMath.fastCos(theta*rad)*FlxMath.fastSin(phi*rad);
+        pos.y = FlxMath.fastCos(phi*rad);
+        pos.z = FlxMath.fastSin(theta*rad)*FlxMath.fastSin(phi*rad);
         pos.x *= radius;
         pos.y *= radius;
         pos.z *= radius;
