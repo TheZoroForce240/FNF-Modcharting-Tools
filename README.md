@@ -59,7 +59,7 @@ override public function create()
 
 // (at the bottom of create())
 
-ModchartLuaFuncs.luaFunctionStuff(); //add this if you want lua functions in scripts
+ModchartFuncs.loadLuaFunctions(); //add this if you want lua functions in scripts
 //being used in psych engine as an example
 
 callOnLuas('onCreatePost', []);

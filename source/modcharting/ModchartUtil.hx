@@ -39,6 +39,9 @@ class ModchartUtil
     }
     public static function getScrollSpeed(instance:PlayState)
     {
+        if (instance == null)
+            return PlayState.SONG.speed;
+
         #if (PSYCH || ANDROMEDA) 
         return instance.songSpeed;
         #elseif LEATHER
@@ -54,6 +57,8 @@ class ModchartUtil
 
     public static function getIsPixelStage(instance:PlayState)
     {
+        if (instance == null)
+            return false;
         #if LEATHER
         return PlayState.SONG.ui_Skin == 'pixel';
         #else 
