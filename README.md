@@ -31,7 +31,7 @@ Still very WIP and not everything is supported yet!
 2. Now you only need to make a few small additions to get everything working,
 - In PlayState.hx:
 ```haxe
-import modcharting.ModchartLuaFuncs;
+import modcharting.ModchartFuncs;
 import modcharting.NoteMovement;
 import modcharting.PlayfieldRenderer;
 
