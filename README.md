@@ -50,7 +50,8 @@ override public function create()
   playfieldRenderer = new PlayfieldRenderer(strumLineNotes, notes, this);
   playfieldRenderer.cameras = [camHUD];
   add(playfieldRenderer);
-  add(grpNoteSplashes); //before adding this, remove(or smth) the add(grpNoteSplashes); that is below the add(strumLineNotes);
+  add(grpNoteSplashes); /*place splashes in front (add this if the engine has splashes).
+  If you have added this: remove(or something) the add(grpNoteSplashes); which is by default below the add(strumLineNotes);*/
       
       
 ```
