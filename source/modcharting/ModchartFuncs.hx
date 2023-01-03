@@ -25,7 +25,7 @@ class ModchartFuncs
         for (funkin in PlayState.instance.luaArray)
         {
             #if hscript
-            funkin.initHaxeInterp();
+            funkin.initHaxeModule();
             #end
             Lua_helper.add_callback(funkin.lua, 'startMod', function(name:String, modClass:String, type:String = '', pf:Int = -1){
                 startMod(name,modClass,type,pf);
@@ -68,14 +68,14 @@ class ModchartFuncs
         }
         #end
         #if hscript
-        if (FunkinLua.haxeInterp != null)
+        if (FunkinLua.hscript != null)
         {
-            FunkinLua.haxeInterp.variables.set('Math', Math);
-            FunkinLua.haxeInterp.variables.set('PlayfieldRenderer', PlayfieldRenderer);
-            FunkinLua.haxeInterp.variables.set('ModchartUtil', ModchartUtil);
-            FunkinLua.haxeInterp.variables.set('Modifier', Modifier);
-            FunkinLua.haxeInterp.variables.set('NoteMovement', NoteMovement);
-            FunkinLua.haxeInterp.variables.set('NotePositionData', PlayfieldRenderer.NotePositionData);
+            FunkinLua.hscript.variables.set('Math', Math);
+            FunkinLua.hscript.variables.set('PlayfieldRenderer', PlayfieldRenderer);
+            FunkinLua.hscript.variables.set('ModchartUtil', ModchartUtil);
+            FunkinLua.hscript.variables.set('Modifier', Modifier);
+            FunkinLua.hscript.variables.set('NoteMovement', NoteMovement);
+            FunkinLua.hscript.variables.set('NotePositionData', PlayfieldRenderer.NotePositionData);
         }
         #end
 
