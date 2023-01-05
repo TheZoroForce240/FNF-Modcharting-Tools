@@ -46,7 +46,7 @@ class PlayState extends MusicBeatState
 override public function create()
 {
 
-  //Add this before camfollow stuff
+  //Add this before camfollow stuff and after strumLineNotes and notes have been made
   playfieldRenderer = new PlayfieldRenderer(strumLineNotes, notes, this);
   playfieldRenderer.cameras = [camHUD];
   add(playfieldRenderer);
