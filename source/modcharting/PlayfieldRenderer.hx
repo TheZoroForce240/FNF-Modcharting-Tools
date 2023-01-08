@@ -77,14 +77,16 @@ typedef Playfield =
     var z:Float;
 }
 
+typedef StrumNoteType = 
+#if (PSYCH || LEATHER) StrumNote 
+#elseif KADE StaticArrow
+#elseif FOREVER_LEGACY UIStaticArrow
+#elseif ANDROMEDA Receptor
+#else FlxSprite #end;
+
 class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can edit draw
 {
-    var strumGroup:FlxTypedGroup<
-    #if (PSYCH || LEATHER) StrumNote 
-    #elseif KADE StaticArrow
-    #elseif FOREVER_LEGACY UIStaticArrow
-    #elseif ANDROMEDA Receptor
-    #else FlxSprite #end>;
+    var strumGroup:FlxTypedGroup<StrumNoteType>;
     var notes:FlxTypedGroup<Note>;
     var instance:PlayState;
     public var playfields:Array<Playfield> = []; //adding an extra playfield will add 1 for each player
@@ -104,12 +106,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         //makes 4 triangles
     ];
 
-    public function new(strumGroup:FlxTypedGroup<
-        #if (PSYCH || LEATHER) StrumNote 
-        #elseif KADE StaticArrow
-        #elseif FOREVER_LEGACY UIStaticArrow
-        #elseif ANDROMEDA Receptor
-        #else FlxSprite #end>, notes:FlxTypedGroup<Note>,instance:PlayState) 
+    public function new(strumGroup:FlxTypedGroup<StrumNoteType>, notes:FlxTypedGroup<Note>,instance:PlayState) 
     {
         this.strumGroup = strumGroup;
         this.notes = notes;
