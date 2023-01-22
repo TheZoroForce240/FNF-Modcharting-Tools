@@ -485,7 +485,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
                 if (daNote.mesh == null)
                 {
                     daNote.alpha = 1;
-                    daNote.mesh = new SustainMesh(0,0); //setup strip
+                    daNote.mesh = new FlxStrip(0,0); //setup strip
                     daNote.mesh.loadGraphic(daNote.updateFramePixels());
                     daNote.mesh.shader = daNote.shader;
                     for (uv in noteUV)

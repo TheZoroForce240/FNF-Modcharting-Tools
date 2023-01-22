@@ -12,7 +12,7 @@ Still very WIP and not everything is supported yet!
 ![](https://github.com/TheZoroForce240/FNF-Modcharting-Tools/blob/main/readme/custommods.gif)
 ### Support for multiple engines
 - Base Game (not tested)
-- [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine) (working 0.6.2, includes lua functions)
+- [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine) (working 0.6.3, includes lua functions)
 - [Leather Engine](https://github.com/Leather128/LeatherEngine) (working 0.4.2)
 - [Kade Engine](https://github.com/KadeDev/Kade-Engine) (not tested)
 - [Yoshi Engine](https://github.com/YoshiCrafter29/YoshiCrafterEngine) (not tested)
@@ -84,7 +84,7 @@ public function startCountdown():Void
 class Note extends FlxSprite
 {
   //add these 2 variables for the renderer
-  public var mesh:modcharting.SustainMesh = null; 
+  public var mesh:flixel.FlxStrip = null; 
   public var z:Float = 0;
 
 ```
