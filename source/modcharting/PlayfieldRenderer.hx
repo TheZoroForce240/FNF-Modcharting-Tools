@@ -30,26 +30,6 @@ import Note;
 
 using StringTools;
 
-/*
-typedef NotePositionData = 
-{
-    var x:Float;
-    var y:Float;
-    var z:Float;
-    var angle:Float;
-    var scaleX:Float;
-    var scaleY:Float;
-    var curPos:Float;
-    var noteDist:Float;
-    var lane:Int;
-    var index:Int;
-    var playfieldIndex:Int;
-    var isStrum:Bool;
-    var incomingAngleX:Float;
-    var incomingAngleY:Float;
-}
-*/
-
 class NotePositionData //made it a class so hscript should work
 {
     public var x:Float;
@@ -78,7 +58,7 @@ typedef Playfield =
 }
 
 typedef StrumNoteType = 
-#if (PSYCH || LEATHER) StrumNote 
+#if (PSYCH || LEATHER) StrumNote
 #elseif KADE StaticArrow
 #elseif FOREVER_LEGACY UIStaticArrow
 #elseif ANDROMEDA Receptor
@@ -88,7 +68,8 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
 {
     var strumGroup:FlxTypedGroup<StrumNoteType>;
     var notes:FlxTypedGroup<Note>;
-    var instance:PlayState;
+    public var instance:ModchartMusicBeatState;
+    public var playStateInstance:PlayState;
     public var playfields:Array<Playfield> = []; //adding an extra playfield will add 1 for each player
     public var modifiers:Map<String, Modifier> = new Map<String, Modifier>();
     public var events:Array<ModchartEvent> = [];
@@ -106,17 +87,33 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         //makes 4 triangles
     ];
 
-    public function new(strumGroup:FlxTypedGroup<StrumNoteType>, notes:FlxTypedGroup<Note>,instance:PlayState) 
+    public var modchart:ModchartFile;
+    public var inEditor:Bool = false;
+    public var editorPaused:Bool = false;
+    public function new(strumGroup:FlxTypedGroup<StrumNoteType>, notes:FlxTypedGroup<Note>,instance:ModchartMusicBeatState) 
     {
+        super(0,0);
         this.strumGroup = strumGroup;
         this.notes = notes;
         this.instance = instance;
+        if (Std.isOfType(instance, PlayState))
+            playStateInstance = cast instance; //so it just casts once
 
         strumGroup.visible = false; //drawing with renderer instead
         notes.visible = false;
 
-        addNewplayfield(0,0,0);
+        //fix stupid crash because the renderer in playstate is still technically null at this point and its needed for json loading
+        instance.playfieldRenderer = this; 
 
+        addNewplayfield(0,0,0);
+        loadDefaultModifiers();
+
+
+        modchart = new ModchartFile(this);
+    }
+
+    public function loadDefaultModifiers()
+    {
         //default modifiers
         addModifier(new XModifier('x'));
         addModifier(new YModifier('y'));
@@ -133,9 +130,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
             modifiers.get('z'+i).targetLane = i;
             modifiers.get('confusion'+i).targetLane = i;
         }
-        
-
-        super(0,0);
     }
 
 
@@ -147,6 +141,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     public function addModifier(mod:Modifier)
     {
         mod.instance = instance;
+        mod.renderer = this;
         removeModifier(mod.tag); //in case you replace one???
         modifiers.set(mod.tag, mod);
     }
@@ -328,7 +323,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     private function getNoteCurPos(noteIndex:Int, strumTimeOffset:Float = 0)
     {
         var distance = (Conductor.songPosition - notes.members[noteIndex].strumTime) + strumTimeOffset;
-        return distance*ModchartUtil.getScrollSpeed(instance);
+        return distance*getCorrectScrollSpeed();
     }
     private function getLane(noteIndex:Int)
     {
@@ -361,7 +356,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
             }
             for (i in 0...notes.members.length)
             {
-                var songSpeed = ModchartUtil.getScrollSpeed(instance);
+                var songSpeed = getCorrectScrollSpeed();
 
                 var lane = getLane(i);
 
@@ -499,7 +494,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
                 daNote.alpha = noteData.alpha;
                 daNote.mesh.alpha = daNote.alpha;
 
-                var songSpeed = ModchartUtil.getScrollSpeed(instance);
+                var songSpeed = getCorrectScrollSpeed();
                 var lane = noteData.lane;
                 
                 //makes the sustain match the center of the parent note when at weird angles
@@ -652,7 +647,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     function getSustainPoint(noteData:NotePositionData, timeOffset:Float):NotePositionData
     {
         var daNote = notes.members[noteData.index];
-        var songSpeed = ModchartUtil.getScrollSpeed(instance);
+        var songSpeed = getCorrectScrollSpeed();
         var lane = noteData.lane;
 
         var noteDist = getNoteDist(noteData.index);
@@ -693,31 +688,38 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     }
 
 
+    public var speed:Float = 1.0;
 
-
-    public function tweenModifier(modifier:String, val:Float, time:Float, ease:String)
+    public function tweenModifier(modifier:String, val:Float, time:Float, ease:String, beat:Float)
     {
+        
         if (modifiers.exists(modifier))
         {       
             var easefunc = getFlxEaseByString(ease);  
-            #if PSYCH  
-            instance.modchartTweens.set(modifier, FlxTween.tween(modifiers.get(modifier), {currentValue: val}, time, {ease: easefunc,
-                onComplete: function(twn:FlxTween) {
-                    instance.callOnLuas('onTweenCompleted', [modifier]);
-                    instance.modchartTweens.remove(modifier);
-                }
-            }));
-            #else 
-            FlxTween.tween(modifiers.get(modifier), {currentValue: val}, time, {ease: easefunc,
+            if (Conductor.songPosition >= getTimeFromBeat(beat)+(time*1000)) //cancel if should have ended
+            {
+                modifiers.get(modifier).currentValue = val;
+                return;
+            }
+            time /= speed;
+            var tween = FlxTween.tween(modifiers.get(modifier), {currentValue: val}, time, {ease: easefunc,
                 onComplete: function(twn:FlxTween) {
   
                 }
             });
-            #end
+            if (Conductor.songPosition > getTimeFromBeat(beat)) //skip to where it should be i guess??
+            {
+                @:privateAccess
+                tween._secondsSinceStart += ((Conductor.songPosition-getTimeFromBeat(beat))*0.001);
+                @:privateAccess
+                tween.update(0);
+            }
+            if (editorPaused)
+                tween.active = false;
         }
     }
 
-    public function tweenModifierSubValue(modifier:String, subValue:String, val:Float, time:Float, ease:String)
+    public function tweenModifierSubValue(modifier:String, subValue:String, val:Float, time:Float, ease:String, beat:Float)
     {
         if (modifiers.exists(modifier))
         {       
@@ -727,35 +729,34 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
                 var easefunc = getFlxEaseByString(ease);   
                 var tag = modifier+' '+subValue; 
 
-                var startValue = modifiers.get(modifier).subValues.get(subValue);
+                var startValue = modifiers.get(modifier).subValues.get(subValue).value;
 
-
-                #if PSYCH
-                instance.modchartTweens.set(tag, FlxTween.num(startValue, val, time, {ease: easefunc,
+                if (Conductor.songPosition >= getTimeFromBeat(beat)+(time*1000)) //cancel if should have ended
+                {
+                    modifiers.get(modifier).subValues.get(subValue).value = val;
+                    return;
+                }
+                time /= speed;
+                var tween = FlxTween.num(startValue, val, time, {ease: easefunc,
                     onComplete: function(twn:FlxTween) {
-                        instance.callOnLuas('onTweenCompleted', [tag]);
-                        instance.modchartTweens.remove(tag);
+                        if (modifiers.exists(modifier))
+                            modifiers.get(modifier).subValues.get(subValue).value = val;
                     },
                     onUpdate: function(twn:FlxTween) {
                         //need to update like this because its inside a map
                         if (modifiers.exists(modifier))
-                            modifiers.get(modifier).subValues.set(subValue, FlxMath.lerp(startValue, val, easefunc(twn.percent)));
-                    }
-                }));
-
-                #else 
-                FlxTween.num(startValue, val, time, {ease: easefunc,
-                    onComplete: function(twn:FlxTween) {
-                        if (modifiers.exists(modifier))
-                            modifiers.get(modifier).subValues.set(subValue, val);
-                    },
-                    onUpdate: function(twn:FlxTween) {
-                        //need to update like this because its inside a map
-                        if (modifiers.exists(modifier))
-                            modifiers.get(modifier).subValues.set(subValue, FlxMath.lerp(startValue, val, easefunc(twn.percent)));
+                            modifiers.get(modifier).subValues.get(subValue).value = FlxMath.lerp(startValue, val, easefunc(twn.percent));
                     }
                 });
-                #end
+                if (Conductor.songPosition > getTimeFromBeat(beat)) //skip to where it should be i guess??
+                {
+                    @:privateAccess
+                    tween._secondsSinceStart += ((Conductor.songPosition-getTimeFromBeat(beat))*0.001);
+                    @:privateAccess
+                    tween.update(0);
+                }
+                if (editorPaused)
+                    tween.active = false;
             }
 
         }
@@ -806,7 +807,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
 	}
 
 
-    private function getTimeFromBeat(beat:Float)
+    public static function getTimeFromBeat(beat:Float)
     {
         var totalTime:Float = 0;
         var curBpm = Conductor.bpm;
@@ -837,131 +838,14 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     }
 
 
-}
-
-
-/*
-
-class SustainRenderer
-{
-    public var shader:SustainShader = new SustainShader();
-    public function new()
+    public function getCorrectScrollSpeed()
     {
-        shader.xSkew.value = [0.0];
-        shader.ySkew.value = [0.0];
+        if (inEditor)
+            return PlayState.SONG.speed; //just use this while in editor so the instance shit works
+        else
+            return ModchartUtil.getScrollSpeed(playStateInstance);
+        return 1.0; 
     }
-    public function update(xSkew:Float, ySkew:Float)
-    {
-        shader.xSkew.value = [xSkew];
-        shader.ySkew.value = [ySkew];
-    }
+
+
 }
-class SustainShader extends FlxShader
-{
-    @:glVertexBody("
-	// start of default code required for alpha and color to work 
-	openfl_Alphav = openfl_Alpha;
-	openfl_TextureCoordv = openfl_TextureCoord;
-	if (openfl_HasColorTransform) {
-		openfl_ColorMultiplierv = openfl_ColorMultiplier;
-		openfl_ColorOffsetv = openfl_ColorOffset / 255.0;
-	}
-	// end of default code
-	
-	mat4 transform = openfl_Matrix;
-		
-	gl_Position = transform * openfl_Position;
-    //gl_Position.w += 0.1;
-    gl_Position.x += gl_Position.x + gl_Position.y * ((gl_Position.x+xSkew) - gl_Position.x);
-	")
-	@:glVertexSource("
-	#pragma header
-	attribute float alpha;
-	attribute vec4 colorMultiplier;
-	attribute vec4 colorOffset;
-	uniform bool hasColorTransform;
-	uniform float iTime;
-	
-    uniform float xSkew;
-    uniform float ySkew;
-        
-	void main(void)
-	{
-		#pragma body
-		
-		// start of default code required for alpha and color to work 
-		openfl_Alphav = openfl_Alpha * alpha;
-		if (hasColorTransform)
-		{
-			openfl_ColorOffsetv = colorOffset / 255.0;
-			openfl_ColorMultiplierv = colorMultiplier;
-		}
-		// end of default code
-	}")
-	public function new()
-	{
-		super();
-	}
-}
-
-*/
-
-/*
-class TestingState extends MusicBeatState 
-{
-    var testStrip:FlxStrip;
-    override function create()
-    {
-        var bg:FlxSprite = new FlxSprite(-80).loadGraphic(Paths.image('menuBG'));
-		bg.setGraphicSize(Std.int(bg.width * 1.175));
-		bg.updateHitbox();
-		bg.screenCenter();
-		bg.antialiasing = ClientPrefs.globalAntialiasing;
-		add(bg);
-
-        var sustainNote = new FlxSprite(0,0);
-        sustainNote.frames = Paths.getSparrowAtlas('NOTE_assets');
-        sustainNote.animation.addByPrefix('purplehold', 'purple hold piece');
-        sustainNote.animation.play('purplehold', true);
-        add(sustainNote);
-
-        testStrip = new FlxStrip(300, 300);
-        testStrip.loadGraphic(sustainNote.updateFramePixels());
-
-        testStrip.vertices.push(0);
-        testStrip.vertices.push(0);
-
-        testStrip.vertices.push(100);
-        testStrip.vertices.push(0);
-
-        testStrip.vertices.push(200);
-        testStrip.vertices.push(200);
-
-        testStrip.vertices.push(300);
-        testStrip.vertices.push(200);
-
-        testStrip.uvtData.push(0);
-        testStrip.uvtData.push(0);
-
-        testStrip.uvtData.push(1);
-        testStrip.uvtData.push(0);
-
-        testStrip.uvtData.push(0);
-        testStrip.uvtData.push(1);
-
-        testStrip.uvtData.push(1);
-        testStrip.uvtData.push(1);
-
-        testStrip.indices.push(0);
-        testStrip.indices.push(1);
-        testStrip.indices.push(2);
-        testStrip.indices.push(1);
-        testStrip.indices.push(3);
-        testStrip.indices.push(2);
-        
-
-        add(testStrip);
-
-        super.create();
-    }
-}*/

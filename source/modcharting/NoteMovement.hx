@@ -53,6 +53,24 @@ class NoteMovement
             arrowSizes.push(160*s);
         }
     }
+    public static function getDefaultStrumPosEditor(game:ModchartEditorState)
+    {
+        defaultStrumX = []; //reset
+        defaultStrumY = []; 
+        defaultScale = [];
+        keyCount = #if (LEATHER || KADE) PlayState.strumLineNotes.length-PlayState.playerStrums.length #else game.strumLineNotes.length-game.playerStrums.length #end; //base game doesnt have opponent strums as group
+        playerKeyCount = #if (LEATHER || KADE) PlayState.playerStrums.length #else game.playerStrums.length #end;
+
+        for (i in #if (LEATHER || KADE) 0...PlayState.strumLineNotes.members.length #else 0...game.strumLineNotes.members.length #end)
+        {
+            var strum = game.strumLineNotes.members[i];
+            defaultStrumX.push(strum.x);
+            defaultStrumY.push(strum.y);
+            var s = 0.7;
+            defaultScale.push(s);
+            arrowSizes.push(160*s);
+        }
+    }
     public static function setNotePath(daNote:Note, lane:Int, scrollSpeed:Float, curPos:Float, noteDist:Float, incomingAngleX:Float, incomingAngleY:Float)
     {
         daNote.x = defaultStrumX[lane];

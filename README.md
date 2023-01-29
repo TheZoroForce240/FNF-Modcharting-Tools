@@ -36,10 +36,8 @@ import modcharting.ModchartFuncs;
 import modcharting.NoteMovement;
 import modcharting.PlayfieldRenderer;
 
-class PlayState extends MusicBeatState
+class PlayState extends modcharting.ModchartMusicBeatState
 {
-  //init variable for renderer
-  public var playfieldRenderer:PlayfieldRenderer;
   
 ```
 ```haxe
