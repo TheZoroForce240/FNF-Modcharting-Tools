@@ -111,7 +111,7 @@ class Modifier
 
     
 
-    public dynamic function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int) {} //for overriding
+    public dynamic function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int) {} //for overriding (and for custom mods with hscript)
     public dynamic function strumMath(noteData:NotePositionData, lane:Int, pf:Int) {}
     public dynamic function incomingAngleMath(lane:Int, curPos:Float, pf:Int):Array<Float> { return [0,0]; }
     public dynamic function curPosMath(lane:Int, curPos:Float, pf:Int) { return curPos; }
@@ -529,10 +529,13 @@ class MiniModifier extends Modifier
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
     {
         var col = (lane%NoteMovement.keyCount);
-        noteData.x -= (NoteMovement.arrowSizes[lane]-(NoteMovement.arrowSizes[lane]*currentValue))*col;
+        //noteData.x -= (NoteMovement.arrowSizes[lane]-(NoteMovement.arrowSizes[lane]*currentValue))*col;
+
         //noteData.x += (NoteMovement.arrowSizes[lane]*currentValue*NoteMovement.keyCount*0.5);
         noteData.scaleX *= currentValue;
         noteData.scaleY *= currentValue;
+        noteData.x -= ((NoteMovement.arrowSizes[lane]/2)*(noteData.scaleX-NoteMovement.defaultScale[lane]));
+        noteData.y -= ((NoteMovement.arrowSizes[lane]/2)*(noteData.scaleY-NoteMovement.defaultScale[lane]));
     }
     override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
     {

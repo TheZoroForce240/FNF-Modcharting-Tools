@@ -104,11 +104,14 @@ class ModchartFuncs
 
         if (instance.playfieldRenderer.modchart.customModifiers.exists(modClass))
         {
-            var modifier = instance.playfieldRenderer.modchart.customModifiers.get(modClass).copy();
-            modifier.tag = name; //set correct stuff because its copying shit
-            modifier.playfield = pf;
-            modifier.type = getModTypeFromString(type);
+            var modifier = new Modifier(name, getModTypeFromString(type), pf);
+            instance.playfieldRenderer.modchart.customModifiers.get(modClass).initMod(modifier); //need to do it this way instead because using current value in the modifier script didnt work
+            //var modifier = instance.playfieldRenderer.modchart.customModifiers.get(modClass).copy();
+            //modifier.tag = name; //set correct stuff because its copying shit
+            //modifier.playfield = pf;
+            //modifier.type = getModTypeFromString(type);
             instance.playfieldRenderer.addModifier(modifier);
+            return;
         }
 
         var mod = Type.resolveClass('modcharting.'+modClass);
@@ -263,6 +266,8 @@ class ModchartFuncs
             }
         }
             
+        if(Math.isNaN(time))
+            time = 1;
 
         var args = argsAsString.trim().replace(' ', '').split(',');
 

@@ -1,4 +1,5 @@
 package modcharting;
+import flixel.math.FlxMath;
 import haxe.Exception;
 import haxe.Json;
 import haxe.format.JsonParser;
@@ -22,26 +23,32 @@ typedef ModchartJson =
 class ModchartFile
 {
 
-    public static final MOD_NAME = 0;
-    public static final MOD_CLASS = 1;
-    public static final MOD_TYPE = 2;
-    public static final MOD_PF = 3;
-    public static final MOD_LANE = 4;
+    //used for indexing
+    public static final MOD_NAME = 0; //the modifier name
+    public static final MOD_CLASS = 1; //the class/custom mod it uses
+    public static final MOD_TYPE = 2; //the type, which changes if its for the player, opponent, a specific lane or all
+    public static final MOD_PF = 3; //the playfield that mod uses
+    public static final MOD_LANE = 4; //the lane the mod uses
 
-    public static final EVENT_TYPE = 0;
-    public static final EVENT_DATA = 1;
+    public static final EVENT_TYPE = 0; //event type (set or ease)
+    public static final EVENT_DATA = 1; //event data
+    public static final EVENT_REPEAT = 2; //event repeat data
 
-    public static final EVENT_TIME = 0;
-    public static final EVENT_SETDATA = 1;
-    public static final EVENT_EASETIME = 1;
-    public static final EVENT_EASE = 2;
-    public static final EVENT_EASEDATA = 3;
+    public static final EVENT_TIME = 0; //event time (in beats)
+    public static final EVENT_SETDATA = 1; //event data (for sets)
+    public static final EVENT_EASETIME = 1; //event ease time
+    public static final EVENT_EASE = 2; //event ease
+    public static final EVENT_EASEDATA = 3; //event data (for eases)
+
+    public static final EVENT_REPEATBOOL = 0; //if event should repeat
+    public static final EVENT_REPEATCOUNT = 1; //how many times it repeats
+    public static final EVENT_REPEATBEATGAP = 2; //how many beats in between each repeat
 
 
     public var data:ModchartJson = null;
     private var renderer:PlayfieldRenderer;
     public var scriptListen:Bool = false;
-    public var customModifiers:Map<String, Modifier> = new Map<String, Modifier>();
+    public var customModifiers:Map<String, CustomModifierScript> = new Map<String, CustomModifierScript>();
     public function new(renderer:PlayfieldRenderer)
     {
 
@@ -92,9 +99,8 @@ class ModchartFile
                     if(file.endsWith('.hx')) //custom mods!!!!
                     {
                         var scriptStr = File.getContent(folderShit + file);
-                        var mod = new Modifier("");
-                        var script = new CustomModifierScript(scriptStr, mod);
-                        customModifiers.set(file.replace(".hx", ""), mod);
+                        var script = new CustomModifierScript(scriptStr);
+                        customModifiers.set(file.replace(".hx", ""), script);
                     }
                 }
             }
@@ -140,15 +146,33 @@ class ModchartFile
         renderer.events = [];
         for (i in data.events)
         {
-            switch(i[EVENT_TYPE])
+            if (i[EVENT_REPEAT] == null) //add repeat data if it doesnt exist
+                i[EVENT_REPEAT] = [false, 1, 0];
+
+            if (i[EVENT_REPEAT][EVENT_REPEATBOOL])
             {
-                case "ease": 
-                    ModchartFuncs.ease(Std.parseFloat(i[EVENT_DATA][EVENT_TIME]), Std.parseFloat(i[EVENT_DATA][EVENT_EASETIME]), i[EVENT_DATA][EVENT_EASE], i[EVENT_DATA][EVENT_EASEDATA], renderer.instance);
-                case "set": 
-                    ModchartFuncs.set(Std.parseFloat(i[EVENT_DATA][EVENT_TIME]), i[EVENT_DATA][EVENT_SETDATA], renderer.instance);
-                case "hscript": 
-                    //maybe just run some code???
+                for (j in 0...(Std.int(i[EVENT_REPEAT][EVENT_REPEATCOUNT])+1))
+                {
+                    addEvent(i, (j*i[EVENT_REPEAT][EVENT_REPEATBEATGAP]));
+                }
             }
+            else 
+            {
+                addEvent(i);
+            }
+
+        }
+    }
+    private function addEvent(i:Array<Dynamic>, ?beatOffset:Float = 0)
+    {
+        switch(i[EVENT_TYPE])
+        {
+            case "ease": 
+                ModchartFuncs.ease(Std.parseFloat(i[EVENT_DATA][EVENT_TIME])+beatOffset, Std.parseFloat(i[EVENT_DATA][EVENT_EASETIME]), i[EVENT_DATA][EVENT_EASE], i[EVENT_DATA][EVENT_EASEDATA], renderer.instance);
+            case "set": 
+                ModchartFuncs.set(Std.parseFloat(i[EVENT_DATA][EVENT_TIME])+beatOffset, i[EVENT_DATA][EVENT_SETDATA], renderer.instance);
+            case "hscript": 
+                //maybe just run some code???
         }
     }
 
@@ -167,7 +191,7 @@ class CustomModifierScript
     public var interp:Interp = null;
     var script:Expr;
     var parser:Parser;
-    public function new(scriptStr:String, mod:Modifier)
+    public function new(scriptStr:String)
     {
         parser = new Parser();
         parser.allowTypes = true;
@@ -185,9 +209,9 @@ class CustomModifierScript
             lime.app.Application.current.window.alert(e.message, 'Error on custom mod .hx!');
             return;
         }
-        init(mod);
+        init();
     }
-    private function init(mod:Modifier)
+    private function init()
     {
         if (interp == null)
             return;
@@ -197,11 +221,13 @@ class CustomModifierScript
         interp.variables.set('PlayfieldRenderer', PlayfieldRenderer);
         interp.variables.set('ModchartUtil', ModchartUtil);
         interp.variables.set('Modifier', Modifier);
+        interp.variables.set('BeatXModifier', Modifier.BeatXModifier);
         interp.variables.set('NoteMovement', NoteMovement);
         interp.variables.set('NotePositionData', PlayfieldRenderer.NotePositionData);
         interp.variables.set('ModchartFile', ModchartFile);
         interp.variables.set('FlxG', flixel.FlxG);
 		interp.variables.set('FlxSprite', flixel.FlxSprite);
+        interp.variables.set('FlxMath', FlxMath);
 		interp.variables.set('FlxCamera', flixel.FlxCamera);
 		interp.variables.set('FlxTimer', flixel.util.FlxTimer);
 		interp.variables.set('FlxTween', flixel.tweens.FlxTween);
@@ -212,9 +238,7 @@ class CustomModifierScript
 		interp.variables.set('Conductor', Conductor);
         interp.variables.set('StringTools', StringTools);
 
-        call("initMod", [mod]);
-
-        interp = null; //kill script after running
+        
     }
     public function call(event:String, args:Array<Dynamic>)
     {
@@ -234,5 +258,14 @@ class CustomModifierScript
                 lime.app.Application.current.window.alert(e.message, 'Error on custom mod .hx!');
             }
         }
+    }
+    public function initMod(mod:Modifier)
+    {
+        call("initMod", [mod]);
+    }
+
+    public function destroy()
+    {
+        interp = null;
     }
 }
