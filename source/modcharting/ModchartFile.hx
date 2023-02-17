@@ -221,6 +221,7 @@ class CustomModifierScript
         interp.variables.set('PlayfieldRenderer', PlayfieldRenderer);
         interp.variables.set('ModchartUtil', ModchartUtil);
         interp.variables.set('Modifier', Modifier);
+        interp.variables.set('ModifierSubValue', Modifier.ModifierSubValue);
         interp.variables.set('BeatXModifier', Modifier.BeatXModifier);
         interp.variables.set('NoteMovement', NoteMovement);
         interp.variables.set('NotePositionData', PlayfieldRenderer.NotePositionData);

@@ -30,6 +30,15 @@ import Note;
 
 using StringTools;
 
+//a few todos im gonna leave here:
+
+//setup quaternions for everything else (incoming angles and the rotate mod)
+//do add and remove buttons on stacked events in editor
+//add a way to set target lane for a mod in editor
+//fix switching event type in editor so you can actually do set events
+//finish setting up tooltips in editor
+//start documenting more stuff idk
+
 class NotePositionData //made it a class so hscript should work
 {
     public var x:Float;
@@ -47,6 +56,7 @@ class NotePositionData //made it a class so hscript should work
     public var isStrum:Bool;
     public var incomingAngleX:Float;
     public var incomingAngleY:Float;
+    public var strumTime:Float;
     public function new() {}
 }
 
@@ -244,6 +254,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
             strumData.isStrum = true;
             strumData.incomingAngleX = 0;
             strumData.incomingAngleY = 0;
+            strumData.strumTime = 0;
         for (mod in modifiers)
             mod.getStrumPath(strumData, i, p);
 
@@ -317,6 +328,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         noteData.isStrum = false;
         noteData.incomingAngleX = incomingAngle[0];
         noteData.incomingAngleY = incomingAngle[1];
+        noteData.strumTime = notes.members[noteIndex].strumTime;
         return noteData;
     }
 

@@ -21,6 +21,8 @@ import Note;
 
 
 
+
+
 enum ModifierType
 {
     ALL;
@@ -159,6 +161,10 @@ class Modifier
         mod.instance = this.instance;
         mod.renderer = this.renderer;
         return mod;
+    }
+    public function createSubMod(name:String, startVal:Float)
+    {
+        subValues.set(name, new ModifierSubValue(startVal));
     }
 }
 
@@ -328,6 +334,58 @@ class RotateModifier extends Modifier
         var rotY = ModchartUtil.getCartesianCoords3D(90, subValues.get('y').value, yPos-subValues.get('rotatePointY').value);
         noteData.y += rotY.y+subValues.get('rotatePointY').value-yPos;
         noteData.z += rotX.z + rotY.z;
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteMath(noteData, lane, 0, pf);
+    }
+    override function reset()
+    {
+        super.reset();
+        currentValue = 1.0;
+    }
+}
+
+class StrumLineRotateModifier extends Modifier 
+{
+    override function setupSubValues()
+    {
+        subValues.set('x', new ModifierSubValue(0.0));
+        subValues.set('y', new ModifierSubValue(0.0));
+        subValues.set('z', new ModifierSubValue(90.0));
+        currentValue = 1.0;
+    }
+
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        var laneShit = lane%NoteMovement.keyCount;
+        var offsetThing = 0.5;
+        var halfKeyCount = NoteMovement.keyCount/2;
+        if (lane < halfKeyCount)
+        {
+            offsetThing = -0.5;
+            laneShit = lane+1;
+        }
+        var distFromCenter = ((laneShit)-halfKeyCount)+offsetThing; //theres probably an easier way of doing this
+        //basically
+        //0 = 1.5
+        //1 = 0.5
+        //2 = -0.5
+        //3 = -1.5
+        //so if you then multiply by the arrow size, all notes should be in the same place
+        noteData.x += -distFromCenter*NoteMovement.arrowSize;
+
+        var upscroll = true;
+        if (instance != null)
+            if (ModchartUtil.getDownscroll(instance))
+                upscroll = false;
+
+        //var rot = ModchartUtil.getCartesianCoords3D(subValues.get('x').value, subValues.get('y').value, distFromCenter*NoteMovement.arrowSize);
+        var q = SimpleQuaternion.fromEuler(subValues.get('z').value, subValues.get('x').value, (upscroll ? -subValues.get('y').value : subValues.get('y').value)); //i think this is the right order???
+        //q = SimpleQuaternion.normalize(q); //dont think its too nessessary???
+        noteData.x += q.x * distFromCenter*NoteMovement.arrowSize;
+        noteData.y += q.y * distFromCenter*NoteMovement.arrowSize;
+        noteData.z += q.z * distFromCenter*NoteMovement.arrowSize;
     }
     override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
     {

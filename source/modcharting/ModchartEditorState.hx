@@ -58,7 +58,14 @@ class ModchartEditorEvent extends FlxSprite
     {
         this.data = data;
         super(-300, 0);
-        makeGraphic(48, 48);
+        frames = Paths.getSparrowAtlas('NOTE_assets');
+        //makeGraphic(48, 48);
+        
+        animation.addByPrefix('note', 'purple0');
+        animation.play('note');
+        setGraphicSize(ModchartEditorState.gridSize, ModchartEditorState.gridSize);
+        updateHitbox();
+        antialiasing = true;
     }
     public function getBeatTime():Float { return data[ModchartFile.EVENT_DATA][ModchartFile.EVENT_TIME]; }
 }
@@ -73,7 +80,7 @@ class ModchartEditorState extends ModchartMusicBeatState
     public static var modifierList:Array<Class<Modifier>> = [
         DrunkXModifier, DrunkYModifier, DrunkZModifier,
         TipsyXModifier, TipsyYModifier, TipsyZModifier,
-        ReverseModifier, IncomingAngleModifier, RotateModifier, 
+        ReverseModifier, IncomingAngleModifier, RotateModifier, StrumLineRotateModifier,
         BumpyModifier,
         XModifier, YModifier, ZModifier, ConfusionModifier, 
         ScaleModifier, ScaleXModifier, ScaleYModifier, SpeedModifier, 
@@ -152,18 +159,16 @@ class ModchartEditorState extends ModchartMusicBeatState
 	public var opponentStrums:FlxTypedGroup<StrumNoteType>;
 	public var playerStrums:FlxTypedGroup<StrumNoteType>;
 	public var unspawnNotes:Array<Note> = [];
-    public var loadedNotes:Array<Note> = [];
-
+    public var loadedNotes:Array<Note> = []; //stored notes from the chart that unspawnNotes can copy from
     public var vocals:FlxSound;
     var generatedMusic:Bool = false;
     
 
     private var grid:FlxBackdrop;
     private var line:FlxSprite;
-    var gridSize:Int = 64;
     var beatTexts:Array<FlxText> = [];
     public var eventSprites:FlxTypedGroup<ModchartEditorEvent>;
-    public static var gridGap:Float = 2;
+    public static var gridSize:Int = 64;
     public var highlight:FlxSprite;
     public var debugText:FlxText;
     var highlightedEvent:Array<Dynamic> = null;
@@ -175,6 +180,9 @@ class ModchartEditorState extends ModchartMusicBeatState
     var scrollBlockers:Array<FlxUIDropDownMenuCustom> = [];
 
     var playbackSpeed:Float = 1;
+
+    var activeModifiersText:FlxText;
+    var selectedEventBox:FlxSprite;
 
     override public function new()
     {
@@ -242,6 +250,11 @@ class ModchartEditorState extends ModchartMusicBeatState
         highlight.alpha = 0.5;
         add(highlight);
 
+        selectedEventBox = new FlxSprite().makeGraphic(32,32);
+        selectedEventBox.y = gridSize*0.5;
+        selectedEventBox.visible = false;
+        add(selectedEventBox);
+
         updateEventSprites();
 
         line = new FlxSprite().makeGraphic(10, gridSize);
@@ -251,7 +264,8 @@ class ModchartEditorState extends ModchartMusicBeatState
         generateStaticArrows(1);
         NoteMovement.getDefaultStrumPosEditor(this);
 
-        gridGap = FlxMath.remapToRange(Conductor.stepCrochet, 0, Conductor.stepCrochet, 0, gridSize);
+        //gridGap = FlxMath.remapToRange(Conductor.stepCrochet, 0, Conductor.stepCrochet, 0, gridSize); //idk why i even thought this was how i do it
+        //trace(gridGap);
 
         debugText = new FlxText(0, gridSize*2, 0, "", 16);
         debugText.alignment = FlxTextAlign.LEFT;
@@ -324,21 +338,30 @@ class ModchartEditorState extends ModchartMusicBeatState
         Conductor.songPosition = FlxG.sound.music.time;
 
         
-        var songPosPixelPos = (((Conductor.songPosition/Conductor.stepCrochet)%4)*gridGap);
-        grid.x = -curDecStep*gridGap;
-        line.x = gridGap*4;
+        var songPosPixelPos = (((Conductor.songPosition/Conductor.stepCrochet)%4)*gridSize);
+        grid.x = -curDecStep*gridSize;
+        line.x = gridSize*4;
 
         for (i in 0...beatTexts.length)
         {
-            beatTexts[i].x = -songPosPixelPos + (gridGap*4*(i+1)) - 16;
+            beatTexts[i].x = -songPosPixelPos + (gridSize*4*(i+1)) - 16;
             beatTexts[i].text = ""+ (Math.floor(Conductor.songPosition/Conductor.crochet)+i);
         }
+        var eventIsSelected:Bool = false;
         for (i in 0...eventSprites.members.length)
         {
-            var pos = grid.x + (eventSprites.members[i].getBeatTime()*gridGap*4)+(gridGap*4);
+            var pos = grid.x + (eventSprites.members[i].getBeatTime()*gridSize*4)+(gridSize*4);
             //var dec = eventSprites.members[i].beatTime-Math.floor(eventSprites.members[i].beatTime);
-            eventSprites.members[i].x = pos; //+ (dec*4*gridGap);
+            eventSprites.members[i].x = pos; //+ (dec*4*gridSize);
+            if (highlightedEvent != null)
+                if (eventSprites.members[i].data == highlightedEvent)
+                {
+                    eventIsSelected = true;
+                    selectedEventBox.x = pos;
+                }
+                    
         }
+        selectedEventBox.visible = eventIsSelected;
 
 
         var blockInput = false;
@@ -496,7 +519,7 @@ class ModchartEditorState extends ModchartMusicBeatState
             if (FlxG.keys.pressed.SHIFT)
                 highlight.x = FlxG.mouse.x;
             else
-                highlight.x = (Math.floor((FlxG.mouse.x)/gridGap)*gridGap)+(grid.x%gridGap);
+                highlight.x = (Math.floor((FlxG.mouse.x-(grid.x%gridSize))/gridSize)*gridSize)+(grid.x%gridSize);
             if (FlxG.mouse.overlaps(eventSprites))
             {
                 if (FlxG.mouse.justPressed)
@@ -527,7 +550,7 @@ class ModchartEditorState extends ModchartMusicBeatState
             {
                 if (FlxG.mouse.justPressed)
                 {
-                    var timeFromMouse = ((highlight.x-grid.x)/gridGap/4)-1;
+                    var timeFromMouse = ((highlight.x-grid.x)/gridSize/4)-1;
                     //trace(timeFromMouse);
                     var event:Array<Dynamic> = ['ease', [timeFromMouse, 1, 'cubeInOut', ','], [false, 1, 1]];
                     if (highlightedEvent != null) //copy over current event data (without acting as a reference)
@@ -580,6 +603,7 @@ class ModchartEditorState extends ModchartMusicBeatState
             playfieldRenderer.modchart.loadEvents();
             dirtyUpdateEvents = false;
             playfieldRenderer.update(0);
+            updateEventSprites();
         }
 
         if (playfieldRenderer.modchart.data.playfields != playfieldCountStepper.value)
@@ -606,6 +630,22 @@ class ModchartEditorState extends ModchartMusicBeatState
         debugText.text = Std.string(FlxMath.roundDecimal(Conductor.songPosition / 1000, 2)) + " / " + Std.string(FlxMath.roundDecimal(FlxG.sound.music.length / 1000, 2)) +
 		"\nBeat: " + Std.string(curDecBeat).substring(0,4) +
 		"\nStep: " + curStep + "\n";
+
+        var leText = "Active Modifiers: \n";
+        for (modName => mod in playfieldRenderer.modifiers)
+        {
+            if (mod.currentValue != mod.baseValue)
+            {
+                leText += modName + ": " + FlxMath.roundDecimal(mod.currentValue, 2);
+                for (subModName => subMod in mod.subValues)
+                {
+                    leText += "    " + subModName + ": " + FlxMath.roundDecimal(subMod.value, 2);
+                }
+                leText += "\n";
+            }
+        }
+
+        activeModifiersText.text = leText;
     }
 
     function updateEventSprites()
@@ -624,7 +664,6 @@ class ModchartEditorState extends ModchartMusicBeatState
             --i;
         }*/
         eventSprites.clear();
-
         for (i in 0...playfieldRenderer.modchart.data.events.length)
         {
             var beat:Float = playfieldRenderer.modchart.data.events[i][1][0];
@@ -1031,6 +1070,9 @@ class ModchartEditorState extends ModchartMusicBeatState
 
         scrollBlockers.push(modTypeDropDown);
         scrollBlockers.push(modClassDropDown);
+
+        activeModifiersText = new FlxText(50, 180);
+        tab_group.add(activeModifiersText);
         
 
         tab_group.add(modNameInputText);
@@ -1387,6 +1429,7 @@ class ModchartEditorState extends ModchartMusicBeatState
 
         addUI(tab_group, "eventDataInputText", eventDataInputText, 'Raw Event Data', 'The raw data used in the event, you wont really need to use this.');
         addUI(tab_group, "stackedEventStepper", stackedEventStepper, 'Stacked Event Stepper', 'Allows you to find/switch to stacked events.');
+        tab_group.add(makeLabel(stackedEventStepper, 0, -15, "Stacked Events Index"));
 
         addUI(tab_group, "eventValueInputText", eventValueInputText, 'Event Value', 'The value that the modifier will change to.');
         addUI(tab_group, "eventModInputText", eventModInputText, 'Event Modifier', 'The name of the modifier used in the event.');
@@ -1456,8 +1499,7 @@ class ModchartEditorState extends ModchartMusicBeatState
     function updateStackedEventDataStepper() //update the stepper
     {
         stackedEventStepper.max = stackedHighlightedEvents.length-1;
-        if (stackedEventStepper.value > stackedEventStepper.max)
-            stackedEventStepper.value = 0;
+        stackedEventStepper.value = stackedEventStepper.max; //when you select an event, if theres stacked events it should be the one at the end of the list so just set it to the end
     }
     function getEventModIndex() { return Math.floor(selectedEventDataStepper.value); }
     var eventTypes:Array<String> = ["ease", "set"];
