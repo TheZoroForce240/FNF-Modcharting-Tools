@@ -320,8 +320,8 @@ class RotateModifier extends Modifier
         subValues.set('x', new ModifierSubValue(0.0));
         subValues.set('y', new ModifierSubValue(0.0));
 
-        subValues.set('rotatePointX', new ModifierSubValue(FlxG.width/2));
-        subValues.set('rotatePointY', new ModifierSubValue(FlxG.height/2));
+        subValues.set('rotatePointX', new ModifierSubValue((FlxG.width/2)-(NoteMovement.arrowSize/2)));
+        subValues.set('rotatePointY', new ModifierSubValue((FlxG.height/2)-(NoteMovement.arrowSize/2)));
         currentValue = 1.0;
     }
 

@@ -73,7 +73,7 @@ class ModchartEditorEvent extends FlxSprite
 class ModchartEditorState extends ModchartMusicBeatState
 {
     //only works on psych right now, but modcharts made with this should work on other engines
-    #if PSYCH
+    #if (PSYCH && !DISABLE_MODCHART_EDITOR)
 
     //pain
     //tried using a macro but idk how to use them lol
@@ -552,26 +552,7 @@ class ModchartEditorState extends ModchartMusicBeatState
                 {
                     var timeFromMouse = ((highlight.x-grid.x)/gridSize/4)-1;
                     //trace(timeFromMouse);
-                    var event:Array<Dynamic> = ['ease', [timeFromMouse, 1, 'cubeInOut', ','], [false, 1, 1]];
-                    if (highlightedEvent != null) //copy over current event data (without acting as a reference)
-                    {
-                        event[EVENT_TYPE] = highlightedEvent[EVENT_TYPE];
-                        if (event[EVENT_TYPE] == 'ease')
-                        {
-                            event[EVENT_DATA][EVENT_EASETIME] = highlightedEvent[EVENT_DATA][EVENT_EASETIME];
-                            event[EVENT_DATA][EVENT_EASE] = highlightedEvent[EVENT_DATA][EVENT_EASE];
-                            event[EVENT_DATA][EVENT_EASEDATA] = highlightedEvent[EVENT_DATA][EVENT_EASEDATA];
-                        }
-                        else 
-                        {
-                            event[EVENT_DATA][EVENT_SETDATA] = highlightedEvent[EVENT_TYPE][EVENT_SETDATA];
-                        }
-                        event[EVENT_REPEAT][EVENT_REPEATBOOL] = highlightedEvent[EVENT_REPEAT][EVENT_REPEATBOOL];
-                        event[EVENT_REPEAT][EVENT_REPEATCOUNT] = highlightedEvent[EVENT_REPEAT][EVENT_REPEATCOUNT];
-                        event[EVENT_REPEAT][EVENT_REPEATBEATGAP] = highlightedEvent[EVENT_REPEAT][EVENT_REPEATBEATGAP];
-                    
-                    }
-                    playfieldRenderer.modchart.data.events.push(event);
+                    var event = addNewEvent(timeFromMouse);
                     highlightedEvent = event;
                     onSelectEvent();
                     updateEventSprites();
@@ -622,6 +603,20 @@ class ModchartEditorState extends ModchartMusicBeatState
             LoadingState.loadAndSwitchState(new PlayState());
         }
 
+        var curBpmChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
+        if (curBpmChange.songTime <= 0)
+        {
+            curBpmChange.bpm = PlayState.SONG.bpm; //start bpm
+        }
+        if (curBpmChange.bpm != Conductor.bpm)
+        {
+            //trace('changed bpm to ' + curBpmChange.bpm);
+            Conductor.changeBPM(curBpmChange.bpm);
+        }
+
+
+            
+
 
 
 
@@ -646,6 +641,31 @@ class ModchartEditorState extends ModchartMusicBeatState
         }
 
         activeModifiersText.text = leText;
+    }
+
+    function addNewEvent(time:Float)
+    {
+        var event:Array<Dynamic> = ['ease', [time, 1, 'cubeInOut', ','], [false, 1, 1]];
+        if (highlightedEvent != null) //copy over current event data (without acting as a reference)
+        {
+            event[EVENT_TYPE] = highlightedEvent[EVENT_TYPE];
+            if (event[EVENT_TYPE] == 'ease')
+            {
+                event[EVENT_DATA][EVENT_EASETIME] = highlightedEvent[EVENT_DATA][EVENT_EASETIME];
+                event[EVENT_DATA][EVENT_EASE] = highlightedEvent[EVENT_DATA][EVENT_EASE];
+                event[EVENT_DATA][EVENT_EASEDATA] = highlightedEvent[EVENT_DATA][EVENT_EASEDATA];
+            }
+            else 
+            {
+                event[EVENT_DATA][EVENT_SETDATA] = highlightedEvent[EVENT_TYPE][EVENT_SETDATA];
+            }
+            event[EVENT_REPEAT][EVENT_REPEATBOOL] = highlightedEvent[EVENT_REPEAT][EVENT_REPEATBOOL];
+            event[EVENT_REPEAT][EVENT_REPEATCOUNT] = highlightedEvent[EVENT_REPEAT][EVENT_REPEATCOUNT];
+            event[EVENT_REPEAT][EVENT_REPEATBEATGAP] = highlightedEvent[EVENT_REPEAT][EVENT_REPEATBEATGAP];
+        
+        }
+        playfieldRenderer.modchart.data.events.push(event);
+        return event;
     }
 
     function updateEventSprites()
@@ -993,6 +1013,8 @@ class ModchartEditorState extends ModchartMusicBeatState
                 modClassInputText.text = currentModifier[MOD_CLASS];
                 modTypeInputText.text = currentModifier[MOD_TYPE];
                 playfieldStepper.value = currentModifier[MOD_PF];
+                if (currentModifier[MOD_LANE] != null)
+                    targetLaneStepper.value = currentModifier[MOD_LANE];
             }   
         });
 
@@ -1013,14 +1035,14 @@ class ModchartEditorState extends ModchartMusicBeatState
                 if (playfieldRenderer.modchart.data.modifiers[i][MOD_NAME] == modNameInputText.text)
                 {
                     playfieldRenderer.modchart.data.modifiers[i] = [modNameInputText.text, modClassInputText.text, 
-                        modTypeInputText.text, playfieldStepper.value];
+                        modTypeInputText.text, playfieldStepper.value, targetLaneStepper.value];
                     alreadyExists = true;
                 }
 
             if (!alreadyExists)
             {
                 playfieldRenderer.modchart.data.modifiers.push([modNameInputText.text, modClassInputText.text, 
-                    modTypeInputText.text, playfieldStepper.value]);
+                    modTypeInputText.text, playfieldStepper.value, targetLaneStepper.value]);
             }
             dirtyUpdateModifiers = true;
             updateModList();
@@ -1043,6 +1065,7 @@ class ModchartEditorState extends ModchartMusicBeatState
         modClassInputText = new FlxUIInputText(modifierDropDown.x + 500, modifierDropDown.y, 160, '', 8);
         modTypeInputText = new FlxUIInputText(modifierDropDown.x + 700, modifierDropDown.y, 160, '', 8);
         playfieldStepper = new FlxUINumericStepper(modifierDropDown.x + 900, modifierDropDown.y, 1, -1, -1, 100, 0);
+        targetLaneStepper = new FlxUINumericStepper(modifierDropDown.x + 900, modifierDropDown.y+300, 1, -1, -1, 100, 0);
 
         textBlockers.push(modNameInputText);
         textBlockers.push(modClassInputText);
@@ -1079,6 +1102,7 @@ class ModchartEditorState extends ModchartMusicBeatState
         tab_group.add(modClassInputText);
         tab_group.add(modTypeInputText);
         tab_group.add(playfieldStepper);
+        tab_group.add(targetLaneStepper);
 
         tab_group.add(refreshModifiers);
         tab_group.add(saveModifier);
@@ -1088,6 +1112,7 @@ class ModchartEditorState extends ModchartMusicBeatState
         tab_group.add(makeLabel(modClassInputText, 0, -15, "Modifier Class"));
         tab_group.add(makeLabel(modTypeInputText, 0, -15, "Modifier Type"));
         tab_group.add(makeLabel(playfieldStepper, 0, -15, "Playfield (-1 = all)"));
+        tab_group.add(makeLabel(targetLaneStepper, 0, -15, "Target Lane (only for Lane mods!)"));
         tab_group.add(makeLabel(playfieldStepper, 0, 15, "Playfield number starts at 0!"));
 
         tab_group.add(modifierDropDown);
@@ -1292,6 +1317,21 @@ class ModchartEditorState extends ModchartMusicBeatState
         stackedEventStepper = new FlxUINumericStepper(25 + 400, 200, 1, 0, 0, 0, 0);
         stackedEventStepper.name = "stackedEvent";    
 
+        var addStacked:FlxButton = new FlxButton(stackedEventStepper.x, stackedEventStepper.y+30, 'Add', function ()
+        {
+            var data = getCurrentEventInData();
+            if (data != null)
+            {
+                var event = addNewEvent(data[EVENT_DATA][EVENT_TIME]);
+                highlightedEvent = event;
+                onSelectEvent();
+                updateEventSprites();
+                dirtyUpdateEvents = true;
+            }
+            
+        });
+        centerXToObject(stackedEventStepper, addStacked);
+
         eventTypeDropDown = new FlxUIDropDownMenuCustom(25 + 500, 50, FlxUIDropDownMenuCustom.makeStrIdLabelArray(eventTypes, true), function(mod:String)
         {
             var et = eventTypes[Std.parseInt(mod)];
@@ -1426,6 +1466,8 @@ class ModchartEditorState extends ModchartMusicBeatState
         scrollBlockers.push(eventTypeDropDown);
         scrollBlockers.push(subModDropDown);
         scrollBlockers.push(easeDropDown);
+
+        addUI(tab_group, "addStacked", addStacked, 'Add New Stacked Event', 'Adds a new stacked event and duplicates the current one.');
 
         addUI(tab_group, "eventDataInputText", eventDataInputText, 'Raw Event Data', 'The raw data used in the event, you wont really need to use this.');
         addUI(tab_group, "stackedEventStepper", stackedEventStepper, 'Stacked Event Stepper', 'Allows you to find/switch to stacked events.');
@@ -1613,6 +1655,31 @@ class ModchartEditorState extends ModchartMusicBeatState
             dirtyUpdateNotes = true;
 		};
 
+        var check_mute_inst = new FlxUICheckBox(10, 20, null, null, "Mute Instrumental (in editor)", 100);
+		check_mute_inst.checked = false;
+		check_mute_inst.callback = function()
+		{
+			var vol:Float = 1;
+
+			if (check_mute_inst.checked)
+				vol = 0;
+
+			FlxG.sound.music.volume = vol;
+		};
+        var check_mute_vocals = new FlxUICheckBox(check_mute_inst.x + 120, check_mute_inst.y, null, null, "Mute Vocals (in editor)", 100);
+		check_mute_vocals.checked = false;
+		check_mute_vocals.callback = function()
+		{
+			if(vocals != null) {
+				var vol:Float = 1;
+
+				if (check_mute_vocals.checked)
+					vol = 0;
+
+				vocals.volume = vol;
+			}
+		};
+
 
         var resetSpeed:FlxButton = new FlxButton(sliderRate.x+300, sliderRate.y, 'Reset', function ()
         {
@@ -1628,6 +1695,10 @@ class ModchartEditorState extends ModchartMusicBeatState
 		tab_group.add(sliderRate);
         addUI(tab_group, "resetSpeed", resetSpeed, 'Reset Speed', 'Resets playback speed to 1.');
         tab_group.add(songSlider);
+
+        tab_group.add(check_mute_inst);
+        tab_group.add(check_mute_vocals);
+
         UI_box.addGroup(tab_group);
     }
 

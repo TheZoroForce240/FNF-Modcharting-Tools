@@ -128,6 +128,8 @@ class ModchartFile
         for (i in data.modifiers)
         {
             ModchartFuncs.startMod(i[MOD_NAME], i[MOD_CLASS], i[MOD_TYPE], Std.parseInt(i[MOD_PF]), renderer.instance);
+            if (i[MOD_LANE] != null)
+                ModchartFuncs.setModTargetLane(i[MOD_NAME], i[MOD_LANE], renderer.instance);
         }
     }
     public function loadPlayfields()

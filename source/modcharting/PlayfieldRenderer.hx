@@ -34,7 +34,6 @@ using StringTools;
 
 //setup quaternions for everything else (incoming angles and the rotate mod)
 //do add and remove buttons on stacked events in editor
-//add a way to set target lane for a mod in editor
 //fix switching event type in editor so you can actually do set events
 //finish setting up tooltips in editor
 //start documenting more stuff idk
@@ -823,6 +822,8 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     {
         var totalTime:Float = 0;
         var curBpm = Conductor.bpm;
+        if (PlayState.SONG != null)
+            curBpm = PlayState.SONG.bpm;
         for (i in 0...Math.floor(beat))
         {
             if (Conductor.bpmChangeMap.length > 0)
