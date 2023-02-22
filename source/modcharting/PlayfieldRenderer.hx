@@ -333,6 +333,10 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
 
     private function getNoteCurPos(noteIndex:Int, strumTimeOffset:Float = 0)
     {
+        #if PSYCH
+        if (notes.members[noteIndex].isSustainNote && ModchartUtil.getDownscroll(instance))
+            strumTimeOffset -= Std.int(Conductor.stepCrochet/getCorrectScrollSpeed()); //psych does this to fix its sustains but that breaks the visuals so basically reverse it back to normal
+        #end
         var distance = (Conductor.songPosition - notes.members[noteIndex].strumTime) + strumTimeOffset;
         return distance*getCorrectScrollSpeed();
     }

@@ -973,6 +973,8 @@ class ModchartEditorState extends ModchartMusicBeatState
         mods = [];
         for (i in 0...playfieldRenderer.modchart.data.modifiers.length)
             mods.push(playfieldRenderer.modchart.data.modifiers[i][MOD_NAME]);
+        if (mods.length == 0)
+            mods.push('');
         modifierDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(mods, true));
         eventModifierDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(mods, true));
 
@@ -997,7 +999,9 @@ class ModchartEditorState extends ModchartMusicBeatState
         
         for (i in 0...playfieldRenderer.modchart.data.modifiers.length)
             mods.push(playfieldRenderer.modchart.data.modifiers[i][MOD_NAME]);
-        
+
+        if (mods.length == 0)
+            mods.push('');
 
         modifierDropDown = new FlxUIDropDownMenuCustom(25, 50, FlxUIDropDownMenuCustom.makeStrIdLabelArray(mods, true), function(mod:String)
         {

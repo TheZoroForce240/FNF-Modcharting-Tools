@@ -240,6 +240,12 @@ class CustomModifierScript
 		interp.variables.set('Paths', Paths);
 		interp.variables.set('Conductor', Conductor);
         interp.variables.set('StringTools', StringTools);
+        interp.variables.set('Note', Note);
+
+        #if PSYCH
+        interp.variables.set('ClientPrefs', ClientPrefs);
+        interp.variables.set('ColorSwap', ColorSwap);
+        #end
 
         
     }
