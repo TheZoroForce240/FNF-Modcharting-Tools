@@ -1,5 +1,6 @@
 package modcharting;
 
+import flixel.util.FlxAxes;
 import flixel.math.FlxPoint;
 import flixel.addons.ui.FlxUITooltipManager;
 import flixel.addons.ui.FlxUITooltipManager.FlxUITooltipData;
@@ -233,7 +234,12 @@ class ModchartEditorState extends ModchartMusicBeatState
         //strumLineNotes.cameras = [camHUD];
 		//notes.cameras = [camHUD];
 
+        #if ("flixel-addons" >= "3.0.0")
+        grid = new FlxBackdrop(FlxGraphic.fromBitmapData(createGrid(gridSize, gridSize, Std.int(gridSize*48), gridSize)), FlxAxes.X, 0, 0);
+        #else 
         grid = new FlxBackdrop(FlxGraphic.fromBitmapData(createGrid(gridSize, gridSize, Std.int(gridSize*48), gridSize)), 0, 0, true, false);
+        #end
+        
         add(grid);
         
         for (i in 0...12)
