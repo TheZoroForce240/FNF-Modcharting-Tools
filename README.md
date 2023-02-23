@@ -28,7 +28,7 @@ Still very WIP and not everything is supported yet!
 ## Installation 
 You need the most recent version of HaxeFlixel for it to work. (5.2.1 as of writing)
 ### With Source:
-1. Start by downloading the source folder from this repo and dragging it into your current fnf source folder you want to add it to.
+1. Install the haxelib by typing `haxelib git fnf-modcharting-tools https://github.com/TheZoroForce240/FNF-Modcharting-Tools` in the console
 2. Now you only need to make a few small additions to get everything working,
 - In MusicBeatState.hx:
 ```haxe
@@ -37,7 +37,6 @@ class MusicBeatState extends modcharting.ModchartMusicBeatState
 {
   
 ```
-```haxe
 - In PlayState.hx:
 ```haxe
 import modcharting.ModchartFuncs;
@@ -77,6 +76,7 @@ public function startCountdown():Void
 {
   generateStaticArrows(0);
   generateStaticArrows(1);
+  
   //add after generating strums
   NoteMovement.getDefaultStrumPos(this);
 
@@ -94,8 +94,10 @@ class Note extends FlxSprite
 ```
 - In Project.xml:
 ```xml
-
+<!--Set this to the engine you're using!-->
 <define name="PSYCH" />
+
+<haxelib name="fnf-modcharting-tools" />
 
 ```
 You need to define which engine you're using to fix compiling issues, or it would default to base game settings (downscroll won't work etc).
