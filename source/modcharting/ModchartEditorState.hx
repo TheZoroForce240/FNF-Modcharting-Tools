@@ -1,5 +1,7 @@
 package modcharting;
 
+import lime.utils.Assets;
+import flixel.graphics.frames.FlxFramesCollection;
 import flixel.util.FlxAxes;
 import flixel.math.FlxPoint;
 import flixel.addons.ui.FlxUITooltipManager;
@@ -30,8 +32,6 @@ import flixel.system.FlxSound;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxCamera;
 import flixel.FlxG;
-import Section.SwagSection;
-import Song.SwagSong;
 import flixel.ui.FlxButton;
 import flixel.ui.FlxSpriteButton;
 import flixel.addons.ui.FlxInputText;
@@ -45,6 +45,23 @@ import flixel.addons.ui.FlxUITabMenu;
 import flixel.addons.ui.FlxUITooltip.FlxUITooltipStyle;
 
 
+#if LEATHER
+import states.PlayState;
+import game.Song;
+import game.Section.SwagSection;
+import game.Note;
+import ui.FlxUIDropDownMenuCustom;
+import game.Conductor;
+import utilities.CoolUtil;
+import game.StrumNote;
+import utilities.NoteVariables;
+import states.LoadingState;
+import states.MusicBeatState;
+#else
+import Section.SwagSection;
+import Song.SwagSong;
+#end
+
 
 import modcharting.*;
 import modcharting.PlayfieldRenderer.StrumNoteType;
@@ -54,6 +71,7 @@ using StringTools;
 
 class ModchartEditorEvent extends FlxSprite
 {
+    #if ((PSYCH || LEATHER) && !DISABLE_MODCHART_EDITOR)
     public var data:Array<Dynamic>;
     public function new (data:Array<Dynamic>)
     {
@@ -69,12 +87,96 @@ class ModchartEditorEvent extends FlxSprite
         antialiasing = true;
     }
     public function getBeatTime():Float { return data[ModchartFile.EVENT_DATA][ModchartFile.EVENT_TIME]; }
+    #end
 }
-
-class ModchartEditorState extends ModchartMusicBeatState
+#if ((PSYCH || LEATHER) && !DISABLE_MODCHART_EDITOR)
+class ModchartEditorState extends MusicBeatState
 {
-    //only works on psych right now, but modcharts made with this should work on other engines
-    #if (PSYCH && !DISABLE_MODCHART_EDITOR)
+    #if LEATHER 
+    private var curDecStep:Float = 0;
+	private var curDecBeat:Float = 0;
+    override private function updateBeat():Void
+    {
+        curBeat = Math.floor(curStep / Conductor.timeScale[1]);
+        curDecBeat = curDecStep/Conductor.timeScale[1];
+    }
+
+    override private function updateCurStep():Void
+    {
+        var lastChange:BPMChangeEvent = {
+            stepTime: 0,
+            songTime: 0,
+            bpm: 0
+        }
+		for(i in 0...Conductor.bpmChangeMap.length)
+        {
+            if (Conductor.songPosition >= Conductor.bpmChangeMap[i].songTime)
+                lastChange = Conductor.bpmChangeMap[i];
+        }
+
+        var dumb:TimeScaleChangeEvent = {
+            stepTime: 0,
+            songTime: 0,
+            timeScale: [4,4]
+        };
+
+        var lastTimeChange:TimeScaleChangeEvent = dumb;
+
+        for(i in 0...Conductor.timeScaleChangeMap.length)
+        {
+            if (Conductor.songPosition >= Conductor.timeScaleChangeMap[i].songTime)
+                lastTimeChange = Conductor.timeScaleChangeMap[i];
+        }
+
+        if(lastTimeChange != dumb)
+            Conductor.timeScale = lastTimeChange.timeScale;
+
+        var multi:Float = 1;
+
+        if(FlxG.state == PlayState.instance)
+            multi = PlayState.songMultiplier;
+
+        Conductor.recalculateStuff(multi);
+
+        var shit = (Conductor.songPosition - lastChange.songTime) / Conductor.stepCrochet;
+        curStep = lastChange.stepTime + Math.floor(shit);
+        curDecStep = lastChange.stepTime + shit;
+
+        updateBeat();
+    }
+    public var ui_Settings:Array<String>;
+	public var mania_size:Array<String>;
+	public var mania_offset:Array<String>;
+	public var mania_gap:Array<String>;
+	public var types:Array<String>;
+
+	public var arrow_Configs:Map<String, Array<String>> = new Map<String, Array<String>>();
+	public var type_Configs:Map<String, Array<String>> = new Map<String, Array<String>>();
+    public var arrow_Type_Sprites:Map<String, FlxFramesCollection> = [];
+    #end
+
+    public static function getBPMFromSeconds(time:Float){
+        #if PSYCH 
+        return Conductor.getBPMFromSeconds(time);
+        #else 
+        var lastChange:BPMChangeEvent = {
+			stepTime: 0,
+			songTime: 0,
+			bpm: Conductor.bpm,
+		}
+		for (i in 0...Conductor.bpmChangeMap.length)
+		{
+			if (time >= Conductor.bpmChangeMap[i].songTime)
+				lastChange = Conductor.bpmChangeMap[i];
+		}
+
+		return lastChange;
+        #end
+
+	}
+
+  
+    
 
     //pain
     //tried using a macro but idk how to use them lol
@@ -211,18 +313,52 @@ class ModchartEditorState extends ModchartMusicBeatState
 
         FlxG.mouse.visible = true;
 
+        #if LEATHER 
+        var SONG = PlayState.SONG;
+        if(Std.string(SONG.ui_Skin) == "null")
+			SONG.ui_Skin = SONG.stage == "school" || SONG.stage == "school-mad" || SONG.stage == "evil-school" ? "pixel" : "default";
+
+		// yo poggars
+		if(SONG.ui_Skin == "default")
+			SONG.ui_Skin = utilities.Options.getData("uiSkin");
+
+		ui_Settings = CoolUtil.coolTextFile(Paths.txt("ui skins/" + SONG.ui_Skin + "/config"));
+		mania_size = CoolUtil.coolTextFile(Paths.txt("ui skins/" + SONG.ui_Skin + "/maniasize"));
+		mania_offset = CoolUtil.coolTextFile(Paths.txt("ui skins/" + SONG.ui_Skin + "/maniaoffset"));
+
+		if(Assets.exists(Paths.txt("ui skins/" + SONG.ui_Skin + "/maniagap")))
+			mania_gap = CoolUtil.coolTextFile(Paths.txt("ui skins/" + SONG.ui_Skin + "/maniagap"));
+		else
+			mania_gap = CoolUtil.coolTextFile(Paths.txt("ui skins/default/maniagap"));
+
+		types = CoolUtil.coolTextFile(Paths.txt("ui skins/" + SONG.ui_Skin + "/types"));
+
+		arrow_Configs.set("default", CoolUtil.coolTextFile(Paths.txt("ui skins/" + SONG.ui_Skin + "/default")));
+		type_Configs.set("default", CoolUtil.coolTextFile(Paths.txt("arrow types/default")));
+
+		arrow_Type_Sprites.set("default", Paths.getSparrowAtlas('ui skins/' + SONG.ui_Skin + "/arrows/default", 'shared'));
+
+        #end
 
 
-        
+
+        #if PSYCH
 		strumLine = new FlxSprite(ClientPrefs.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, 50).makeGraphic(FlxG.width, 10);
-		if(ClientPrefs.downScroll) strumLine.y = FlxG.height - 150;
+        if(ModchartUtil.getDownscroll(this)) strumLine.y = FlxG.height - 150;
+        #else
+        strumLine = new FlxSprite(0, 100).makeGraphic(FlxG.width, 10);
+        #if LEATHER
+        if(ModchartUtil.getDownscroll(this)) strumLine.y = FlxG.height - 100;
+        #end
+        #end
+		
 		strumLine.scrollFactor.set();
 
-        strumLineNotes = new FlxTypedGroup<StrumNote>();
+        strumLineNotes = new FlxTypedGroup<StrumNoteType>();
 		add(strumLineNotes);
 
-		opponentStrums = new FlxTypedGroup<StrumNote>();
-		playerStrums = new FlxTypedGroup<StrumNote>();
+		opponentStrums = new FlxTypedGroup<StrumNoteType>();
+		playerStrums = new FlxTypedGroup<StrumNoteType>();
 
 		generateSong(PlayState.SONG.song);
 
@@ -375,9 +511,11 @@ class ModchartEditorState extends ModchartMusicBeatState
             if (i.hasFocus)
             {
                 blockInput = true;
+                #if PSYCH
                 FlxG.sound.muteKeys = [];
 				FlxG.sound.volumeDownKeys = [];
 				FlxG.sound.volumeUpKeys = [];
+                #end
             }
                 
         for (i in scrollBlockers)
@@ -387,9 +525,11 @@ class ModchartEditorState extends ModchartMusicBeatState
 
         if (!blockInput)
         {
+            #if PSYCH
             FlxG.sound.muteKeys = TitleState.muteKeys;
 			FlxG.sound.volumeDownKeys = TitleState.volumeDownKeys;
 			FlxG.sound.volumeUpKeys = TitleState.volumeUpKeys;
+            #end
             if (FlxG.keys.justPressed.SPACE)
             {
                 if (FlxG.sound.music.playing)
@@ -470,8 +610,20 @@ class ModchartEditorState extends ModchartMusicBeatState
             playbackSpeed = 3;
 
         playfieldRenderer.speed = playbackSpeed; //adjust the speed of tweens
+        #if PSYCH 
         FlxG.sound.music.pitch = playbackSpeed;
         vocals.pitch = playbackSpeed;
+        #else
+            /*#if cpp
+            @:privateAccess
+            {
+                lime.media.openal.AL.sourcef(FlxG.sound.music._channel.__source.__backend.handle, lime.media.openal.AL.PITCH, playbackSpeed);
+
+                if (vocals.playing)
+                    lime.media.openal.AL.sourcef(vocals._channel.__source.__backend.handle, lime.media.openal.AL.PITCH, playbackSpeed);
+            }
+            #end*/
+        #end
         
 
         if (unspawnNotes[0] != null)
@@ -483,7 +635,9 @@ class ModchartEditorState extends ModchartMusicBeatState
             {
                 var dunceNote:Note = unspawnNotes[0];
                 notes.insert(0, dunceNote);
+                #if PSYCH 
                 dunceNote.spawned=true;
+                #end
                 var index:Int = unspawnNotes.indexOf(dunceNote);
                 unspawnNotes.splice(index, 1);
             }
@@ -495,7 +649,7 @@ class ModchartEditorState extends ModchartMusicBeatState
             if (Conductor.songPosition >= daNote.strumTime)
             {
                 daNote.wasGoodHit = true;
-                var strum = strumLineNotes.members[daNote.noteData+(daNote.mustPress ? 4 : 0)];
+                var strum = strumLineNotes.members[daNote.noteData+(daNote.mustPress ? NoteMovement.keyCount : 0)];
                 strum.playAnim("confirm", true);
                 strum.resetAnim = 0.15;
                 if(daNote.isSustainNote && !daNote.animation.curAnim.name.endsWith('end')) {
@@ -605,11 +759,13 @@ class ModchartEditorState extends ModchartMusicBeatState
             FlxG.mouse.visible = false;
             FlxG.sound.music.stop();
             if(vocals != null) vocals.stop();
+            #if PSYCH 
             StageData.loadDirectory(PlayState.SONG);
+            #end
             LoadingState.loadAndSwitchState(new PlayState());
         }
 
-        var curBpmChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
+        var curBpmChange = getBPMFromSeconds(Conductor.songPosition);
         if (curBpmChange.songTime <= 0)
         {
             curBpmChange.bpm = PlayState.SONG.bpm; //start bpm
@@ -792,7 +948,13 @@ class ModchartEditorState extends ModchartMusicBeatState
         Conductor.changeBPM(songData.bpm);
 
         if (PlayState.SONG.needsVoices)
+        {
+            #if LEATHER 
+            vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song, (PlayState.SONG.specialAudioName == null ? PlayState.storyDifficultyStr.toLowerCase() : PlayState.SONG.specialAudioName)));
+            #else 
             vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song));
+            #end
+        }
         else
             vocals = new FlxSound();
 
@@ -822,21 +984,29 @@ class ModchartEditorState extends ModchartMusicBeatState
 
         var daBeats:Int = 0; // Not exactly representative of 'daBeats' lol, just how much it has looped
 
-        var songName:String = Paths.formatToSongPath(PlayState.SONG.song);
+        //var songName:String = Paths.formatToSongPath(PlayState.SONG.song);
 
         for (section in noteData)
         {
             for (songNotes in section.sectionNotes)
             {
                 var daStrumTime:Float = songNotes[0];
-                var daNoteData:Int = Std.int(songNotes[1] % 4);
-
+                #if LEATHER 
                 var gottaHitNote:Bool = section.mustHitSection;
-
+				if(songNotes[1] >= (!gottaHitNote ? PlayState.SONG.keyCount : PlayState.SONG.playerKeyCount))
+					gottaHitNote = !section.mustHitSection;
+                var daNoteData:Int = Std.int(songNotes[1] % (!gottaHitNote ? PlayState.SONG.keyCount : PlayState.SONG.playerKeyCount));
+                #else 
+                var daNoteData:Int = Std.int(songNotes[1] % 4);
+                var gottaHitNote:Bool = section.mustHitSection;
                 if (songNotes[1] > 3)
                 {
                     gottaHitNote = !section.mustHitSection;
                 }
+                #end
+                
+
+
 
                 var oldNote:Note;
                 if (unspawnNotes.length > 0)
@@ -844,12 +1014,18 @@ class ModchartEditorState extends ModchartMusicBeatState
                 else
                     oldNote = null;
 
+
+                #if PSYCH 
                 var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
-                swagNote.mustPress = gottaHitNote;
                 swagNote.sustainLength = songNotes[2];
+                swagNote.mustPress = gottaHitNote;
                 swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
                 swagNote.noteType = songNotes[3];
                 if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
+                #elseif LEATHER 
+                var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, 0, songNotes[4], null, [0], gottaHitNote);
+                swagNote.sustainLength = songNotes[2];
+                #end
 
                 swagNote.scrollFactor.set();
 
@@ -864,13 +1040,20 @@ class ModchartEditorState extends ModchartMusicBeatState
                     {
                         oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
+                        #if PSYCH 
                         var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + (Conductor.stepCrochet / FlxMath.roundDecimal(PlayState.SONG.speed, 2)), daNoteData, oldNote, true);
                         sustainNote.mustPress = gottaHitNote;
+                        #else 
+                        var sustainNote:Note = new Note(daStrumTime + (Std.int(Conductor.stepCrochet) * susNote) + Std.int(Conductor.stepCrochet), daNoteData, oldNote, true, 0, songNotes[4], null, [0], gottaHitNote);
+                        sustainNote.mustPress = gottaHitNote;
+                        #end
+                        #if PSYCH 
                         sustainNote.gfNote = (section.gfSection && (songNotes[1]<4));
                         sustainNote.noteType = swagNote.noteType;
-                        sustainNote.scrollFactor.set();
                         swagNote.tail.push(sustainNote);
                         sustainNote.parent = swagNote;
+                        #end
+                        sustainNote.scrollFactor.set();
                         unspawnNotes.push(sustainNote);
                     }
                 }
@@ -890,19 +1073,54 @@ class ModchartEditorState extends ModchartMusicBeatState
 
     private function generateStaticArrows(player:Int):Void
     {
-        for (i in 0...4)
+        var usedKeyCount = 4;
+        #if LEATHER
+        usedKeyCount = PlayState.SONG.keyCount;
+		if(player == 1)
+			usedKeyCount = PlayState.SONG.playerKeyCount;
+        #end
+
+        for (i in 0...usedKeyCount)
         {
             // FlxG.log.add(i);
             var targetAlpha:Float = 1;
             if (player < 1)
             {
+                #if PSYCH
                 if(!ClientPrefs.opponentStrums) targetAlpha = 0;
                 else if(ClientPrefs.middleScroll) targetAlpha = 0.35;
+                #end
             }
 
+            #if LEATHER 
+            var babyArrow:StrumNote = new StrumNote(0, strumLine.y, i, null, null, null, usedKeyCount);
+			babyArrow.frames = arrow_Type_Sprites.get("default");
+
+			babyArrow.antialiasing = ui_Settings[3] == "true";
+
+			babyArrow.setGraphicSize(Std.int((babyArrow.width * Std.parseFloat(ui_Settings[0])) * (Std.parseFloat(ui_Settings[2]) - (Std.parseFloat(mania_size[usedKeyCount-1])))));
+			babyArrow.updateHitbox();
+			
+			var animation_Base_Name = NoteVariables.Note_Count_Directions[usedKeyCount - 1][Std.int(Math.abs(i))].toLowerCase();
+
+			babyArrow.animation.addByPrefix('static', animation_Base_Name + " static");
+			babyArrow.animation.addByPrefix('pressed', NoteVariables.Other_Note_Anim_Stuff[usedKeyCount - 1][i] + ' press', 24, false);
+			babyArrow.animation.addByPrefix('confirm', NoteVariables.Other_Note_Anim_Stuff[usedKeyCount - 1][i] + ' confirm', 24, false);
+
+			babyArrow.scrollFactor.set();
+			
+			babyArrow.playAnim('static');
+
+			babyArrow.x += (babyArrow.width + (2 + Std.parseFloat(mania_gap[usedKeyCount - 1]))) * Math.abs(i) + Std.parseFloat(mania_offset[usedKeyCount - 1]);
+			babyArrow.y = strumLine.y - (babyArrow.height / 2);
+			babyArrow.x += 100 - ((usedKeyCount - 4) * 16) + (usedKeyCount >= 10 ? 30 : 0);
+			babyArrow.x += ((FlxG.width / 2) * player);
+            #elseif PSYCH 
             var babyArrow:StrumNote = new StrumNote(ClientPrefs.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, strumLine.y, i, player);
             babyArrow.downScroll = ClientPrefs.downScroll;
             babyArrow.alpha = targetAlpha;
+            #end
+
 
             if (player == 1)
             {
@@ -910,6 +1128,7 @@ class ModchartEditorState extends ModchartMusicBeatState
             }
             else
             {
+                #if PSYCH 
                 if(ClientPrefs.middleScroll)
                 {
                     babyArrow.x += 310;
@@ -917,11 +1136,14 @@ class ModchartEditorState extends ModchartMusicBeatState
                         babyArrow.x += FlxG.width / 2 + 25;
                     }
                 }
+                #end
                 opponentStrums.add(babyArrow);
             }
 
             strumLineNotes.add(babyArrow);
+            #if PSYCH 
             babyArrow.postAddedToGroup();
+            #end
         }
     }
     
@@ -1762,8 +1984,8 @@ class ModchartEditorState extends ModchartMusicBeatState
 		if ((data != null) && (data.length > 0))
         {
             _file = new FileReference();
-            _file.addEventListener(Event.COMPLETE, onSaveComplete);
-            _file.addEventListener(Event.CANCEL, onSaveCancel);
+            _file.addEventListener(openfl.events.Event.COMPLETE, onSaveComplete);
+            _file.addEventListener(openfl.events.Event.CANCEL, onSaveCancel);
             _file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
             _file.save(data.trim(), "modchart.json");
         }
@@ -1774,8 +1996,8 @@ class ModchartEditorState extends ModchartMusicBeatState
     }
     function onSaveComplete(_):Void
     {
-        _file.removeEventListener(Event.COMPLETE, onSaveComplete);
-        _file.removeEventListener(Event.CANCEL, onSaveCancel);
+        _file.removeEventListener(openfl.events.Event.COMPLETE, onSaveComplete);
+        _file.removeEventListener(openfl.events.Event.CANCEL, onSaveCancel);
         _file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
         _file = null;
     }
@@ -1785,8 +2007,8 @@ class ModchartEditorState extends ModchartMusicBeatState
      */
     function onSaveCancel(_):Void
     {
-        _file.removeEventListener(Event.COMPLETE, onSaveComplete);
-        _file.removeEventListener(Event.CANCEL, onSaveCancel);
+        _file.removeEventListener(openfl.events.Event.COMPLETE, onSaveComplete);
+        _file.removeEventListener(openfl.events.Event.CANCEL, onSaveCancel);
         _file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
         _file = null;
     }
@@ -1796,12 +2018,13 @@ class ModchartEditorState extends ModchartMusicBeatState
      */
     function onSaveError(_):Void
     {
-        _file.removeEventListener(Event.COMPLETE, onSaveComplete);
-        _file.removeEventListener(Event.CANCEL, onSaveCancel);
+        _file.removeEventListener(openfl.events.Event.COMPLETE, onSaveComplete);
+        _file.removeEventListener(openfl.events.Event.CANCEL, onSaveCancel);
         _file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
         _file = null;
     }
 
 
-    #end
+    
 }
+#end

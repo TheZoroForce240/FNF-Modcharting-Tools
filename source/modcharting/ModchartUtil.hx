@@ -37,6 +37,16 @@ class ModchartUtil
         return false;
         #end
     }
+    public static function getMiddlescroll(instance:ModchartMusicBeatState)
+    {
+        #if PSYCH 
+        return ClientPrefs.middleScroll;
+        #elseif LEATHER
+        return utilities.Options.getData("middlescroll");
+        #else 
+        return false;
+        #end
+    }
     public static function getScrollSpeed(instance:PlayState)
     {
         if (instance == null)
@@ -73,53 +83,30 @@ class ModchartUtil
         #elseif LEATHER 
         //fuck
         var offset:Float = 0;
-        if (daNote.mustPress)
+        var arrayVal = Std.string([daNote.noteData, daNote.arrow_Type, daNote.isSustainNote, daNote.mustPress]);
+
+        if (!NoteMovement.leatherEngineOffsetStuff.exists(arrayVal))
         {
-            var instance = PlayState.instance;
-            var arrayVal = Std.string([daNote.noteData, daNote.arrow_Type, daNote.isSustainNote]);
-            var coolStrum = PlayState.playerStrums.members[Math.floor(Math.abs(daNote.noteData))];
-            if (!instance.prevPlayerXVals.exists(arrayVal))
+            var tempShit:Float = 0.0;
+            var lane = daNote.noteData;
+            if (daNote.mustPress)
+                lane += NoteMovement.keyCount;
+            
+            var targetX = NoteMovement.defaultStrumX[lane];
+
+            while (Std.int(targetX + (daNote.width / 2)) != Std.int(NoteMovement.defaultStrumX[lane] + (NoteMovement.arrowSizes[lane] / 2)))
             {
-                var tempShit:Float = 0.0;
-
-                
-                var targetX = coolStrum.x;
-
-                while (Std.int(targetX + (daNote.width / 2)) != Std.int(coolStrum.x + (coolStrum.width / 2)))
-                {
-                    targetX += (targetX + daNote.width > coolStrum.x + coolStrum.width ? -0.1 : 0.1);
-                    tempShit += (targetX + daNote.width > coolStrum.x + coolStrum.width ? -0.1 : 0.1);
-                }
-
-                instance.prevPlayerXVals.set(arrayVal, tempShit);
+                targetX += (targetX + daNote.width > NoteMovement.defaultStrumX[lane] + NoteMovement.arrowSizes[lane] ? -0.1 : 0.1);
+                tempShit += (targetX + daNote.width > NoteMovement.defaultStrumX[lane] + NoteMovement.arrowSizes[lane] ? -0.1 : 0.1);
             }
-            offset = instance.prevPlayerXVals.get(arrayVal);
+
+            NoteMovement.leatherEngineOffsetStuff.set(arrayVal, tempShit);
         }
-        else 
-        {
-            var instance = PlayState.instance;
-            var arrayVal = Std.string([daNote.noteData, daNote.arrow_Type, daNote.isSustainNote]);
-            var coolStrum = PlayState.enemyStrums.members[Math.floor(Math.abs(daNote.noteData))];
-            if (!instance.prevEnemyXVals.exists(arrayVal))
-            {
-                var tempShit:Float = 0.0;
-
-                
-                var targetX = coolStrum.x;
-
-                while (Std.int(targetX + (daNote.width / 2)) != Std.int(coolStrum.x + (coolStrum.width / 2)))
-                {
-                    targetX += (targetX + daNote.width > coolStrum.x + coolStrum.width ? -0.1 : 0.1);
-                    tempShit += (targetX + daNote.width > coolStrum.x + coolStrum.width ? -0.1 : 0.1);
-                }
-
-                instance.prevEnemyXVals.set(arrayVal, tempShit);
-            }
-            offset = instance.prevEnemyXVals.get(arrayVal);
-        }
+        offset = NoteMovement.leatherEngineOffsetStuff.get(arrayVal);
+        
         return offset;
         #else 
-        return 37;
+        return 37; //the magic number
         #end
     }
     

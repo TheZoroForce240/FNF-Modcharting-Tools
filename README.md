@@ -30,14 +30,19 @@ You need the most recent version of HaxeFlixel for it to work. (5.2.1 as of writ
 ### With Source:
 1. Start by downloading the source folder from this repo and dragging it into your current fnf source folder you want to add it to.
 2. Now you only need to make a few small additions to get everything working,
+- In MusicBeatState.hx:
+```haxe
+
+class MusicBeatState extends modcharting.ModchartMusicBeatState
+{
+  
+```
+```haxe
 - In PlayState.hx:
 ```haxe
 import modcharting.ModchartFuncs;
 import modcharting.NoteMovement;
 import modcharting.PlayfieldRenderer;
-
-class PlayState extends modcharting.ModchartMusicBeatState
-{
   
 ```
 ```haxe

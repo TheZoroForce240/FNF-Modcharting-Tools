@@ -10,6 +10,11 @@ import llua.State;
 import llua.Convert;
 #end
 
+#if LEATHER
+import states.PlayState;
+import game.Conductor;
+#end
+
 import modcharting.Modifier;
 import modcharting.PlayfieldRenderer;
 import modcharting.NoteMovement;
@@ -197,7 +202,7 @@ class ModchartFuncs
         instance.playfieldRenderer.tweenModifier(modifier,val,time,ease, Modifier.beat);
     }
 
-    public static function tweenModifierSubValue(modifier:String, subValue:String, val:Float, time:Float, ease:String, ?instance:PlayState = null)
+    public static function tweenModifierSubValue(modifier:String, subValue:String, val:Float, time:Float, ease:String, ?instance:ModchartMusicBeatState = null)
     {
         if (instance == null)
             instance = PlayState.instance;
