@@ -1,6 +1,6 @@
 {
     "name": "fnf-modcharting-tools",
-    "url" : "https://github.com/TheZoroForce240/FNF-Modcharting-Tools/tree/modchart-editor",
+    "url" : "https://github.com/TheZoroForce240/FNF-Modcharting-Tools",
     "license": "Apache",
     "tags": ["fnf"],
     "description": "A modchart framework for Friday Night Funkin.",
