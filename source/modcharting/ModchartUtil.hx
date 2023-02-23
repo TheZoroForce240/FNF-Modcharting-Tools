@@ -15,7 +15,7 @@ import Note;
 
 class ModchartUtil
 {
-    public static function getDownscroll(instance:PlayState)
+    public static function getDownscroll(instance:ModchartMusicBeatState)
     {
         //need to test each engine
         //not expecting all to work
@@ -55,7 +55,7 @@ class ModchartUtil
     }
 
 
-    public static function getIsPixelStage(instance:PlayState)
+    public static function getIsPixelStage(instance:ModchartMusicBeatState)
     {
         if (instance == null)
             return false;
