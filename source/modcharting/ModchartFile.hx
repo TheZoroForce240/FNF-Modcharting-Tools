@@ -4,7 +4,11 @@ import haxe.Exception;
 import haxe.Json;
 import haxe.format.JsonParser;
 import lime.utils.Assets;
-
+#if LEATHER
+import states.PlayState;
+import game.Note;
+import game.Conductor;
+#end
 #if sys
 import sys.io.File;
 import sys.FileSystem;
