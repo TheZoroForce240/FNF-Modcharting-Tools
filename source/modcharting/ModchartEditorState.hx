@@ -626,20 +626,8 @@ class ModchartEditorState extends MusicBeatState
             playbackSpeed = 3;
 
         playfieldRenderer.speed = playbackSpeed; //adjust the speed of tweens
-        #if PSYCH 
         FlxG.sound.music.pitch = playbackSpeed;
         vocals.pitch = playbackSpeed;
-        #else
-            /*#if cpp
-            @:privateAccess
-            {
-                lime.media.openal.AL.sourcef(FlxG.sound.music._channel.__source.__backend.handle, lime.media.openal.AL.PITCH, playbackSpeed);
-
-                if (vocals.playing)
-                    lime.media.openal.AL.sourcef(vocals._channel.__source.__backend.handle, lime.media.openal.AL.PITCH, playbackSpeed);
-            }
-            #end*/
-        #end
         
 
         if (unspawnNotes[0] != null)

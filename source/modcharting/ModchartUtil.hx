@@ -76,29 +76,35 @@ class ModchartUtil
         #end
     }
 
-    public static function getNoteOffsetX(daNote:Note)
+    public static function getNoteOffsetX(daNote:Note, instance:ModchartMusicBeatState)
     {
         #if PSYCH
         return daNote.offsetX;
         #elseif LEATHER 
         //fuck
         var offset:Float = 0;
-        var arrayVal = Std.string([daNote.noteData, daNote.arrow_Type, daNote.isSustainNote, daNote.mustPress]);
+       
+        var lane = daNote.noteData;
+        if (daNote.mustPress)
+            lane += NoteMovement.keyCount;
+        var strum = instance.playfieldRenderer.strumGroup.members[lane];
+
+        var arrayVal = Std.string([lane, daNote.arrow_Type, daNote.isSustainNote]);
 
         if (!NoteMovement.leatherEngineOffsetStuff.exists(arrayVal))
         {
             var tempShit:Float = 0.0;
-            var lane = daNote.noteData;
-            if (daNote.mustPress)
-                lane += NoteMovement.keyCount;
+
             
             var targetX = NoteMovement.defaultStrumX[lane];
-
-            while (Std.int(targetX + (daNote.width / 2)) != Std.int(NoteMovement.defaultStrumX[lane] + (NoteMovement.arrowSizes[lane] / 2)))
+            var xPos = targetX;
+            while (Std.int(xPos + (daNote.width / 2)) != Std.int(targetX + (strum.width / 2)))
             {
-                targetX += (targetX + daNote.width > NoteMovement.defaultStrumX[lane] + NoteMovement.arrowSizes[lane] ? -0.1 : 0.1);
-                tempShit += (targetX + daNote.width > NoteMovement.defaultStrumX[lane] + NoteMovement.arrowSizes[lane] ? -0.1 : 0.1);
+                xPos += (xPos + daNote.width > targetX + strum.width ? -0.1 : 0.1);
+                tempShit += (xPos + daNote.width > targetX + strum.width ? -0.1 : 0.1);
             }
+            //trace(arrayVal);
+            //trace(tempShit);
 
             NoteMovement.leatherEngineOffsetStuff.set(arrayVal, tempShit);
         }
@@ -106,7 +112,7 @@ class ModchartUtil
         
         return offset;
         #else 
-        return 37; //the magic number
+        return (daNote.isSustainNote ? 37 : 0); //the magic number
         #end
     }
     
