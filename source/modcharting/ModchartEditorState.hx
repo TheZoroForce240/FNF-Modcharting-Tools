@@ -306,7 +306,11 @@ class ModchartEditorState extends MusicBeatState
 		persistentDraw = true;
 
 		if (PlayState.SONG == null)
-			PlayState.SONG = Song.loadFromJson('tutorial');
+            #if LEATHER
+			PlayState.SONG = Song.loadFromJson('tutorial','tutorial');
+            #else
+            PlayState.SONG = Song.loadFromJson('tutorial');
+            #end
 
 		Conductor.mapBPMChanges(PlayState.SONG);
 		Conductor.changeBPM(PlayState.SONG.bpm);
@@ -1023,8 +1027,12 @@ class ModchartEditorState extends MusicBeatState
                 swagNote.noteType = songNotes[3];
                 if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
                 #elseif LEATHER 
-                var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, 0, songNotes[4], null, [0], gottaHitNote);
-                swagNote.sustainLength = songNotes[2];
+                var char:Dynamic = songNotes[3];
+
+				var chars:Array<Int> = [];
+
+				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, char, songNotes[4], null, chars, gottaHitNote);
+				swagNote.sustainLength = songNotes[2];
                 #end
 
                 swagNote.scrollFactor.set();
