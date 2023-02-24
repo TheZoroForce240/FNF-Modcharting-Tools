@@ -71,7 +71,7 @@ using StringTools;
 
 class ModchartEditorEvent extends FlxSprite
 {
-    #if ((PSYCH || LEATHER) && !DISABLE_MODCHART_EDITOR)
+    #if (PSYCH && !DISABLE_MODCHART_EDITOR)
     public var data:Array<Dynamic>;
     public function new (data:Array<Dynamic>)
     {
@@ -81,6 +81,22 @@ class ModchartEditorEvent extends FlxSprite
         //makeGraphic(48, 48);
         
         animation.addByPrefix('note', 'purple0');
+        animation.play('note');
+        setGraphicSize(ModchartEditorState.gridSize, ModchartEditorState.gridSize);
+        updateHitbox();
+        antialiasing = true;
+    }
+    public function getBeatTime():Float { return data[ModchartFile.EVENT_DATA][ModchartFile.EVENT_TIME]; }
+    #elseif (LEATHER && !DISABLE_MODCHART_EDITOR)
+    public var data:Array<Dynamic>;
+    public function new (data:Array<Dynamic>)
+    {
+        this.data = data;
+        super(-300, 0);
+        frames = Paths.getSparrowAtlas("ui skins/" + utilities.Options.getData("uiSkin") + "/arrows/default", 'shared');
+        //makeGraphic(48, 48);
+        
+        animation.addByPrefix('note', 'left0');
         animation.play('note');
         setGraphicSize(ModchartEditorState.gridSize, ModchartEditorState.gridSize);
         updateHitbox();
