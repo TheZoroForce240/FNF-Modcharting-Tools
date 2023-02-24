@@ -160,7 +160,7 @@ class ModchartEditorState extends MusicBeatState
 
         updateBeat();
     }
-    public var ui_Settings:Array<String>;
+    public var ui_settings:Array<String>;
 	public var mania_size:Array<String>;
 	public var mania_offset:Array<String>;
 	public var mania_gap:Array<String>;
@@ -338,7 +338,7 @@ class ModchartEditorState extends MusicBeatState
 		if(SONG.ui_Skin == "default")
 			SONG.ui_Skin = utilities.Options.getData("uiSkin");
 
-		ui_Settings = CoolUtil.coolTextFile(Paths.txt("ui skins/" + SONG.ui_Skin + "/config"));
+		ui_settings = CoolUtil.coolTextFile(Paths.txt("ui skins/" + SONG.ui_Skin + "/config"));
 		mania_size = CoolUtil.coolTextFile(Paths.txt("ui skins/" + SONG.ui_Skin + "/maniasize"));
 		mania_offset = CoolUtil.coolTextFile(Paths.txt("ui skins/" + SONG.ui_Skin + "/maniaoffset"));
 
@@ -1100,9 +1100,9 @@ class ModchartEditorState extends MusicBeatState
             var babyArrow:StrumNote = new StrumNote(0, strumLine.y, i, null, null, null, usedKeyCount);
 			babyArrow.frames = arrow_Type_Sprites.get("default");
 
-			babyArrow.antialiasing = ui_Settings[3] == "true";
+			babyArrow.antialiasing = ui_settings[3] == "true";
 
-			babyArrow.setGraphicSize(Std.int((babyArrow.width * Std.parseFloat(ui_Settings[0])) * (Std.parseFloat(ui_Settings[2]) - (Std.parseFloat(mania_size[usedKeyCount-1])))));
+			babyArrow.setGraphicSize(Std.int((babyArrow.width * Std.parseFloat(ui_settings[0])) * (Std.parseFloat(ui_settings[2]) - (Std.parseFloat(mania_size[usedKeyCount-1])))));
 			babyArrow.updateHitbox();
 			
 			var animation_Base_Name = NoteVariables.Note_Count_Directions[usedKeyCount - 1][Std.int(Math.abs(i))].toLowerCase();

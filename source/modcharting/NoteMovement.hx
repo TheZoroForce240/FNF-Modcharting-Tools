@@ -48,7 +48,7 @@ class NoteMovement
             defaultStrumY.push(strum.y);
             #if LEATHER
             var localKeyCount = (i < keyCount ? keyCount : playerKeyCount);
-            var s = Std.parseFloat(game.ui_Settings[0]) * (Std.parseFloat(game.ui_Settings[2]) - (Std.parseFloat(game.mania_size[localKeyCount-1])));
+            var s = Std.parseFloat(game.ui_settings[0]) * (Std.parseFloat(game.ui_settings[2]) - (Std.parseFloat(game.mania_size[localKeyCount-1])));
             #else 
             var s = 0.7;
             #end
@@ -75,7 +75,7 @@ class NoteMovement
             defaultStrumY.push(strum.y);
             #if LEATHER
             var localKeyCount = (i < keyCount ? keyCount : playerKeyCount);
-            var s = Std.parseFloat(game.ui_Settings[0]) * (Std.parseFloat(game.ui_Settings[2]) - (Std.parseFloat(game.mania_size[localKeyCount-1])));
+            var s = Std.parseFloat(game.ui_settings[0]) * (Std.parseFloat(game.ui_settings[2]) - (Std.parseFloat(game.mania_size[localKeyCount-1])));
             #else
             var s = 0.7;
             #end
