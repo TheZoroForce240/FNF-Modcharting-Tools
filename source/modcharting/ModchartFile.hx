@@ -79,14 +79,20 @@ class ModchartFile
         #end
         if (rawJson == null)
         {
+            #if LEATHER
+            var filePath = Paths.json("song data/" + folder + '/modchart');
+            #else 
             var filePath = Paths.json(folder + '/modchart');
+            #end
             folderShit = filePath.replace("modchart.json", "customMods/");
+            //trace(filePath);
             #if sys
             if(FileSystem.exists(filePath))
                 rawJson = File.getContent(filePath).trim();
             else #end //should become else if i think???
             if (Assets.exists(filePath))
                 rawJson = Assets.getText(filePath).trim();
+                
         }
         var json:ModchartJson = null;
         if (rawJson != null)
