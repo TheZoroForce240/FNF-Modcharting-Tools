@@ -1,6 +1,6 @@
 package modcharting;
 
-import substates.MusicBeatSubstate;
+import MusicBeatSubstate;
 import lime.utils.Assets;
 import flixel.graphics.frames.FlxFramesCollection;
 import flixel.util.FlxAxes;
@@ -58,6 +58,7 @@ import game.StrumNote;
 import utilities.NoteVariables;
 import states.LoadingState;
 import states.MusicBeatState;
+import substates.MusicBeatSubstate;
 #else
 import Section.SwagSection;
 import Song.SwagSong;
