@@ -1,5 +1,6 @@
 package modcharting;
 
+import substates.MusicBeatSubstate;
 import lime.utils.Assets;
 import flixel.graphics.frames.FlxFramesCollection;
 import flixel.util.FlxAxes;
@@ -71,32 +72,22 @@ using StringTools;
 
 class ModchartEditorEvent extends FlxSprite
 {
-    #if (PSYCH && !DISABLE_MODCHART_EDITOR)
+    #if ((PSYCH || LEATHER) && !DISABLE_MODCHART_EDITOR)
     public var data:Array<Dynamic>;
     public function new (data:Array<Dynamic>)
     {
         this.data = data;
         super(-300, 0);
-        frames = Paths.getSparrowAtlas('NOTE_assets');
-        //makeGraphic(48, 48);
-        
-        animation.addByPrefix('note', 'purple0');
-        animation.play('note');
-        setGraphicSize(ModchartEditorState.gridSize, ModchartEditorState.gridSize);
-        updateHitbox();
-        antialiasing = true;
-    }
-    public function getBeatTime():Float { return data[ModchartFile.EVENT_DATA][ModchartFile.EVENT_TIME]; }
-    #elseif (LEATHER && !DISABLE_MODCHART_EDITOR)
-    public var data:Array<Dynamic>;
-    public function new (data:Array<Dynamic>)
-    {
-        this.data = data;
-        super(-300, 0);
+        #if LEATHER 
         frames = Paths.getSparrowAtlas("ui skins/" + utilities.Options.getData("uiSkin") + "/arrows/default", 'shared');
+        animation.addByPrefix('note', 'left0');
+        #else
+        frames = Paths.getSparrowAtlas('NOTE_assets');
+        animation.addByPrefix('note', 'purple0');
+        #end
         //makeGraphic(48, 48);
         
-        animation.addByPrefix('note', 'left0');
+        
         animation.play('note');
         setGraphicSize(ModchartEditorState.gridSize, ModchartEditorState.gridSize);
         updateHitbox();
@@ -108,6 +99,12 @@ class ModchartEditorEvent extends FlxSprite
 #if ((PSYCH || LEATHER) && !DISABLE_MODCHART_EDITOR)
 class ModchartEditorState extends MusicBeatState
 {
+    var hasUnsavedChanges:Bool = false;
+    override function closeSubState() 
+    {
+		persistentUpdate = true;
+		super.closeSubState();
+	}
     #if LEATHER 
     private var curDecStep:Float = 0;
 	private var curDecBeat:Float = 0;
@@ -760,13 +757,25 @@ class ModchartEditorState extends MusicBeatState
 
         if (FlxG.keys.justPressed.ESCAPE)
         {
-            FlxG.mouse.visible = false;
-            FlxG.sound.music.stop();
-            if(vocals != null) vocals.stop();
-            #if PSYCH 
-            StageData.loadDirectory(PlayState.SONG);
-            #end
-            LoadingState.loadAndSwitchState(new PlayState());
+            var exitFunc = function()
+            {
+                FlxG.mouse.visible = false;
+                FlxG.sound.music.stop();
+                if(vocals != null) vocals.stop();
+                
+                #if PSYCH 
+                StageData.loadDirectory(PlayState.SONG);
+                #end
+                LoadingState.loadAndSwitchState(new PlayState());
+            };
+            if (hasUnsavedChanges)
+            {
+                persistentUpdate = false;
+                openSubState(new ModchartEditorExitSubstate(exitFunc));
+            }
+            else 
+                exitFunc();
+
         }
 
         var curBpmChange = getBPMFromSeconds(Conductor.songPosition);
@@ -831,6 +840,7 @@ class ModchartEditorState extends MusicBeatState
         
         }
         playfieldRenderer.modchart.data.events.push(event);
+        hasUnsavedChanges = true;
         return event;
     }
 
@@ -1282,6 +1292,7 @@ class ModchartEditorState extends MusicBeatState
             }
             dirtyUpdateModifiers = true;
             updateModList();
+            hasUnsavedChanges = true;
         });
 
         var removeModifier:FlxButton = new FlxButton(saveModifier.x, saveModifier.y+saveModifier.height+20, 'Remove Modifier', function ()
@@ -1293,6 +1304,7 @@ class ModchartEditorState extends MusicBeatState
                 }
             dirtyUpdateModifiers = true;
             updateModList();
+            hasUnsavedChanges = true;
         });
         removeModifier.scale.y *= 1.5;
         removeModifier.updateHitbox();
@@ -1511,6 +1523,7 @@ class ModchartEditorState extends MusicBeatState
                 data[EVENT_REPEAT][EVENT_REPEATBOOL] = repeatCheckbox.checked;
                 highlightedEvent = data;
                 dirtyUpdateEvents = true;
+                hasUnsavedChanges = true;
             }
         }
         repeatBeatGapStepper = new FlxUINumericStepper(950, 100, 0.25, 0, 0, 9999, 3);
@@ -1532,6 +1545,7 @@ class ModchartEditorState extends MusicBeatState
                 highlightedEvent = data; 
                 eventDataInputText.text = highlightedEvent[EVENT_DATA][EVENT_EASEDATA];
                 dirtyUpdateEvents = true;
+                hasUnsavedChanges = true;
             }
         };
         eventValueInputText = new FlxUIInputText(25 + 200, 50, 160, '', 8);
@@ -1544,6 +1558,7 @@ class ModchartEditorState extends MusicBeatState
                 highlightedEvent = data; 
                 eventDataInputText.text = highlightedEvent[EVENT_DATA][EVENT_EASEDATA];
                 dirtyUpdateEvents = true;
+                hasUnsavedChanges = true;
             }
         };
 
@@ -1563,8 +1578,7 @@ class ModchartEditorState extends MusicBeatState
                 onSelectEvent();
                 updateEventSprites();
                 dirtyUpdateEvents = true;
-            }
-            
+            } 
         });
         centerXToObject(stackedEventStepper, addStacked);
 
@@ -1588,6 +1602,7 @@ class ModchartEditorState extends MusicBeatState
                 eventTimeInputText.alpha = 0.5;
             }
             dirtyUpdateEvents = true;
+            hasUnsavedChanges = true;
         });
         eventEaseInputText = new FlxUIInputText(25 + 650, 50+100, 160, '', 8);
         eventTimeInputText = new FlxUIInputText(25 + 650, 50, 160, '', 8);
@@ -1600,6 +1615,7 @@ class ModchartEditorState extends MusicBeatState
                     data[EVENT_DATA][EVENT_EASE] = eventEaseInputText.text;
             }
             dirtyUpdateEvents = true;
+            hasUnsavedChanges = true;
         }
         eventTimeInputText.callback = function(str:String, str2:String)
         {
@@ -1610,6 +1626,7 @@ class ModchartEditorState extends MusicBeatState
                     data[EVENT_DATA][EVENT_EASETIME] = eventTimeInputText.text;
             }
             dirtyUpdateEvents = true;
+            hasUnsavedChanges = true;
         }
 
         easeDropDown = new FlxUIDropDownMenuCustom(25, eventEaseInputText.y+30, FlxUIDropDownMenuCustom.makeStrIdLabelArray(easeList, true), function(ease:String)
@@ -1617,6 +1634,7 @@ class ModchartEditorState extends MusicBeatState
             var easeStr = easeList[Std.parseInt(ease)];
             eventEaseInputText.text = easeStr;
             eventEaseInputText.callback("", ""); //make sure it updates
+            hasUnsavedChanges = true;
         });
         centerXToObject(eventEaseInputText, easeDropDown);
 
@@ -1627,6 +1645,7 @@ class ModchartEditorState extends MusicBeatState
             eventModInputText.text = modName;
             updateSubModList(modName);
             eventModInputText.callback("", ""); //make sure it updates
+            hasUnsavedChanges = true;
         });
         centerXToObject(eventModInputText, eventModifierDropDown);
         
@@ -1645,6 +1664,7 @@ class ModchartEditorState extends MusicBeatState
             }
             
             eventModInputText.callback("", ""); //make sure it updates
+            hasUnsavedChanges = true;
         });
         centerXToObject(eventModInputText, subModDropDown);
 
@@ -1658,6 +1678,7 @@ class ModchartEditorState extends MusicBeatState
                 data[EVENT_DATA][EVENT_EASEDATA] = eventDataInputText.text;
                 highlightedEvent = data; 
                 dirtyUpdateEvents = true;
+                hasUnsavedChanges = true;
             }
         };
 
@@ -1672,6 +1693,7 @@ class ModchartEditorState extends MusicBeatState
                 eventModInputText.text = getEventModData(true);
                 eventValueInputText.text = getEventModData(false);
                 dirtyUpdateEvents = true;
+                hasUnsavedChanges = true;
             }
         });
         var remove:FlxButton = new FlxButton(0, selectedEventDataStepper.y+50, 'Remove', function ()
@@ -1685,6 +1707,7 @@ class ModchartEditorState extends MusicBeatState
                 eventModInputText.text = getEventModData(true);
                 eventValueInputText.text = getEventModData(false);
                 dirtyUpdateEvents = true;
+                hasUnsavedChanges = true;
             }
         });
         centerXToObject(selectedEventDataStepper, add);
@@ -1829,6 +1852,7 @@ class ModchartEditorState extends MusicBeatState
                     {
                         data[EVENT_REPEAT][EVENT_REPEATBEATGAP] = repeatBeatGapStepper.value;
                         highlightedEvent = data;
+                        hasUnsavedChanges = true;
                         dirtyUpdateEvents = true;
                     }
                 case "repeatCount": 
@@ -1837,6 +1861,7 @@ class ModchartEditorState extends MusicBeatState
                     {
                         data[EVENT_REPEAT][EVENT_REPEATCOUNT] = repeatCountStepper.value;
                         highlightedEvent = data;
+                        hasUnsavedChanges = true;
                         dirtyUpdateEvents = true;
                     }
                 case "stackedEvent": 
@@ -1995,7 +2020,7 @@ class ModchartEditorState extends MusicBeatState
         }
         #end
 
-
+        hasUnsavedChanges = false;
         
     }
     function onSaveComplete(_):Void
@@ -2026,9 +2051,59 @@ class ModchartEditorState extends MusicBeatState
         _file.removeEventListener(openfl.events.Event.CANCEL, onSaveCancel);
         _file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
         _file = null;
+    }   
+}
+class ModchartEditorExitSubstate extends MusicBeatSubstate
+{
+    var exitFunc:Void->Void;
+    override public function new(funcOnExit:Void->Void)
+    {
+        exitFunc = funcOnExit;
+        super();
     }
-
-
     
+    override public function create()
+    {
+        super.create();
+
+        var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		bg.alpha = 0;
+		bg.scrollFactor.set();
+		add(bg);
+        FlxTween.tween(bg, {alpha: 0.6}, 0.4, {ease: FlxEase.quartInOut});
+
+
+        var warning:FlxText = new FlxText(0, 0, 0, 'You have unsaved changes!\nAre you sure you want to exit?', 48);
+        warning.alignment = CENTER;
+        warning.screenCenter();
+        warning.y -= 150;
+        add(warning);
+
+        var goBackButton:FlxUIButton = new FlxUIButton(0, 500, 'Go Back', function()
+        {
+            close();
+        });
+        goBackButton.scale.set(2.5, 2.5);
+        goBackButton.updateHitbox();
+        goBackButton.label.size = 12;
+        goBackButton.autoCenterLabel();
+        goBackButton.x = (FlxG.width*0.3)-(goBackButton.width*0.5);
+        add(goBackButton);
+        
+        var exit:FlxUIButton = new FlxUIButton(0, 500, 'Exit without saving', function()
+        {
+            exitFunc();
+        });
+        exit.scale.set(2.5, 2.5);
+        exit.updateHitbox();
+        exit.label.size = 12;
+        exit.label.fieldWidth = exit.width;
+        exit.autoCenterLabel();
+        
+        exit.x = (FlxG.width*0.7)-(exit.width*0.5);
+        add(exit);
+
+        cameras = [FlxG.cameras.list[FlxG.cameras.list.length-1]];
+    }
 }
 #end

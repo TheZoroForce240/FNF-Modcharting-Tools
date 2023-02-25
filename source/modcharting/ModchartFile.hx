@@ -90,8 +90,8 @@ class ModchartFile
             if(FileSystem.exists(filePath))
                 rawJson = File.getContent(filePath).trim();
             else #end //should become else if i think???
-            if (Assets.exists(filePath))
-                rawJson = Assets.getText(filePath).trim();
+                if (Assets.exists(filePath))
+                    rawJson = Assets.getText(filePath).trim();
                 
         }
         var json:ModchartJson = null;
