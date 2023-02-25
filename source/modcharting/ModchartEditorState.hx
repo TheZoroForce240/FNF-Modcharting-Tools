@@ -1,6 +1,6 @@
 package modcharting;
 
-import MusicBeatSubstate;
+
 import lime.utils.Assets;
 import flixel.graphics.frames.FlxFramesCollection;
 import flixel.util.FlxAxes;
@@ -62,6 +62,7 @@ import substates.MusicBeatSubstate;
 #else
 import Section.SwagSection;
 import Song.SwagSong;
+import MusicBeatSubstate;
 #end
 
 
