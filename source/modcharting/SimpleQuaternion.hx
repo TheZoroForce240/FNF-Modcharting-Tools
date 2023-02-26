@@ -35,8 +35,6 @@ class SimpleQuaternion
     }
     public static function transformVector(v:Vector3D, q:Quaternion) : Vector3D
     {
-        
-
         return v;
     }
     public static function normalize(q:Quaternion) : Quaternion

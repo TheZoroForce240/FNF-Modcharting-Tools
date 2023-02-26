@@ -188,7 +188,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         super.update(elapsed);
     }
 
-
     override public function draw()
     {
         if (alpha == 0 || !visible)
@@ -196,20 +195,10 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
 
         strumGroup.cameras = this.cameras;
         notes.cameras = this.cameras;
-
-        
-        //drawStrums();
-        //drawSustains();
-        //drawNotes();
         
         drawStuff(getNotePositions());
-
-
         //draw notes to screen
-
-        
     }
-
 
     private function addDataToStrum(strumData:NotePositionData, strum:FlxSprite)
     {
@@ -357,11 +346,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         return noteDist;
     }
 
-
-
-
-
-
     private function getNotePositions()
     {
         var notePositions:Array<NotePositionData> = [];
@@ -393,7 +377,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
                     //else 
                         //sustainTimeThingy = (-NoteMovement.getFakeCrochet()/4)/songSpeed;
                 }*/
-                    
 
                 var curPos = getNoteCurPos(i, sustainTimeThingy);
 
@@ -457,7 +440,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
 
                 addDataToStrum(noteData, strumGroup.members[noteData.index]); //set position and stuff before drawing
                 strumGroup.members[noteData.index].cameras = this.cameras;
-
                 
 
                 /*if (!PlayState.isPixelStage)
@@ -652,12 +634,10 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         return noteData;
     }
 
-
     public var speed:Float = 1.0;
 
     public function tweenModifier(modifier:String, val:Float, time:Float, ease:String, beat:Float)
     {
-        
         if (modifiers.exists(modifier))
         {       
             var easefunc = getFlxEaseByString(ease);  
@@ -727,8 +707,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         }
     }
 
-
-
     public static function getFlxEaseByString(?ease:String = '') {
 		switch(ease.toLowerCase().trim()) {
 			case 'backin': return FlxEase.backIn;
@@ -771,7 +749,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
 		return FlxEase.linear;
 	}
 
-
     public static function getTimeFromBeat(beat:Float)
     {
         var totalTime:Float = 0;
@@ -803,7 +780,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         //trace(time);
         events.push(new ModchartEvent(time, func, args));
     }
-
 
     public function getCorrectScrollSpeed()
     {

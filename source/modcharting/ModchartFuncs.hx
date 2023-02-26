@@ -30,8 +30,7 @@ class ModchartFuncs
 {
     public static function loadLuaFunctions()
     {
-        #if PSYCH
-        #if LUA_ALLOWED
+        #if (PSYCH && LUA_ALLOWED)
         for (funkin in PlayState.instance.luaArray)
         {
             #if hscript
@@ -88,11 +87,6 @@ class ModchartFuncs
             FunkinLua.hscript.variables.set('NotePositionData', PlayfieldRenderer.NotePositionData);
             FunkinLua.hscript.variables.set('ModchartFile', ModchartFile);
         }
-        #end
-
-
-        #elseif LEATHER
-
         #end
     }
 

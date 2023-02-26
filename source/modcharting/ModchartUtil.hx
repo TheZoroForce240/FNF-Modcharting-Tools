@@ -140,16 +140,12 @@ class ModchartUtil
     **/
     public static function calculatePerspective(pos:Vector3D, FOV:Float, offsetX:Float = 0, offsetY:Float = 0)
     {
-
         /* math from opengl lol
             found from this website https://ogldev.org/www/tutorial12/tutorial12.html
         */
 
         //TODO: maybe try using actual matrix???
 
-        
-        
-        
         var newz = pos.z - 1;
         var zRange = zNear - zFar;
         var tanHalfFOV = FlxMath.fastSin(FOV*0.5)/FlxMath.fastCos(FOV*0.5); //faster tan
@@ -167,7 +163,6 @@ class ModchartUtil
 
         var zPerspectiveOffset = (newz+(2 * zFar * zNear / zRange));
 
-
         //xOffsetToCenter += (offsetX / (1/-zPerspectiveOffset));
         //yOffsetToCenter += (offsetY / (1/-zPerspectiveOffset));
         xOffsetToCenter += (offsetX * -zPerspectiveOffset);
@@ -181,8 +176,6 @@ class ModchartUtil
         pos.x = xPerspective+(FlxG.width*0.5); //offset it back to normal
         pos.y = yPerspective+(FlxG.height*0.5);
         pos.z = zPerspectiveOffset;
-
-        
 
         //pos.z -= 1;
         //pos = perspectiveMatrix.transformVector(pos);

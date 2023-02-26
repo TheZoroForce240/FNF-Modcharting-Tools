@@ -146,7 +146,5 @@ class NoteMovement
 
         return col;
     }
-
-
 }
 

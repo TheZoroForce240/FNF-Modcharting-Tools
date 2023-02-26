@@ -206,9 +206,7 @@ class CustomModifierScript
     public function new(scriptStr:String)
     {
         parser = new Parser();
-        parser.allowTypes = true;
-        parser.allowMetadata = true;
-        parser.allowJSON = true;
+        parser.allowTypes = parser.allowMetadata = parser.allowJSON = true;
         
         try
         {
@@ -227,7 +225,6 @@ class CustomModifierScript
     {
         if (interp == null)
             return;
-
 
         interp.variables.set('Math', Math);
         interp.variables.set('PlayfieldRenderer', PlayfieldRenderer);
@@ -256,8 +253,6 @@ class CustomModifierScript
         interp.variables.set('ClientPrefs', ClientPrefs);
         interp.variables.set('ColorSwap', ColorSwap);
         #end
-
-        
     }
     public function call(event:String, args:Array<Dynamic>)
     {
