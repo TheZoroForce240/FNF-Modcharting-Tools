@@ -88,7 +88,7 @@ public function startCountdown():Void
 class Note extends FlxSprite
 {
   //add these 2 variables for the renderer
-  public var mesh:flixel.FlxStrip = null; 
+  public var mesh:modcharting.SustainStrip = null;
   public var z:Float = 0;
 
 ```

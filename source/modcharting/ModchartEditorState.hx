@@ -733,7 +733,7 @@ class ModchartEditorState extends MusicBeatState
         }
         if (dirtyUpdateModifiers)
         {
-            playfieldRenderer.modifiers.clear();
+            playfieldRenderer.modifierTable.clear();
             playfieldRenderer.modchart.loadModifiers();
             dirtyUpdateEvents = true;
             dirtyUpdateModifiers = false;
@@ -741,9 +741,8 @@ class ModchartEditorState extends MusicBeatState
         if (dirtyUpdateEvents)
         {
             FlxTween.globalManager.completeAll();
-            playfieldRenderer.events = [];
-            for (mod in playfieldRenderer.modifiers)
-                mod.reset();
+            playfieldRenderer.eventManager.clearEvents();
+            playfieldRenderer.modifierTable.resetMods();
             playfieldRenderer.modchart.loadEvents();
             dirtyUpdateEvents = false;
             playfieldRenderer.update(0);
@@ -804,7 +803,7 @@ class ModchartEditorState extends MusicBeatState
 		"\nStep: " + curStep + "\n";
 
         var leText = "Active Modifiers: \n";
-        for (modName => mod in playfieldRenderer.modifiers)
+        for (modName => mod in playfieldRenderer.modifierTable.modifiers)
         {
             if (mod.currentValue != mod.baseValue)
             {
@@ -1226,9 +1225,9 @@ class ModchartEditorState extends MusicBeatState
     function updateSubModList(modName:String)
     {
         subMods = [""];
-        if (playfieldRenderer.modifiers.exists(modName))
+        if (playfieldRenderer.modifierTable.modifiers.exists(modName))
         {
-            for (subModName => subMod in playfieldRenderer.modifiers.get(modName).subValues)
+            for (subModName => subMod in playfieldRenderer.modifierTable.modifiers.get(modName).subValues)
             {
                 subMods.push(subModName);
             }

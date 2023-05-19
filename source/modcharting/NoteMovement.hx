@@ -20,6 +20,7 @@ class NoteMovement
 {
     public static var keyCount = 4;
     public static var playerKeyCount = 4;
+    public static var totalKeyCount = 8;
     public static var arrowScale:Float = 0.7;
     public static var arrowSize:Float = 112;
     public static var defaultStrumX:Array<Float> = [];
@@ -59,6 +60,7 @@ class NoteMovement
         #if LEATHER
         leatherEngineOffsetStuff.clear();
         #end
+        totalKeyCount = keyCount + playerKeyCount;
     }
     public static function getDefaultStrumPosEditor(game:ModchartEditorState)
     {
@@ -95,38 +97,11 @@ class NoteMovement
         daNote.y = defaultStrumY[lane];
         daNote.z = 0;
 
-        //daNote.zScaledOffsetX = daNote.offsetX; //using actual offset so it matches with the perspective math bullshit
-        //daNote.zScaledOffsetY = daNote.offsetY;
-
         var pos = ModchartUtil.getCartesianCoords3D(incomingAngleX,incomingAngleY, curPos*noteDist);
         daNote.y += pos.y;
         daNote.x += pos.x;
         daNote.z += pos.z;
-
-        //if (noteDist > 0)
-            //fixDownscrollSustains(daNote, scrollSpeed); //will prob rewrite rendering soon
-
-        //var targetNotePos = 
     }
-
-    /*private static function fixDownscrollSustains(daNote:Note, scrollSpeed:Float)
-    {
-        var songSpeed = scrollSpeed;
-        var fakeCrochet = getFakeCrochet();
-        var offsetThingy:Float = 0;
-        if (daNote.animation.curAnim.name.endsWith('end')) {
-            offsetThingy += 10.5 * (fakeCrochet / 400) * 1.5 * songSpeed + (46 * (songSpeed - 1));
-            offsetThingy -= 46 * (1 - (fakeCrochet / 600)) * songSpeed;
-            if(PlayState.isPixelStage) {
-                offsetThingy += 8 + (6 - daNote.originalHeightForCalcs) * PlayState.daPixelZoom;
-            } else {
-                offsetThingy -= 19;
-            }
-        }
-        offsetThingy += ((Note.swagWidth) / 2) - (60.5 * (songSpeed - 1));
-        offsetThingy += 27.5 * ((lastBpm / 100) - 1) * (songSpeed - 1);
-        //daNote.zScaledOffsetY += offsetThingy;
-    }*/
 
     public static function getLaneDiffFromCenter(lane:Int)
     {

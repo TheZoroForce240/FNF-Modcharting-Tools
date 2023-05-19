@@ -14,8 +14,6 @@ typedef Quaternion =
 class SimpleQuaternion
 {
     //no more gimbal lock fuck you
-
-    //still needs a little bit of testing i think
     public static function fromEuler(roll:Float, pitch:Float, yaw:Float) : Quaternion
     {
         //https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
@@ -48,5 +46,26 @@ class SimpleQuaternion
         q.z = q.z / length;
 
         return q;
+    }
+    public static function conjugate(q:Quaternion) : Quaternion
+    {
+        q.y = -q.y;
+        q.z = -q.z;
+        q.w = -q.w;
+        return q;
+    }
+    public static function multiply(q1:Quaternion, q2:Quaternion) : Quaternion
+    {
+        var x = q1.x * q2.x - q1.y * q2.y - q1.z * q2.z - q1.w * q2.w;
+        var y = q1.x * q2.y + q1.y * q2.x + q1.z * q2.w - q1.w * q2.z;
+        var z = q1.x * q2.z - q1.y * q2.w + q1.z * q2.x + q1.w * q2.y;
+        var w = q1.x * q2.w + q1.y * q2.z - q1.z * q2.y + q1.w * q2.x;
+
+        q1.x = x;
+        q1.y = y;
+        q1.z = z;
+        q1.w = w;
+
+        return q1;
     }
 }
