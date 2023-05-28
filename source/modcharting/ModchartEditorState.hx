@@ -29,7 +29,7 @@ import flixel.addons.display.FlxGridOverlay;
 import flixel.math.FlxMath;
 import flixel.FlxSprite;
 import flixel.util.FlxSort;
-# (if flixel < "5.3.0"
+#if (flixel < "5.3.0")
 import flixel.system.FlxSound;
 #else
 import flixel.sound.FlxSound;
