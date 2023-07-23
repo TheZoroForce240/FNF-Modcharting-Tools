@@ -13,7 +13,7 @@ Still very WIP and not everything is supported yet!
 ### Support for multiple engines
 - Base Game (not tested)
 - [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine) (working 0.6.3, includes lua functions)
-- [Leather Engine](https://github.com/Leather128/LeatherEngine) (working 0.4.2)
+- [Leather Engine](https://github.com/Leather128/LeatherEngine) (working 0.5.0)
 - [Kade Engine](https://github.com/KadeDev/Kade-Engine) (not tested)
 - [Yoshi Engine](https://github.com/YoshiCrafter29/YoshiCrafterEngine) (not tested)
 - [Forever Engine Legacy](https://github.com/Yoshubs/Forever-Engine-Legacy) (not tested)
