@@ -4,14 +4,12 @@ import flixel.math.FlxMath;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxSprite;
 import flixel.FlxG;
+import states.PlayState;
 
 #if LEATHER
-import states.PlayState;
 import game.Note;
-
 #else 
-import PlayState;
-import Note;
+import objects.Note;
 #end
 
 using StringTools;
@@ -51,9 +49,10 @@ class NoteMovement
             #if LEATHER
             var localKeyCount = (i < keyCount ? keyCount : playerKeyCount);
             var s = Std.parseFloat(game.ui_settings[0]) * (Std.parseFloat(game.ui_settings[2]) - (Std.parseFloat(game.mania_size[localKeyCount-1])));
-            #else 
+            #else
             var s = 0.7;
             #end
+
             defaultScale.push(s);
             arrowSizes.push(160*s);
         }
@@ -83,6 +82,7 @@ class NoteMovement
             #else
             var s = 0.7;
             #end
+
             defaultScale.push(s);
             arrowSizes.push(160*s);
         }

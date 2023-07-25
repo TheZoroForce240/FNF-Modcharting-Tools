@@ -252,16 +252,16 @@ class CustomModifierScript
 		interp.variables.set('FlxTimer', flixel.util.FlxTimer);
 		interp.variables.set('FlxTween', flixel.tweens.FlxTween);
 		interp.variables.set('FlxEase', flixel.tweens.FlxEase);
-		interp.variables.set('PlayState', PlayState);
-		interp.variables.set('game', PlayState.instance);
-		interp.variables.set('Paths', Paths);
-		interp.variables.set('Conductor', Conductor);
+		interp.variables.set('PlayState', states.PlayState);
+		interp.variables.set('game', states.PlayState.instance);
+		interp.variables.set('Paths', backend.Paths);
+		interp.variables.set('Conductor', backend.Conductor);
         interp.variables.set('StringTools', StringTools);
-        interp.variables.set('Note', Note);
+        interp.variables.set('Note', objects.Note);
 
         #if PSYCH
-        interp.variables.set('ClientPrefs', ClientPrefs);
-        interp.variables.set('ColorSwap', ColorSwap);
+        interp.variables.set('ClientPrefs', backend.ClientPrefs);
+        interp.variables.set('ColorSwap', shaders.ColorSwap);
         #end
 
         

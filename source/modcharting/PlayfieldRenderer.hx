@@ -13,10 +13,14 @@ import flixel.util.FlxSpriteUtil;
 import flixel.graphics.frames.FlxFrame;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxSprite;
+import flixel.util.FlxTimer;
 
 import flixel.FlxG;
+import managers.*;
 import modcharting.Modifier;
 import flixel.system.FlxAssets.FlxShader;
+
+import states.PlayState;
 
 #if LEATHER
 import states.PlayState;
@@ -24,8 +28,8 @@ import game.Note;
 import game.StrumNote;
 import game.Conductor;
 #else 
-import PlayState;
-import Note;
+import objects.Note;
+import objects.StrumNote;
 #end
 
 using StringTools;
@@ -55,7 +59,8 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
 
     public var eventManager:ModchartEventManager;
     public var modifierTable:ModTable;
-    public var tweenManager:FlxTweenManager;
+    public var tweenManager:FlxTweenManager = null;
+    public var timerManager:FlxTimerManager = null;
 
     public var modchart:ModchartFile;
     public var inEditor:Bool = false;
@@ -64,14 +69,35 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     public var speed:Float = 1.0;
 
     public var modifiers(get, default):Map<String, Modifier>;
-    
+
+    public function createTween(Object:Dynamic, Values:Dynamic, Duration:Float, ?Options:TweenOptions):FlxTween
+	{
+		var tween:FlxTween = tweenManager.tween(Object, Values, Duration, Options);
+		tween.manager = tweenManager;
+		return tween;
+	}
+
+	public function createTweenNum(FromValue:Float, ToValue:Float, Duration:Float = 1, ?Options:TweenOptions, ?TweenFunction:Float->Void):FlxTween
+	{
+		var tween:FlxTween = tweenManager.num(FromValue, ToValue, Duration, Options, TweenFunction);
+		tween.manager = tweenManager;
+		return tween;
+	}
+
+	public function createTimer(Time:Float = 1, ?OnComplete:FlxTimer->Void, Loops:Int = 1):FlxTimer
+	{
+		var timer:FlxTimer = new FlxTimer();
+		timer.manager = timerManager;
+		return timer.start(Time, OnComplete, Loops);
+	}
+
     private function get_modifiers() : Map<String, Modifier>
     {
         return modifierTable.modifiers; //back compat with lua modcharts
     }
 
 
-    public function new(strumGroup:FlxTypedGroup<StrumNoteType>, notes:FlxTypedGroup<Note>,instance:ModchartMusicBeatState) 
+    public function new(strumGroup:FlxTypedGroup<StrumNoteType>, notes:FlxTypedGroup<Note>, instance:ModchartMusicBeatState) 
     {
         super(0,0);
         this.strumGroup = strumGroup;
@@ -87,6 +113,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         instance.playfieldRenderer = this;
 
         tweenManager = new FlxTweenManager();
+        timerManager = new FlxTimerManager();
         eventManager = new ModchartEventManager(this);
         modifierTable = new ModTable(instance, this);
         addNewPlayfield(0,0,0);
@@ -103,6 +130,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     {
         eventManager.update(elapsed);
         tweenManager.update(elapsed); //should be automatically paused when you pause in game
+        timerManager.update(elapsed);
         super.update(elapsed);
     }
 
@@ -151,8 +179,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         return strumData;
     }
 
-   
-
     private function addDataToNote(noteData:NotePositionData, daNote:Note)
     {
         daNote.x = noteData.x;
@@ -174,7 +200,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
 
         var noteAlpha:Float = 1;
         #if PSYCH
-        noteAlpha = notes.members[noteIndex].multAlpha;
+            noteAlpha = notes.members[noteIndex].multAlpha;
         #else 
         if (notes.members[noteIndex].isSustainNote)
             noteAlpha = 0.6;
@@ -193,7 +219,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         noteData.setupNote(noteX, noteY, noteZ, lane, noteScaleX, noteScaleY, playfieldIndex, noteAlpha, 
             curPos, noteDist, incomingAngle[0], incomingAngle[1], notes.members[noteIndex].strumTime, noteIndex);
         playfields[playfieldIndex].applyOffsets(noteData);
-
         return noteData;
     }
 
@@ -221,7 +246,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         return noteDist;
     }
 
-
     private function getNotePositions()
     {
         var notePositions:Array<NotePositionData> = [];
@@ -245,12 +269,12 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
                 var sustainTimeThingy:Float = 0;
 
                 //just causes too many issues lol, might fix it at some point
-                /*if (notes.members[i].animation.curAnim.name.endsWith('end') && ClientPrefs.downScroll)
+                /*if (notes.members[i].isHoldEnd && ClientPrefs.data.downScroll)
                 {
                     if (noteDist > 0)
-                        sustainTimeThingy = (NoteMovement.getFakeCrochet()/4)/2; //fix stretched sustain ends (downscroll)
-                    //else 
-                        //sustainTimeThingy = (-NoteMovement.getFakeCrochet()/4)/songSpeed;
+                        sustainTimeThingy = (ModchartUtil.getFakeCrochet()/4)/2; //fix stretched sustain ends (downscroll)
+                    else 
+                        sustainTimeThingy = (-ModchartUtil.getFakeCrochet()/4)/songSpeed;
                 }*/
                     
                 var curPos = getNoteCurPos(i, sustainTimeThingy);
@@ -347,9 +371,9 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         var thisNotePos = ModchartUtil.calculatePerspective(new Vector3D(noteData.x+(daNote.width/2)+ModchartUtil.getNoteOffsetX(daNote, instance), noteData.y+(NoteMovement.arrowSizes[noteData.lane]/2), noteData.z*0.001), 
         ModchartUtil.defaultFOV*(Math.PI/180), -(daNote.width/2), yOffsetThingy-(NoteMovement.arrowSizes[noteData.lane]/2));
         
-        var timeToNextSustain = ModchartUtil.getFakeCrochet()/4;
+        var timeToNextSustain = ModchartUtil.getFakeCrochet()/3.75;
         if (noteData.noteDist < 0)
-            timeToNextSustain = -ModchartUtil.getFakeCrochet()/4; //weird shit that fixes upscroll lol
+            timeToNextSustain *= -1; //weird shit that fixes upscroll lol
 
         var nextHalfNotePos = getSustainPoint(noteData, timeToNextSustain*0.5);
         var nextNotePos = getSustainPoint(noteData, timeToNextSustain);

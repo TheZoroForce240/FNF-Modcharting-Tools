@@ -4,6 +4,8 @@ import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
 import openfl.geom.Vector3D;
 #if LEATHER
 import game.Note;
+#else
+import objects.Note;
 #end
 import flixel.FlxStrip;
 
@@ -42,17 +44,17 @@ class SustainStrip extends FlxStrip
 
     public function constructVertices(noteData:NotePositionData, thisNotePos:Vector3D, nextHalfNotePos:NotePositionData, nextNotePos:NotePositionData, flipGraphic:Bool, reverseClip:Bool)
     {
-        var yOffset = 2; //fix small gaps
+        var yOffset = -1; //fix small gaps
         if (reverseClip)
-            yOffset = -yOffset;
+            yOffset *= -1;
 
         var verts:Array<Float> = [];
         if (flipGraphic)
         {
             verts.push(nextNotePos.x);
-            verts.push(nextNotePos.y+yOffset); //slight offset to fix small gaps
+            verts.push(nextNotePos.y); //slight offset to fix small gaps
             verts.push(nextNotePos.x+(daNote.frameWidth*(1/-nextNotePos.z)*noteData.scaleX));
-            verts.push(nextNotePos.y+yOffset);
+            verts.push(nextNotePos.y);
 
             verts.push(nextHalfNotePos.x);
             verts.push(nextHalfNotePos.y);
@@ -67,7 +69,7 @@ class SustainStrip extends FlxStrip
         else 
         {
             verts.push(thisNotePos.x);
-            verts.push(thisNotePos.y);
+            verts.push(thisNotePos.y); //fliped this with the down ones (last) to test if it bugs of it fixes itself
             verts.push(thisNotePos.x+(daNote.frameWidth*(1/-thisNotePos.z)*noteData.scaleX));
             verts.push(thisNotePos.y);
 
@@ -77,9 +79,9 @@ class SustainStrip extends FlxStrip
             verts.push(nextHalfNotePos.y);
 
             verts.push(nextNotePos.x);
-            verts.push(nextNotePos.y+yOffset); //slight offset to fix small gaps
+            verts.push(nextNotePos.y); //slight offset to fix small gaps
             verts.push(nextNotePos.x+(daNote.frameWidth*(1/-nextNotePos.z)*nextNotePos.scaleX));
-            verts.push(nextNotePos.y+yOffset);
+            verts.push(nextNotePos.y);
         }
         vertices = new DrawData(12, true, verts);
     }

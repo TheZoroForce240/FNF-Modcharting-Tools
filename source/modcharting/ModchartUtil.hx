@@ -5,14 +5,13 @@ import flixel.math.FlxMath;
 import flixel.math.FlxAngle;
 import openfl.geom.Vector3D;
 import flixel.FlxG;
+import states.PlayState;
 
 #if LEATHER
-import states.PlayState;
 import game.Note;
 import game.Conductor;
 #else 
-import PlayState;
-import Note;
+import objects.Note;
 #end
 
 using StringTools;
@@ -24,7 +23,7 @@ class ModchartUtil
         //need to test each engine
         //not expecting all to work
         #if PSYCH 
-        return ClientPrefs.downScroll;
+        return ClientPrefs.data.downScroll;
         #elseif LEATHER
         return utilities.Options.getData("downscroll");
         #elseif ANDROMEDA //dunno why youd use this on andromeda but whatever, already got its own cool modchart system
@@ -44,7 +43,7 @@ class ModchartUtil
     public static function getMiddlescroll(instance:ModchartMusicBeatState)
     {
         #if PSYCH 
-        return ClientPrefs.middleScroll;
+        return ClientPrefs.data.middleScroll;
         #elseif LEATHER
         return utilities.Options.getData("middlescroll");
         #else 
@@ -246,7 +245,7 @@ class ModchartUtil
 			case 'sineout': return FlxEase.sineOut;
 			case 'smoothstepin': return FlxEase.smoothStepIn;
 			case 'smoothstepinout': return FlxEase.smoothStepInOut;
-			case 'smoothstepout': return FlxEase.smoothStepInOut;
+			case 'smoothstepout': return FlxEase.smoothStepOut;
 			case 'smootherstepin': return FlxEase.smootherStepIn;
 			case 'smootherstepinout': return FlxEase.smootherStepInOut;
 			case 'smootherstepout': return FlxEase.smootherStepOut;

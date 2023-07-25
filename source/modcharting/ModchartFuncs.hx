@@ -13,6 +13,9 @@ import llua.Convert;
 #if LEATHER
 import states.PlayState;
 import game.Conductor;
+#else
+import psychlua.HScript as FunkinHScript;
+import psychlua.FunkinLua;
 #end
 
 import modcharting.Modifier;
@@ -34,9 +37,7 @@ class ModchartFuncs
         #if LUA_ALLOWED
         for (funkin in PlayState.instance.luaArray)
         {
-            #if hscript
-            funkin.initHaxeModule();
-            #end
+            FunkinHScript.initHaxeModule(funkin);
             Lua_helper.add_callback(funkin.lua, 'startMod', function(name:String, modClass:String, type:String = '', pf:Int = -1){
                 startMod(name,modClass,type,pf);
 
@@ -80,15 +81,15 @@ class ModchartFuncs
         }
         #end
         #if hscript
-        if (FunkinLua.hscript != null)
+        if (FunkinLua.instance.hscript != null)
         {
-            FunkinLua.hscript.variables.set('Math', Math);
-            FunkinLua.hscript.variables.set('PlayfieldRenderer', PlayfieldRenderer);
-            FunkinLua.hscript.variables.set('ModchartUtil', ModchartUtil);
-            FunkinLua.hscript.variables.set('Modifier', Modifier);
-            FunkinLua.hscript.variables.set('NoteMovement', NoteMovement);
-            FunkinLua.hscript.variables.set('NotePositionData', NotePositionData);
-            FunkinLua.hscript.variables.set('ModchartFile', ModchartFile);
+            FunkinLua.instance.hscript.interp.variables.set('Math', Math);
+            FunkinLua.instance.hscript.interp.variables.set('PlayfieldRenderer', PlayfieldRenderer);
+            FunkinLua.instance.hscript.interp.variables.set('ModchartUtil', ModchartUtil);
+            FunkinLua.instance.hscript.interp.variables.set('Modifier', Modifier);
+            FunkinLua.instance.hscript.interp.variables.set('NoteMovement', NoteMovement);
+            FunkinLua.instance.hscript.interp.variables.set('NotePositionData', NotePositionData);
+            FunkinLua.instance.hscript.interp.variables.set('ModchartFile', ModchartFile);
         }
         #end
 
@@ -106,6 +107,7 @@ class ModchartFuncs
             if (instance.playfieldRenderer.modchart.scriptListen)
             {
                 instance.playfieldRenderer.modchart.data.modifiers.push([name, modClass, type, pf]);
+                trace(name,modClass,type,pf);
             }
         }
 
