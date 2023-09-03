@@ -21,9 +21,16 @@ Still very WIP and not everything is supported yet!
 
 
 ## Credits 
-- [Original FNF Team](https://github.com/ninjamuffin99/Funkin) - they made the game
+- [Original FNF Team](https://github.com/ninjamuffin99/Funkin) - They made the game
 - [NotITG](https://www.noti.tg/) - Inspiration (made me love modcharts lol)
 - [OpenITG](https://github.com/openitg/openitg) - Math used for some modifiers
+- [TheZoroForce240](https://github.com/TheZoroForce240/FNF-Modcharting-Tools) - Creator of modcharting tools base
+- [Vortex2Oblivion](https://github.com/Vortex2Oblivion) - Helper from modcharting tools
+- [Manu614](https://github.com/Manu614) - Helper from modcharting tools
+- [UncertainProd](https://github.com/UncertainProd) - Helper from modcharting tools
+- [Joalor64GH](https://github.com/Joalor64GH) - Helper from modcharting tools
+- [Edwhak_KB](https://github.com/EdwhakKB) - Added some modifiers and fixed stuff + skewNotes
+- [Glowsoony](https://github.com/glowsoony) - Help with some 0.7.X stuff! + skewNotes too
 
 ## Installation 
 You need the most recent version of HaxeFlixel for it to work. (5.2.1 as of writing)
@@ -82,10 +89,23 @@ public function startCountdown():Void
 
 ```
 
+- In StrumNote.hx:
+```haxe
+//Import FlxSkewedSprite at the top
+import flixel.addons.effects.FlxSkewedSprite;
+
+//change "FlxSprite" to "FlxSkewedSprite"
+class StrumNote extends FlxSkewedSprite
+
+```
+
 - In Note.hx:
 ```haxe
+//Import FlxSkewedSprite at the top
+import flixel.addons.effects.FlxSkewedSprite;
 
-class Note extends FlxSprite
+//change "FlxSprite" to "FlxSkewedSprite"
+class Note extends FlxSkewedSprite
 {
   //add these 2 variables for the renderer
   public var mesh:modcharting.SustainStrip = null;
