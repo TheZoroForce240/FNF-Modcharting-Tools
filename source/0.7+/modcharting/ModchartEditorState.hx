@@ -1520,9 +1520,9 @@ class ModchartEditorState extends backend.MusicBeatState
 		explainString = "Modifier similar to jump but only notes aplied";
             case 'EaseXModifier':
 		explainString = "Modifier used to make notes go left to right on the screen";
-            case 'SealthBoostModifier':
+            case 'StealthBoostModifier':
         explainString = "Modifier used to make an alpha boost on notes";
-            case 'SealthBrakeModifier':
+            case 'StealthBrakeModifier':
         explainString = "Modifier used to make an alpha brake on notes";
             case 'SkewModifier':
         explainString = "Modifier used to make note effects (skew)";
