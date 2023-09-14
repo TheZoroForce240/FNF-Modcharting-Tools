@@ -1411,7 +1411,7 @@ class ModchartEditorState extends backend.MusicBeatState
         UI_box.addGroup(tab_group);
     }
 
-    //Thanks for edwhak finshing it and doing it! (whole some ;_;)
+    //Thanks to glowsoony for the idea lol
     function modifierExplain(modifiersName:String):String
     {
         var explainString:String = '';
@@ -1518,10 +1518,18 @@ class ModchartEditorState extends backend.MusicBeatState
 		explainString = "Modifier similar to jump but only target aplied";
             case 'JumpNotesModifier':
 		explainString = "Modifier similar to jump but only notes aplied";
-          case 'EaseXModifier':
+            case 'EaseXModifier':
 		explainString = "Modifier used to make notes go left to right on the screen";
             case 'SealthBoostModifier':
         explainString = "Modifier used to make an alpha boost on notes";
+            case 'SealthBrakeModifier':
+        explainString = "Modifier used to make an alpha brake on notes";
+            case 'SkewModifier':
+        explainString = "Modifier used to make note effects (skew)";
+            case 'SkewXModifier':
+        explainString = "Modifier based from SkewModifier but only in X";
+            case 'SkewYModifier':
+        explainString = "Modifier based from SkewModifier but only in Y";
         }
 
        return explainString;

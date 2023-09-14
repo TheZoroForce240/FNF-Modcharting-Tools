@@ -1030,36 +1030,42 @@ class YDModifier extends Modifier
 
 class StealthBoostModifier extends Modifier
 {
+    override function setupSubValues()
+    {
+        subValues.set('offset', new ModifierSubValue(0.0));
+    }
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        if (curPos <= (subValues.get('offset').value*-100) && curPos >= ((subValues.get('offset').value*-100)-200))
         {
-            if (curPos <= -200)
-            {
-                var a = (200-Math.abs(curPos))/(200-1250); //lerp out the desat
-                noteData.alpha = 0+a;
-            }else{
-                noteData.alpha = 0;
-            }
+            var hmult = -(curPos-(subValues.get('offset').value*-100))/200;
+            noteData.alpha *=(1-hmult)*currentValue;
+        } 
+        else if (curPos < ((subValues.get('offset').value*-100)-100))
+        {
+            noteData.alpha *=(1-currentValue);
         }
+    }
 }
 
 class StealthBrakeModifier extends Modifier
 {
+    override function setupSubValues()
+    {
+        subValues.set('offset', new ModifierSubValue(0.0));
+    }
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        if (curPos >= (subValues.get('offset').value*-100) && curPos <= ((subValues.get('offset').value*-100)-200))
         {
-            if (curPos <= -800)
-            {
-                noteData.alpha = 0;
-            } 
-            else if (curPos <= -500)
-            {
-                var a = (500-Math.abs(curPos))/(500-1250); //lerp out the desat
-                noteData.alpha = 1*a;
-            }
-            else 
-            {
-                noteData.alpha = 1;
-            }
+            noteData.alpha *=(0+currentValue);
+        } 
+        else if (curPos > ((subValues.get('offset').value*-100)-100))
+        {
+            var hmult = (curPos-(subValues.get('offset').value*-100))/200;
+            noteData.alpha *=(1-hmult);
         }
+    }
 }
 
 class SkewModifier extends Modifier

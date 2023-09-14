@@ -59,40 +59,97 @@ class ModchartFile
     public function new(renderer:PlayfieldRenderer)
     {
 
-        data = loadFromJson(PlayState.SONG.song.toLowerCase());
+        data = loadFromJson(PlayState.SONG.song.toLowerCase(), CoolUtil.difficultyString().toLowerCase() == null ? CoolUtil.difficulties[PlayState.storyDifficulty] : CoolUtil.difficultyString().toLowerCase());
         this.renderer = renderer;
         renderer.modchart = this;
-        if (ClientPrefs.getGameplaySetting('modchart', true)){
-            loadPlayfields();
-            loadModifiers();
-            loadEvents();
-        }
+        loadPlayfields();
+        loadModifiers();
+        loadEvents();
     }
 
-    public function loadFromJson(folder:String):ModchartJson //load da shit
+    public function loadFromJson(folder:String, difficulty:String):ModchartJson //load da shit
     {
         var rawJson = null;
         var folderShit:String = "";
+        var filePath = null;
+        var modchartPath:String = Paths.formatToSongPath(folder)+'/modchart-'+difficulty.toLowerCase();
+        #if sys
+            if(FileSystem.exists(modchartPath))
+                hasDifficultyModchart = true; //so it loads difficulty modchart
+            else
+                hasDifficultyModchart = false; //so it loads default modchart
+        #else //should become else if i think???
+            if (Assets.exists(modchartPath))
+                hasDifficultyModchart = true; //so it loads difficulty modchart
+            else
+                hasDifficultyModchart = false; //so it loads default modchart
+        #end
         #if sys
         #if PSYCH
-		var moddyFile:String = Paths.modsJson(Paths.formatToSongPath(folder) + '/modchart');
-		if(FileSystem.exists(moddyFile)) {
-			rawJson = File.getContent(moddyFile).trim();
-            folderShit = moddyFile.replace("modchart.json", "customMods/");
-		}
-		#end
+        if (hasDifficultyModchart){
+            if (difficulty.toLowerCase() != CoolUtil.defaultDifficulty)
+            {
+                var moddyFile:String = Paths.modsJson(Paths.formatToSongPath(folder) + '/modchart-' + difficulty.toLowerCase());
+                if(FileSystem.exists(moddyFile)) {
+                    rawJson = File.getContent(moddyFile).trim();
+                    folderShit = moddyFile.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/");
+                }
+            }
+            else
+            {
+                var moddyFile:String = Paths.modsJson(Paths.formatToSongPath(folder) + '/modchart');
+                if(FileSystem.exists(moddyFile)) {
+                    rawJson = File.getContent(moddyFile).trim();
+                    folderShit = moddyFile.replace("modchart.json", "customMods/");
+                }
+                trace('Found no Diffs! Loading modchart.json...');
+            }
+        }else{
+            var moddyFile:String = Paths.modsJson(Paths.formatToSongPath(folder) + '/modchart');
+            if(FileSystem.exists(moddyFile)) {
+                rawJson = File.getContent(moddyFile).trim();
+                folderShit = moddyFile.replace("modchart.json", "customMods/");
+            }
+            trace('Found no Diffs! Loading modchart.json...');
+        }
+        #end
         #end
         if (rawJson == null)
         {
-            #if LEATHER
-            var filePath = Paths.json("song data/" + folder + '/modchart');
-            folderShit = PolymodAssets.getPath(filePath.replace("modchart.json", "customMods/"));
-            #else 
-            var filePath = Paths.json(folder + '/modchart');
-            folderShit = filePath.replace("modchart.json", "customMods/");
-            #end
-            
-            //trace(filePath);
+            if (hasDifficultyModchart){
+               if (difficulty.toLowerCase() != CoolUtil.defaultDifficulty)
+                {
+                    #if LEATHER
+                        filePath = Paths.json("song data/" + folder + '/modchart-' + difficulty.toLowerCase());
+                        folderShit = PolymodAssets.getPath(filePath.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/"));
+                    #else 
+                        filePath = Paths.json(folder + '/modchart-' + difficulty.toLowerCase());
+                        folderShit = filePath.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/");
+                    #end
+                }
+                else
+                {
+                    #if LEATHER
+                        filePath = Paths.json("song data/" + folder + '/modchart');
+                        folderShit = PolymodAssets.getPath(filePath.replace("modchart.json", "customMods/"));
+                    #else 
+                        filePath = Paths.json(folder + '/modchart');
+                        folderShit = filePath.replace("modchart.json", "customMods/");
+                    #end
+
+                    trace('Found no Diffs! Loading modchart.json...');
+                } 
+            }else{
+                #if LEATHER
+                filePath = Paths.json("song data/" + folder + '/modchart');
+                folderShit = PolymodAssets.getPath(filePath.replace("modchart.json", "customMods/"));
+                #else 
+                filePath = Paths.json(folder + '/modchart');
+                folderShit = filePath.replace("modchart.json", "customMods/");
+                #end
+                trace('Found no Diffs! Loading modchart.json...');
+            }
+
             #if sys
             if(FileSystem.exists(filePath))
                 rawJson = File.getContent(filePath).trim();
@@ -104,7 +161,8 @@ class ModchartFile
         var json:ModchartJson = null;
         if (rawJson != null)
         {
-            json = cast Json.parse(rawJson);
+            for (i in 0...difficulty.length)
+                json = cast Json.parse(rawJson); //idk why but if i remove this it don't works
             //trace('loaded json');
             trace(folderShit);
             #if sys
