@@ -56,6 +56,8 @@ class ModchartFile
     private var renderer:PlayfieldRenderer;
     public var scriptListen:Bool = false;
     public var customModifiers:Map<String, CustomModifierScript> = new Map<String, CustomModifierScript>();
+    public var hasDifficultyModchart:Bool = false; //so it loads false as default!
+    
     public function new(renderer:PlayfieldRenderer)
     {
 

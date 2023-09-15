@@ -56,10 +56,12 @@ class ModchartFile
     private var renderer:PlayfieldRenderer;
     public var scriptListen:Bool = false;
     public var customModifiers:Map<String, CustomModifierScript> = new Map<String, CustomModifierScript>();
+    public var hasDifficultyModchart:Bool = false; //so it loads false as default!
+
     public function new(renderer:PlayfieldRenderer)
     {
 
-        data = loadFromJson(PlayState.SONG.song.toLowerCase(), CoolUtil.difficultyString().toLowerCase() == null ? CoolUtil.difficulties[PlayState.storyDifficulty] : CoolUtil.difficultyString().toLowerCase());
+        data = loadFromJson(PlayState.SONG.song.toLowerCase(), Difficulty.difficultyString().toLowerCase() == null ? Difficulty.difficulties[PlayState.storyDifficulty] : Difficulty.difficultyString().toLowerCase());
         this.renderer = renderer;
         renderer.modchart = this;
         loadPlayfields();
@@ -87,7 +89,7 @@ class ModchartFile
         #if sys
         #if PSYCH
         if (hasDifficultyModchart){
-            if (difficulty.toLowerCase() != CoolUtil.defaultDifficulty)
+            if (difficulty.toLowerCase() != Difficulty.defaultDifficulty)
             {
                 var moddyFile:String = Paths.modsJson(Paths.formatToSongPath(folder) + '/modchart-' + difficulty.toLowerCase());
                 if(FileSystem.exists(moddyFile)) {
@@ -117,7 +119,7 @@ class ModchartFile
         if (rawJson == null)
         {
             if (hasDifficultyModchart){
-               if (difficulty.toLowerCase() != CoolUtil.defaultDifficulty)
+               if (difficulty.toLowerCase() != Difficulty.defaultDifficulty)
                 {
                     #if LEATHER
                         filePath = Paths.json("song data/" + folder + '/modchart-' + difficulty.toLowerCase());
