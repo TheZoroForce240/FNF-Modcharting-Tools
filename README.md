@@ -112,6 +112,32 @@ class Note extends FlxSkewedSprite
   public var z:Float = 0;
 
 ```
+
+- In FunkinLua.hx (0.7.X exclusive!):
+```haxe
+
+class FunkinLua
+{
+  //add this variable bellow "public var closed:Bool = false;"
+  	public static var instance:FunkinLua = null;
+
+```
+
+- In Conductor.hx (0.7.X exclusive!):
+```haxe
+
+class Conductor
+{
+  //add this variable at the end of the code (but inside the class)
+  	public static function changeBPM(newBpm:Float)
+	  {
+		bpm = newBpm;
+
+		crochet = calculateCrochet(bpm);
+		stepCrochet = crochet / 4;
+	  }
+
+```
 - In Project.xml:
 ```xml
 <!--Set this to the engine you're using!-->
@@ -121,7 +147,7 @@ class Note extends FlxSkewedSprite
 
 ```
 You need to define which engine you're using to fix compiling issues, or it would default to base game settings (downscroll won't work etc).
-Available ones: PSYCH, KADE, LEATHER, FOREVER_LEGACY, YOSHI, FPSPLUS
+Available ones: PSYCH, KADE(notTested), LEATHER, FOREVER_LEGACY(notTested), YOSHI(notTested), FPSPLUS(notTested)
 
 
 3. Now if your game compiles successfully then you should be all good to go.
