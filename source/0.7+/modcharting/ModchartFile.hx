@@ -61,7 +61,7 @@ class ModchartFile
     public function new(renderer:PlayfieldRenderer)
     {
 
-        data = loadFromJson(PlayState.SONG.song.toLowerCase(), Difficulty.getString().toLowerCase() == null ? Difficulty.difficulties[PlayState.storyDifficulty] : Difficulty.getString().toLowerCase());
+        data = loadFromJson(PlayState.SONG.song.toLowerCase(), Difficulty.getString().toLowerCase() == null ? Difficulty.defaultList[PlayState.storyDifficulty] : Difficulty.getString().toLowerCase());
         this.renderer = renderer;
         renderer.modchart = this;
         loadPlayfields();
