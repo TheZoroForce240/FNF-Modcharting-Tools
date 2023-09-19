@@ -72,54 +72,109 @@ class ModchartFile
     public function loadFromJson(folder:String, difficulty:String):ModchartJson //load da shit
     {
         var rawJson = null;
-        var folderShit:String = "";
         var filePath = null;
-        var modchartPath:String = Paths.formatToSongPath(folder)+'/modchart-'+difficulty.toLowerCase();
-        #if sys
-            if(FileSystem.exists(modchartPath))
-                hasDifficultyModchart = true; //so it loads difficulty modchart
-            else
-                hasDifficultyModchart = false; //so it loads default modchart
-        #else //should become else if i think???
-            if (Assets.exists(modchartPath))
-                hasDifficultyModchart = true; //so it loads difficulty modchart
-            else
-                hasDifficultyModchart = false; //so it loads default modchart
+
+        var folderShit:String = "";
+
+        var moddyFile:String = Paths.json(Paths.formatToSongPath(folder) + '/modchart-' + difficulty.toLowerCase());
+        var moddyFile2:String = Paths.json(Paths.formatToSongPath(folder) + '/modchart');
+
+        #if MODS_ALLOWED
+        var moddyFileMods:String = Paths.modsJson(Paths.formatToSongPath(folder) + '/modchart-' + difficulty.toLowerCase());
+        var moddyFileMods2:String = Paths.modsJson(Paths.formatToSongPath(folder) + '/modchart');
         #end
+
         #if sys
         #if PSYCH
-        if (hasDifficultyModchart){
-            if (difficulty.toLowerCase() != CoolUtil.defaultDifficulty)
+        try 
+        {
+            #if MODS_ALLOWED
+            if(FileSystem.exists(moddyFileMods) && difficulty.toLowerCase() != null) 
+                hasDifficultyModchart = true;
+                if (FileSystem.exists(moddyFileMods2) && !FileSystem.exists(moddyFileMods))
+                    hasDifficultyModchart = false;
+            else if(FileSystem.exists(moddyFileMods2) && difficulty.toLowerCase() == null && !FileSystem.exists(moddyFileMods)) hasDifficultyModchart = false;
+            #end
+
+            if(FileSystem.exists(moddyFile) && difficulty.toLowerCase() != null) 
+                hasDifficultyModchart = true;
+                if (FileSystem.exists(moddyFile) && !FileSystem.exists(moddyFile))
+                    hasDifficultyModchart = false;
+            else if(FileSystem.exists(moddyFile2) && difficulty.toLowerCase() == null && !FileSystem.exists(moddyFile)) hasDifficultyModchart = false;
+
+            #if MODS_ALLOWED
+            if (hasDifficultyModchart)
             {
-                var moddyFile:String = Paths.modsJson(Paths.formatToSongPath(folder) + '/modchart-' + difficulty.toLowerCase());
-                if(FileSystem.exists(moddyFile)) {
-                    rawJson = File.getContent(moddyFile).trim();
-                    folderShit = moddyFile.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/");
-                }
+                rawJson = File.getContent(moddyFileMods).trim();
+                folderShit = moddyFileMods.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/");
+
+                trace('${difficulty} Mochart Found In Mods! loading modchart-${difficulty.toLowerCase()}.json');
             }
             else
             {
-                var moddyFile:String = Paths.modsJson(Paths.formatToSongPath(folder) + '/modchart');
-                if(FileSystem.exists(moddyFile)) {
-                    rawJson = File.getContent(moddyFile).trim();
-                    folderShit = moddyFile.replace("modchart.json", "customMods/");
-                }
-                trace('Found no Diffs! Loading modchart.json...');
+                rawJson = File.getContent(moddyFileMods2).trim();
+                folderShit = moddyFileMods2.replace("modchart.json", "customMods/");
+
+                trace('${difficulty} Mochart Has Not Been Found In Mods! loading modchart.json');
             }
-        }else{
-            var moddyFile:String = Paths.modsJson(Paths.formatToSongPath(folder) + '/modchart');
-            if(FileSystem.exists(moddyFile)) {
+            #end
+
+            if (hasDifficultyModchart)
+            {
                 rawJson = File.getContent(moddyFile).trim();
-                folderShit = moddyFile.replace("modchart.json", "customMods/");
+                folderShit = moddyFile.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/");
+
+                trace('${difficulty} Mochart Found! loading modchart-${difficulty.toLowerCase()}.json');
             }
-            trace('Found no Diffs! Loading modchart.json...');
+            else
+            {
+                rawJson = File.getContent(moddyFile2).trim();
+                folderShit = moddyFile2.replace("modchart.json", "customMods/");
+
+                trace('${difficulty} Mochart Has Not Been Found! loading modchart.json');
+            }
+        }
+        catch(e:Dynamic)
+        {
+            trace(e);
         }
         #end
         #end
+        
         if (rawJson == null)
         {
-            if (hasDifficultyModchart){
-               if (difficulty.toLowerCase() != CoolUtil.defaultDifficulty)
+            try
+            {
+                #if MODS_ALLOWED
+                if (hasDifficultyModchart)
+                {
+
+                    #if LEATHER
+                        filePath = Paths.modsJson("song data/" + folder + '/modchart-' + difficulty.toLowerCase());
+                        folderShit = PolymodAssets.getPath(filePath.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/"));
+                    #else 
+                        filePath = Paths.modsJson(folder + '/modchart-' + difficulty.toLowerCase());
+                        folderShit = filePath.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/");
+                    #end
+
+                    trace('${difficulty} Mochart FolderShit Found In Mods! loading modchart-${difficulty.toLowerCase()}.json');
+                }
+                else
+                { 
+                    #if LEATHER
+                        filePath = Paths.modsJson("song data/" + folder + '/modchart');
+                        folderShit = PolymodAssets.getPath(filePath.replace("modchart.json", "customMods/"));
+                    #else 
+                        filePath = Paths.modsJson(folder + '/modchart');
+                        folderShit = filePath.replace("modchart.json", "customMods/");
+                    #end
+
+                    trace('${difficulty} Mochart Has No FolderShit Found In Mods! loading modchart.json');
+                }
+                #end
+
+
+                if (hasDifficultyModchart)
                 {
                     #if LEATHER
                         filePath = Paths.json("song data/" + folder + '/modchart-' + difficulty.toLowerCase());
@@ -128,6 +183,8 @@ class ModchartFile
                         filePath = Paths.json(folder + '/modchart-' + difficulty.toLowerCase());
                         folderShit = filePath.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/");
                     #end
+
+                    trace('${difficulty} Mochart FolderShit Found! loading modchart-${difficulty.toLowerCase()}.json');
                 }
                 else
                 {
@@ -139,18 +196,15 @@ class ModchartFile
                         folderShit = filePath.replace("modchart.json", "customMods/");
                     #end
 
-                    trace('Found no Diffs! Loading modchart.json...');
-                } 
-            }else{
-                #if LEATHER
-                filePath = Paths.json("song data/" + folder + '/modchart');
-                folderShit = PolymodAssets.getPath(filePath.replace("modchart.json", "customMods/"));
-                #else 
-                filePath = Paths.json(folder + '/modchart');
-                folderShit = filePath.replace("modchart.json", "customMods/");
-                #end
-                trace('Found no Diffs! Loading modchart.json...');
+                    trace('${difficulty} Mochart Has No FolderShit Found! loading modchart.json');
+                }
             }
+            catch(e:Dynamic)
+            {
+                trace(e);
+            }
+            
+            trace(filePath);
 
             #if sys
             if(FileSystem.exists(filePath))
