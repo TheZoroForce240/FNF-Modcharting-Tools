@@ -10,7 +10,7 @@ import flixel.FlxG;
 import states.PlayState;
 import game.Note;
 import game.Conductor;
-#elseif (PSYCH && PSYCHVER_0.7)
+#elseif (PSYCH && PSYCHVERSION == 0.7)
 import states.PlayState;
 import objects.Note;
 #else
@@ -26,9 +26,9 @@ class ModchartUtil
     {
         //need to test each engine
         //not expecting all to work
-        #if (PSYCH && !PSYCHVER_0.7)
+        #if (PSYCH && !PSYCHVERSION == 0.7_0.7)
         return ClientPrefs.downScroll;
-        #elseif (PSYCH && PSYCHVER_0.7)
+        #elseif (PSYCH && PSYCHVERSION == 0.7_0.7)
         return ClientPrefs.data.downScroll;
         #elseif LEATHER
         return utilities.Options.getData("downscroll");
@@ -48,9 +48,9 @@ class ModchartUtil
     }
     public static function getMiddlescroll(instance:ModchartMusicBeatState)
     {
-        #if (PSYCH && !PSYCHVER_0.7)
+        #if (PSYCH && !PSYCHVERSION == 0.7_0.7)
         return ClientPrefs.middleScroll;
-        #elseif (PSYCH && PSYCHVER_0.7)
+        #elseif (PSYCH && PSYCHVERSION == 0.7_0.7)
         return ClientPrefs.data.middleScroll;
         #elseif LEATHER
         return utilities.Options.getData("middlescroll");

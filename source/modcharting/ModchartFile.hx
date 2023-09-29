@@ -60,7 +60,7 @@ class ModchartFile
     
     public function new(renderer:PlayfieldRenderer)
     {
-        #if (PSYCH && !PSYCHVER_0.7)
+        #if (PSYCH && PSYCHVERSION == 0.7)
             data = loadFromJson(PlayState.SONG.song.toLowerCase(), Difficulty.getString().toLowerCase() == null ? Difficulty.defaultList[PlayState.storyDifficulty] : Difficulty.getString().toLowerCase());
         #else
             data = loadFromJson(PlayState.SONG.song.toLowerCase(), CoolUtil.difficultyString().toLowerCase() == null ? CoolUtil.difficulties[PlayState.storyDifficulty] : CoolUtil.difficultyString().toLowerCase());

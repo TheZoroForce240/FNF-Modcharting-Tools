@@ -15,7 +15,7 @@ import states.PlayState;
 import game.Conductor;
 #end
 
-#if (PSYCH && PSYCHVER_0.7)
+#if (PSYCH && PSYCHVERSION == 0.7)
 import psychlua.FunkinLua;
 #end
 

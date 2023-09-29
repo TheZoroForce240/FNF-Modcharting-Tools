@@ -154,12 +154,12 @@ Note: If you use psych engine you should add this
 
 ```xml
 
-<define name="PSYCHVER_0.7" />
+<define name="PSYCHVERSION" value="0.7"/>
 
 ```
 
 to get 0.7+ and up
-leave it as another lower ver to use 0.6.3 edition 
+leave it as another value to use 0.6.3 edition 
 
 
 3. Now if your game compiles successfully then you should be all good to go.
