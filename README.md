@@ -36,7 +36,7 @@ Still very WIP and not everything is supported yet!
 ## Installation 
 You need the most recent version of HaxeFlixel for it to work. (5.2.1 as of writing)
 ### With Source:
-1. Install the haxelib by typing `haxelib git fnf-modcharting-tools https://github.com/TheZoroForce240/FNF-Modcharting-Tools` in the console
+1. Install the haxelib by typing `haxelib git fnf-modcharting-tools https://github.com/EdwhakKB/FNF-Modcharting-Tools` in the console
 2. Now you only need to make a few small additions to get everything working,
 - In MusicBeatState.hx:
 ```haxe

@@ -64,7 +64,7 @@ import utilities.NoteVariables;
 import states.LoadingState;
 import states.MusicBeatState;
 import substates.MusicBeatSubstate;
-#elseif (PSYCH && PSYCH_0.7)
+#elseif (PSYCH && PSYCHVERSION == 0.7)
 import flixel.addons.ui.FlxUIDropDownMenu;
 import backend.Section.SwagSection;
 import backend.Song.SwagSong;
