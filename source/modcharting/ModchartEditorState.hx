@@ -56,7 +56,7 @@ import states.PlayState;
 import game.Song;
 import game.Section.SwagSection;
 import game.Note;
-import ui.FlxUIDropDownMenu;
+import ui.FlxUIDropDownMenuCustom;
 import game.Conductor;
 import utilities.CoolUtil;
 import game.StrumNote;
@@ -64,7 +64,7 @@ import utilities.NoteVariables;
 import states.LoadingState;
 import states.MusicBeatState;
 import substates.MusicBeatSubstate;
-#else
+#elseif (PSYCH && PSYCH_0.7)
 import flixel.addons.ui.FlxUIDropDownMenu;
 import backend.Section.SwagSection;
 import backend.Song.SwagSong;
@@ -73,6 +73,10 @@ import objects.Note;
 import objects.StrumNote;
 import backend.Song;
 import backend.WeekData;
+#else
+import Section.SwagSection;
+import Song.SwagSong;
+import MusicBeatSubstate;
 #end
 
 
@@ -99,6 +103,7 @@ class ModchartEditorEvent extends FlxSprite
         #end
         //makeGraphic(48, 48);
         
+        
         animation.play('note');
         setGraphicSize(ModchartEditorState.gridSize, ModchartEditorState.gridSize);
         updateHitbox();
@@ -108,7 +113,7 @@ class ModchartEditorEvent extends FlxSprite
     #end
 }
 #if ((PSYCH || LEATHER))
-class ModchartEditorState extends backend.MusicBeatState
+class ModchartEditorState extends MusicBeatState
 {
     var hasUnsavedChanges:Bool = false;
     override function closeSubState() 
@@ -209,7 +214,7 @@ class ModchartEditorState extends backend.MusicBeatState
         TipsyXModifier, TipsyYModifier, TipsyZModifier,
         ReverseModifier, IncomingAngleModifier, RotateModifier, StrumLineRotateModifier,
         BumpyModifier,
-        XModifier, YModifier, YDModifier, ZModifier, ConfusionModifier, 
+        XModifier, YModifier, YDModifier, ZModifier, ConfusionModifier, DizzyModifier, 
         ScaleModifier, ScaleXModifier, ScaleYModifier, SkewModifier, SkewXModifier, SkewYModifier, SpeedModifier, 
         StealthModifier, NoteStealthModifier, LaneStealthModifier, InvertModifier, FlipModifier, 
         MiniModifier, ShrinkModifier, BeatXModifier, BeatYModifier, BeatZModifier, 
@@ -217,7 +222,7 @@ class ModchartEditorState extends backend.MusicBeatState
         EaseCurveModifier, EaseCurveXModifier, EaseCurveYModifier, EaseCurveZModifier, EaseCurveAngleModifier,
         InvertSineModifier, BoostModifier, BrakeModifier, JumpModifier, WaveXModifier, WaveYModifier,
         WaveZModifier, TimeStopModifier, StrumAngleModifier, JumpTargetModifier, JumpNotesModifier, EaseXModifier,
-        StealthBoostModifier, StealthBrakeModifier
+        SuddenModifier, HiddenModifier, NotesModifier, LanesModifier
     ];
     public static var easeList:Array<String> = [
         "backIn",
@@ -290,7 +295,6 @@ class ModchartEditorState extends backend.MusicBeatState
 	public var unspawnNotes:Array<Note> = [];
     public var loadedNotes:Array<Note> = []; //stored notes from the chart that unspawnNotes can copy from
     public var vocals:FlxSound;
-    public var inst:FlxSound;
     var generatedMusic:Bool = false;
     
 
@@ -307,7 +311,7 @@ class ModchartEditorState extends backend.MusicBeatState
     var UI_box:FlxUITabMenu;
 
     var textBlockers:Array<FlxUIInputText> = [];
-    var scrollBlockers:Array<FlxUIDropDownMenu> = [];
+    var scrollBlockers:Array<FlxUIDropDownMenuCustom> = [];
 
     var playbackSpeed:Float = 1;
 
@@ -336,13 +340,9 @@ class ModchartEditorState extends backend.MusicBeatState
 			PlayState.SONG = Song.loadFromJson('tutorial');
 
 		Conductor.mapBPMChanges(PlayState.SONG);
-		Conductor.changeBPM(PlayState.SONG.bpm);
+		Conductor.bpm = PlayState.SONG.bpm;
 
         FlxG.mouse.visible = true;
-
-        var bg:FlxSprite = new FlxSprite(0, 0).loadGraphic(Paths.image('menuDesat'));
-        bg.setGraphicSize(Std.int(FlxG.width), Std.int(FlxG.height));
-        add(bg);
 
         #if LEATHER 
         var SONG = PlayState.SONG;
@@ -371,14 +371,8 @@ class ModchartEditorState extends backend.MusicBeatState
 
         #end
 
-        /*if (PlayState.SONG.middleScroll){
-			ClientPrefs.middleScroll = true;
-		}else if (PlayState.SONG.rightScroll){
-			ClientPrefs.middleScroll = false;
-		}*/
-
         #if PSYCH
-		strumLine = new FlxSprite(ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, 50).makeGraphic(FlxG.width, 10);
+		strumLine = new FlxSprite(ClientPrefs.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, 50).makeGraphic(FlxG.width, 10);
         if(ModchartUtil.getDownscroll(this)) strumLine.y = FlxG.height - 150;
         #else
         strumLine = new FlxSprite(0, 100).makeGraphic(FlxG.width, 10);
@@ -440,7 +434,7 @@ class ModchartEditorState extends backend.MusicBeatState
 
         updateEventSprites();
 
-        line = new FlxSprite().makeGraphic(10, gridSize, FlxColor.BLACK);
+        line = new FlxSprite().makeGraphic(10, gridSize);
         add(line);
 
         generateStaticArrows(0);
@@ -496,7 +490,10 @@ class ModchartEditorState extends backend.MusicBeatState
         });
         hideUI.y -= hideUI.height;
         hideUI.x -= hideUI.width;
-        add(hideUI);   
+        add(hideUI);
+
+
+        
     }
     var dirtyUpdateNotes:Bool = false;
     var dirtyUpdateEvents:Bool = false;
@@ -507,15 +504,15 @@ class ModchartEditorState extends backend.MusicBeatState
         totalElapsed += elapsed;
         highlight.alpha = 0.8+Math.sin(totalElapsed*5)*0.15;
         super.update(elapsed);
-        if(inst.time < 0) {
-			inst.pause();
-			inst.time = 0;
+        if(FlxG.sound.music.time < 0) {
+			FlxG.sound.music.pause();
+			FlxG.sound.music.time = 0;
 		}
-		else if(inst.time > inst.length) {
-			inst.pause();
-			inst.time = 0;
+		else if(FlxG.sound.music.time > FlxG.sound.music.length) {
+			FlxG.sound.music.pause();
+			FlxG.sound.music.time = 0;
 		}
-        Conductor.songPosition = inst.time;
+        Conductor.songPosition = FlxG.sound.music.time;
 
         
         var songPosPixelPos = (((Conductor.songPosition/Conductor.stepCrochet)%4)*gridSize);
@@ -550,7 +547,9 @@ class ModchartEditorState extends backend.MusicBeatState
             {
                 blockInput = true;
                 #if PSYCH
-                ClientPrefs.toggleVolumeKeys(false);
+                FlxG.sound.muteKeys = [];
+				FlxG.sound.volumeDownKeys = [];
+				FlxG.sound.volumeUpKeys = [];
                 #end
             }
                 
@@ -562,13 +561,15 @@ class ModchartEditorState extends backend.MusicBeatState
         if (!blockInput)
         {
             #if PSYCH
-            ClientPrefs.toggleVolumeKeys(true);
+            FlxG.sound.muteKeys = TitleState.muteKeys;
+			FlxG.sound.volumeDownKeys = TitleState.volumeDownKeys;
+			FlxG.sound.volumeUpKeys = TitleState.volumeUpKeys;
             #end
             if (FlxG.keys.justPressed.SPACE)
             {
-                if (inst.playing)
+                if (FlxG.sound.music.playing)
                 {
-                    inst.pause();
+                    FlxG.sound.music.pause();
                     if(vocals != null) vocals.pause();
                     playfieldRenderer.editorPaused = true;
                 }
@@ -577,10 +578,10 @@ class ModchartEditorState extends backend.MusicBeatState
                     if(vocals != null) {
                         vocals.play();
                         vocals.pause();
-                        vocals.time = inst.time;
+                        vocals.time = FlxG.sound.music.time;
                         vocals.play();
                     }
-                    inst.play();
+                    FlxG.sound.music.play();
                     playfieldRenderer.editorPaused = false;
                     dirtyUpdateNotes = true;
                     dirtyUpdateEvents = true;
@@ -591,12 +592,12 @@ class ModchartEditorState extends backend.MusicBeatState
                 shiftThing = 4;
             if (FlxG.mouse.wheel != 0)
             {
-                inst.pause();
+                FlxG.sound.music.pause();
                 if(vocals != null) vocals.pause();
-                inst.time += (FlxG.mouse.wheel * Conductor.stepCrochet*0.8*shiftThing);
+                FlxG.sound.music.time += (FlxG.mouse.wheel * Conductor.stepCrochet*0.8*shiftThing);
                 if(vocals != null) {
                     vocals.pause();
-                    vocals.time = inst.time;
+                    vocals.time = FlxG.sound.music.time;
                 }
                 playfieldRenderer.editorPaused = true;
                 dirtyUpdateNotes = true;
@@ -605,17 +606,17 @@ class ModchartEditorState extends backend.MusicBeatState
     
             if (FlxG.keys.justPressed.D || FlxG.keys.justPressed.RIGHT)
             {
-                inst.pause();
+                FlxG.sound.music.pause();
                 if(vocals != null) vocals.pause();
-                inst.time += (Conductor.crochet*4*shiftThing);
+                FlxG.sound.music.time += (Conductor.crochet*4*shiftThing);
                 dirtyUpdateNotes = true;
                 dirtyUpdateEvents = true;
             }
             if (FlxG.keys.justPressed.A || FlxG.keys.justPressed.LEFT) 
             {
-                inst.pause();
+                FlxG.sound.music.pause();
                 if(vocals != null) vocals.pause();
-                inst.time -= (Conductor.crochet*4*shiftThing);
+                FlxG.sound.music.time -= (Conductor.crochet*4*shiftThing);
                 dirtyUpdateNotes = true;
                 dirtyUpdateEvents = true;
             }
@@ -644,7 +645,7 @@ class ModchartEditorState extends backend.MusicBeatState
             playbackSpeed = 3;
 
         playfieldRenderer.speed = playbackSpeed; //adjust the speed of tweens
-        inst.pitch = playbackSpeed;
+        FlxG.sound.music.pitch = playbackSpeed;
         vocals.pitch = playbackSpeed;
         
 
@@ -774,16 +775,17 @@ class ModchartEditorState extends backend.MusicBeatState
             playfieldRenderer.modchart.loadPlayfields();
         }
 
+
         if (FlxG.keys.justPressed.ESCAPE)
         {
             var exitFunc = function()
             {
                 FlxG.mouse.visible = false;
-                inst.stop();
+                FlxG.sound.music.stop();
                 if(vocals != null) vocals.stop();
                 
                 #if PSYCH 
-                backend.StageData.loadDirectory(PlayState.SONG);
+                StageData.loadDirectory(PlayState.SONG);
                 #end
                 LoadingState.loadAndSwitchState(new PlayState());
             };
@@ -805,7 +807,7 @@ class ModchartEditorState extends backend.MusicBeatState
         if (curBpmChange.bpm != Conductor.bpm)
         {
             //trace('changed bpm to ' + curBpmChange.bpm);
-            Conductor.changeBPM(curBpmChange.bpm);
+            Conductor.bpm = curBpmChange.bpm;
         }
 
 
@@ -816,7 +818,7 @@ class ModchartEditorState extends backend.MusicBeatState
 
 
 
-        debugText.text = Std.string(FlxMath.roundDecimal(Conductor.songPosition / 1000, 2)) + " / " + Std.string(FlxMath.roundDecimal(inst.length / 1000, 2)) +
+        debugText.text = Std.string(FlxMath.roundDecimal(Conductor.songPosition / 1000, 2)) + " / " + Std.string(FlxMath.roundDecimal(FlxG.sound.music.length / 1000, 2)) +
 		"\nBeat: " + Std.string(curDecBeat).substring(0,4) +
 		"\nStep: " + curStep + "\n";
 
@@ -980,7 +982,7 @@ class ModchartEditorState extends backend.MusicBeatState
     {
 
         var songData = PlayState.SONG;
-        Conductor.changeBPM(songData.bpm);
+        Conductor.bpm = songData.bpm;
 
         if (PlayState.SONG.needsVoices)
         {
@@ -995,13 +997,11 @@ class ModchartEditorState extends backend.MusicBeatState
 
         //vocals.pitch = playbackRate;
         FlxG.sound.list.add(vocals);
+        FlxG.sound.list.add(new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song)));
 
-        inst = new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song));
-        FlxG.sound.list.add(inst);
-
-        inst.onComplete = function()
+        FlxG.sound.music.onComplete = function()
         {
-            inst.pause();
+            FlxG.sound.music.pause();
             Conductor.songPosition = 0;
             if(vocals != null) {
                 vocals.pause();
@@ -1033,13 +1033,6 @@ class ModchartEditorState extends backend.MusicBeatState
 				if(songNotes[1] >= (!gottaHitNote ? PlayState.SONG.keyCount : PlayState.SONG.playerKeyCount))
 					gottaHitNote = !section.mustHitSection;
                 var daNoteData:Int = Std.int(songNotes[1] % (!gottaHitNote ? PlayState.SONG.keyCount : PlayState.SONG.playerKeyCount));
-                #elseif PSYCH 
-                var daNoteData:Int = Std.int(songNotes[1] % 4);
-                var gottaHitNote:Bool = section.mustHitSection;
-                if (songNotes[1] > 4)
-                {
-                    gottaHitNote = !section.mustHitSection;
-                }
                 #else
                 var daNoteData:Int = Std.int(songNotes[1] % 4);
                 var gottaHitNote:Bool = section.mustHitSection;
@@ -1057,12 +1050,12 @@ class ModchartEditorState extends backend.MusicBeatState
 
 
                 #if PSYCH 
-                var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
+                var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, false);
                 swagNote.sustainLength = songNotes[2];
                 swagNote.mustPress = gottaHitNote;
                 swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
                 swagNote.noteType = songNotes[3];
-                if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = states.editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
+                if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
                 #elseif LEATHER 
                 var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, 0, songNotes[4], null, [0], gottaHitNote);
                 swagNote.sustainLength = songNotes[2];
@@ -1130,8 +1123,8 @@ class ModchartEditorState extends backend.MusicBeatState
             if (player < 1)
             {
                 #if PSYCH
-                if(!ClientPrefs.data.opponentStrums) targetAlpha = 0;
-                else if(ClientPrefs.data.middleScroll) targetAlpha = 0.35;
+                if(!ClientPrefs.opponentStrums) targetAlpha = 0;
+                else if(ClientPrefs.middleScroll) targetAlpha = 0.35;
                 #end
             }
 
@@ -1159,8 +1152,8 @@ class ModchartEditorState extends backend.MusicBeatState
 			babyArrow.x += 100 - ((usedKeyCount - 4) * 16) + (usedKeyCount >= 10 ? 30 : 0);
 			babyArrow.x += ((FlxG.width / 2) * player);
             #elseif PSYCH 
-            var babyArrow:StrumNote = new StrumNote(ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, strumLine.y, i, player);
-            babyArrow.downScroll = ClientPrefs.data.downScroll;
+            var babyArrow:StrumNote = new StrumNote(ClientPrefs.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, strumLine.y, i, player);
+            babyArrow.downScroll = ClientPrefs.downScroll;
             babyArrow.alpha = targetAlpha;
             #end
 
@@ -1172,7 +1165,7 @@ class ModchartEditorState extends backend.MusicBeatState
             else
             {
                 #if PSYCH 
-                if(ClientPrefs.data.middleScroll)
+                if(ClientPrefs.middleScroll)
                 {
                     babyArrow.x += 310;
                     if(i > 1) { //Up and Right
@@ -1197,6 +1190,7 @@ class ModchartEditorState extends backend.MusicBeatState
         // How many cells can we fit into the width/height? (round it UP if not even, then trim back)
         var Color1 = FlxColor.GRAY; //quant colors!!!
         var Color2 = FlxColor.WHITE;
+        // var Color3 = FlxColor.LIME;
         var rowColor:Int = Color1;
         var lastColor:Int = Color1;
         var grid:BitmapData = new BitmapData(Width, Height, true);
@@ -1242,7 +1236,7 @@ class ModchartEditorState extends backend.MusicBeatState
     var modTypeInputText:FlxUIInputText;
     var playfieldStepper:FlxUINumericStepper;
     var targetLaneStepper:FlxUINumericStepper;
-    var modifierDropDown:FlxUIDropDownMenu;
+    var modifierDropDown:FlxUIDropDownMenuCustom;
     var mods:Array<String> = [];
     var subMods:Array<String> = [""];
     
@@ -1253,8 +1247,8 @@ class ModchartEditorState extends backend.MusicBeatState
             mods.push(playfieldRenderer.modchart.data.modifiers[i][MOD_NAME]);
         if (mods.length == 0)
             mods.push('');
-        modifierDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(mods, true));
-        eventModifierDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(mods, true));
+        modifierDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(mods, true));
+        eventModifierDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(mods, true));
 
     }
     function updateSubModList(modName:String)
@@ -1267,7 +1261,7 @@ class ModchartEditorState extends backend.MusicBeatState
                 subMods.push(subModName);
             }
         }
-        subModDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(subMods, true));
+        subModDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(subMods, true));
     }
     function setupModifierUI()
     {
@@ -1281,7 +1275,7 @@ class ModchartEditorState extends backend.MusicBeatState
         if (mods.length == 0)
             mods.push('');
 
-        modifierDropDown = new FlxUIDropDownMenu(25, 50, FlxUIDropDownMenu.makeStrIdLabelArray(mods, true), function(mod:String)
+        modifierDropDown = new FlxUIDropDownMenuCustom(25, 50, FlxUIDropDownMenuCustom.makeStrIdLabelArray(mods, true), function(mod:String)
         {
             var modName = mods[Std.parseInt(mod)];
             for (i in 0...playfieldRenderer.modchart.data.modifiers.length)
@@ -1364,7 +1358,7 @@ class ModchartEditorState extends backend.MusicBeatState
             modClassList.push(Std.string(modifierList[i]).replace("modcharting.", ""));
         }
             
-        var modClassDropDown = new FlxUIDropDownMenu(modClassInputText.x, modClassInputText.y+30, FlxUIDropDownMenu.makeStrIdLabelArray(modClassList, true), function(mod:String)
+        var modClassDropDown = new FlxUIDropDownMenuCustom(modClassInputText.x, modClassInputText.y+30, FlxUIDropDownMenuCustom.makeStrIdLabelArray(modClassList, true), function(mod:String)
         {
             modClassInputText.text = modClassList[Std.parseInt(mod)];
             if (modClassInputText.text != '')
@@ -1372,7 +1366,7 @@ class ModchartEditorState extends backend.MusicBeatState
         });
         centerXToObject(modClassInputText, modClassDropDown);
         var modTypeList = ["All", "Player", "Opponent", "Lane"];
-        var modTypeDropDown = new FlxUIDropDownMenu(modTypeInputText.x, modClassInputText.y+30, FlxUIDropDownMenu.makeStrIdLabelArray(modTypeList, true), function(mod:String)
+        var modTypeDropDown = new FlxUIDropDownMenuCustom(modTypeInputText.x, modClassInputText.y+30, FlxUIDropDownMenuCustom.makeStrIdLabelArray(modTypeList, true), function(mod:String)
         {
             modTypeInputText.text = modTypeList[Std.parseInt(mod)];
         });
@@ -1387,8 +1381,8 @@ class ModchartEditorState extends backend.MusicBeatState
         
 
         tab_group.add(modNameInputText);
-        tab_group.add(explainText);
         tab_group.add(modClassInputText);
+        tab_group.add(explainText);
         tab_group.add(modTypeInputText);
         tab_group.add(playfieldStepper);
         tab_group.add(targetLaneStepper);
@@ -1412,6 +1406,7 @@ class ModchartEditorState extends backend.MusicBeatState
     }
 
     //Thanks to glowsoony for the idea lol
+        //Thanks to glowsoony for the idea lol
     function modifierExplain(modifiersName:String):String
     {
         var explainString:String = '';
@@ -1450,6 +1445,8 @@ class ModchartEditorState extends backend.MusicBeatState
 		explainString = "Moves notes and targets Z (Far, Close)";
             case 'ConfusionModifier':
 		explainString = "Changes notes and targets angle";
+            case 'DizzyModifier':
+        explainString = "Changes notes angle making a visual on them";
             case 'ScaleModifier':
 		explainString = "Modifier used to make notes and targets bigger or smaller";
             case 'ScaleXModifier':
@@ -1520,9 +1517,9 @@ class ModchartEditorState extends backend.MusicBeatState
 		explainString = "Modifier similar to jump but only notes aplied";
             case 'EaseXModifier':
 		explainString = "Modifier used to make notes go left to right on the screen";
-            case 'StealthBoostModifier':
+            case 'HiddenModifier':
         explainString = "Modifier used to make an alpha boost on notes";
-            case 'StealthBrakeModifier':
+            case 'SuddenModifier':
         explainString = "Modifier used to make an alpha brake on notes";
             case 'SkewModifier':
         explainString = "Modifier used to make note effects (skew)";
@@ -1530,11 +1527,14 @@ class ModchartEditorState extends backend.MusicBeatState
         explainString = "Modifier based from SkewModifier but only in X";
             case 'SkewYModifier':
         explainString = "Modifier based from SkewModifier but only in Y";
+            case 'NotesModifier':
+        explainString = "Modifier based from other modifiers but only affects notes and no targets";
+            case 'LanesModifier':
+        explainString = "Modifier based from other modifiers but only affects targets and no notes";
         }
 
        return explainString;
     }
-
 
 
     function findCorrectModData(data:Array<Dynamic>) //the data is stored at different indexes based on the type (maybe should have kept them the same)
@@ -1659,17 +1659,17 @@ class ModchartEditorState extends backend.MusicBeatState
     var eventModInputText:FlxUIInputText;
     var eventValueInputText:FlxUIInputText;
     var eventDataInputText:FlxUIInputText;
-    var eventModifierDropDown:FlxUIDropDownMenu;
-    var eventTypeDropDown:FlxUIDropDownMenu;
+    var eventModifierDropDown:FlxUIDropDownMenuCustom;
+    var eventTypeDropDown:FlxUIDropDownMenuCustom;
     var eventEaseInputText:FlxUIInputText;
     var eventTimeInputText:FlxUIInputText;
     var selectedEventDataStepper:FlxUINumericStepper;
     var repeatCheckbox:FlxUICheckBox;
     var repeatBeatGapStepper:FlxUINumericStepper;
     var repeatCountStepper:FlxUINumericStepper;
-    var easeDropDown:FlxUIDropDownMenu;
-    var subModDropDown:FlxUIDropDownMenu;
-    var builtInModDropDown:FlxUIDropDownMenu;
+    var easeDropDown:FlxUIDropDownMenuCustom;
+    var subModDropDown:FlxUIDropDownMenuCustom;
+    var builtInModDropDown:FlxUIDropDownMenuCustom;
     var stackedEventStepper:FlxUINumericStepper;
     function setupEventUI()
     {
@@ -1748,7 +1748,7 @@ class ModchartEditorState extends backend.MusicBeatState
         });
         centerXToObject(stackedEventStepper, addStacked);
 
-        eventTypeDropDown = new FlxUIDropDownMenu(25 + 500, 50, FlxUIDropDownMenu.makeStrIdLabelArray(eventTypes, true), function(mod:String)
+        eventTypeDropDown = new FlxUIDropDownMenuCustom(25 + 500, 50, FlxUIDropDownMenuCustom.makeStrIdLabelArray(eventTypes, true), function(mod:String)
         {
             var et = eventTypes[Std.parseInt(mod)];
             trace(et);
@@ -1795,7 +1795,7 @@ class ModchartEditorState extends backend.MusicBeatState
             hasUnsavedChanges = true;
         }
 
-        easeDropDown = new FlxUIDropDownMenu(25, eventEaseInputText.y+30, FlxUIDropDownMenu.makeStrIdLabelArray(easeList, true), function(ease:String)
+        easeDropDown = new FlxUIDropDownMenuCustom(25, eventEaseInputText.y+30, FlxUIDropDownMenuCustom.makeStrIdLabelArray(easeList, true), function(ease:String)
         {
             var easeStr = easeList[Std.parseInt(ease)];
             eventEaseInputText.text = easeStr;
@@ -1805,7 +1805,7 @@ class ModchartEditorState extends backend.MusicBeatState
         centerXToObject(eventEaseInputText, easeDropDown);
 
 
-        eventModifierDropDown = new FlxUIDropDownMenu(25, 50+20, FlxUIDropDownMenu.makeStrIdLabelArray(mods, true), function(mod:String)
+        eventModifierDropDown = new FlxUIDropDownMenuCustom(25, 50+20, FlxUIDropDownMenuCustom.makeStrIdLabelArray(mods, true), function(mod:String)
         {
             var modName = mods[Std.parseInt(mod)];
             eventModInputText.text = modName;
@@ -1815,7 +1815,7 @@ class ModchartEditorState extends backend.MusicBeatState
         });
         centerXToObject(eventModInputText, eventModifierDropDown);
         
-        subModDropDown = new FlxUIDropDownMenu(25, 50+80, FlxUIDropDownMenu.makeStrIdLabelArray(subMods, true), function(mod:String)
+        subModDropDown = new FlxUIDropDownMenuCustom(25, 50+80, FlxUIDropDownMenuCustom.makeStrIdLabelArray(subMods, true), function(mod:String)
         {
             var modName = subMods[Std.parseInt(mod)];
             var splitShit = eventModInputText.text.split(":"); //use to get the normal mod
@@ -2069,15 +2069,15 @@ class ModchartEditorState extends backend.MusicBeatState
             dirtyUpdateEvents = true;
         };
 
-        var songSlider = new FlxUISlider(inst, 'time', 20, 200, 0, inst.length, 250, null, 5, FlxColor.WHITE, FlxColor.BLACK);
+        var songSlider = new FlxUISlider(FlxG.sound.music, 'time', 20, 200, 0, FlxG.sound.music.length, 250, null, 5, FlxColor.WHITE, FlxColor.BLACK);
 		songSlider.valueLabel.visible = false;
 		songSlider.maxLabel.visible = false;
 		songSlider.minLabel.visible = false;
         songSlider.nameLabel.text = 'Song Time';
 		songSlider.callback = function(fuck:Float)
 		{
-			vocals.time = inst.time;
-			Conductor.songPosition = inst.time;
+			vocals.time = FlxG.sound.music.time;
+			Conductor.songPosition = FlxG.sound.music.time;
             dirtyUpdateEvents = true;
             dirtyUpdateNotes = true;
 		};
@@ -2091,7 +2091,7 @@ class ModchartEditorState extends backend.MusicBeatState
 			if (check_mute_inst.checked)
 				vol = 0;
 
-			inst.volume = vol;
+			FlxG.sound.music.volume = vol;
 		};
         var check_mute_vocals = new FlxUICheckBox(check_mute_inst.x + 120, check_mute_inst.y, null, null, "Mute Vocals (in editor)", 100);
 		check_mute_vocals.checked = false;
@@ -2232,10 +2232,8 @@ class ModchartEditorExitSubstate extends MusicBeatSubstate
     {
         super.create();
 
-        var bg:FlxSprite = new FlxSprite(0, 0).loadGraphic(Paths.image('menuDesat'));
-        bg.setGraphicSize(FlxG.width, FlxG.height);
+        var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		bg.alpha = 0;
-        bg.color = 0xff000000;
 		bg.scrollFactor.set();
 		add(bg);
         FlxTween.tween(bg, {alpha: 0.6}, 0.4, {ease: FlxEase.quartInOut});

@@ -5,13 +5,17 @@ import flixel.math.FlxMath;
 import flixel.math.FlxAngle;
 import openfl.geom.Vector3D;
 import flixel.FlxG;
-import states.PlayState;
 
 #if LEATHER
+import states.PlayState;
 import game.Note;
 import game.Conductor;
-#else 
+#elseif (PSYCH && PSYCHVER_0.7)
+import states.PlayState;
 import objects.Note;
+#else
+import PlayState;
+import Note;
 #end
 
 using StringTools;
@@ -22,7 +26,9 @@ class ModchartUtil
     {
         //need to test each engine
         //not expecting all to work
-        #if PSYCH 
+        #if (PSYCH && !PSYCHVER_0.7)
+        return ClientPrefs.downScroll;
+        #elseif (PSYCH && PSYCHVER_0.7)
         return ClientPrefs.data.downScroll;
         #elseif LEATHER
         return utilities.Options.getData("downscroll");
@@ -42,7 +48,9 @@ class ModchartUtil
     }
     public static function getMiddlescroll(instance:ModchartMusicBeatState)
     {
-        #if PSYCH 
+        #if (PSYCH && !PSYCHVER_0.7)
+        return ClientPrefs.middleScroll;
+        #elseif (PSYCH && PSYCHVER_0.7)
         return ClientPrefs.data.middleScroll;
         #elseif LEATHER
         return utilities.Options.getData("middlescroll");
@@ -119,6 +127,23 @@ class ModchartUtil
         #end
     }
     
+    public static function getNoteSkew(daNote:Note, isSkewY:Bool)
+    {
+        if (!isSkewY){
+            return daNote.skew.x;
+        }else{
+            return daNote.skew.y;  
+        }
+    }
+
+    public static function getStrumSkew(daNote:StrumNote, isSkewY:Bool)
+    {
+        if (!isSkewY){
+            return daNote.skew.x;
+        }else{
+            return daNote.skew.y;  
+        }
+    }
 
     static var currentFakeCrochet:Float = -1;
     static var lastBpm:Float = -1;
@@ -245,7 +270,7 @@ class ModchartUtil
 			case 'sineout': return FlxEase.sineOut;
 			case 'smoothstepin': return FlxEase.smoothStepIn;
 			case 'smoothstepinout': return FlxEase.smoothStepInOut;
-			case 'smoothstepout': return FlxEase.smoothStepOut;
+			case 'smoothstepout': return FlxEase.smoothStepInOut;
 			case 'smootherstepin': return FlxEase.smootherStepIn;
 			case 'smootherstepinout': return FlxEase.smootherStepInOut;
 			case 'smootherstepout': return FlxEase.smootherStepOut;

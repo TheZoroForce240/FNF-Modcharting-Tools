@@ -8,7 +8,9 @@
 
         XModifier, YModifier, ZModifier, ConfusionModifier,
 
-        ScaleModifier, ScaleXModifier, ScaleYModifier, SpeedModifier,
+        ScaleModifier, ScaleXModifier, ScaleYModifier, 
+
+	SkewModifier, SkewYModifier, SkewXModifier, SpeedModifier,
  
         StealthModifier, NoteStealthModifier, InvertModifier, FlipModifier,
 
@@ -26,7 +28,7 @@
 
 	TimeStopModifier, StrumAngleModifier, JumpTargetModifier, JumpNotesModifier,
 
-	LaneStealthModifier, easeXModifier, stealthBoostModifier, stealthBrakeModifier
+	LaneStealthModifier, EaseXModifier, HiddenModifier, SuddenModifier, NotesModifier, TargetsModifier
 
 --To move betwen center right and left i show you this shits
 MIDSCROLL:

@@ -1,13 +1,13 @@
 {
     "name": "fnf-modcharting-tools",
-    "url" : "https://github.com/TheZoroForce240/FNF-Modcharting-Tools",
+    "url" : "https://github.com/EdwhakKB/FNF-Modcharting-Tools",
     "license": "Apache",
     "tags": ["fnf"],
     "description": "A modchart framework for Friday Night Funkin.",
     "version": "1.0.1",
     "classPath": "source/",
     "releasenote": "",
-    "contributors": ["TheZoroForce240","UncertainProd"],
+    "contributors": ["TheZoroForce240","UncertainProd","EdwhakKB","Vortex2Oblivion","Glowsoony"],
     "dependencies": {
     }
 }

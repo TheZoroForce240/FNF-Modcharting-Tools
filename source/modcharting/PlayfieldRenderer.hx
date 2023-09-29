@@ -25,7 +25,10 @@ import states.PlayState;
 import game.Note;
 import game.StrumNote;
 import game.Conductor;
-#else 
+#elseif (PSYCH && PSYCHVER_0.7)
+import states.PlayState;
+import objects.Note;
+#else
 import PlayState;
 import Note;
 #end

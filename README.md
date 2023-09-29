@@ -31,6 +31,7 @@ Still very WIP and not everything is supported yet!
 - [Joalor64GH](https://github.com/Joalor64GH) - Helper from modcharting tools
 - [Edwhak_KB](https://github.com/EdwhakKB) - Added some modifiers and fixed stuff + skewNotes
 - [Glowsoony](https://github.com/glowsoony) - Help with some 0.7.X stuff! + skewNotes too
+- [Slushi_Github](https://github.com/Slushi-Github) - Help with reorganisation with haxelib edition
 
 ## Installation 
 You need the most recent version of HaxeFlixel for it to work. (5.2.1 as of writing)
@@ -148,6 +149,17 @@ class Conductor
 ```
 You need to define which engine you're using to fix compiling issues, or it would default to base game settings (downscroll won't work etc).
 Available ones: PSYCH, KADE(notTested), LEATHER, FOREVER_LEGACY(notTested), YOSHI(notTested), FPSPLUS(notTested)
+
+Note: If you use psych engine you should add this
+
+```xml
+
+<define name="PSYCHVER_0.7" />
+
+```
+
+to get 0.7+ and up
+leave it as another lower ver to use 0.6.3 edition 
 
 
 3. Now if your game compiles successfully then you should be all good to go.

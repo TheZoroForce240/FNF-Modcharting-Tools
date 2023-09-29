@@ -4,12 +4,16 @@ import flixel.math.FlxMath;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxSprite;
 import flixel.FlxG;
-import states.PlayState;
 
 #if LEATHER
+import states.PlayState;
 import game.Note;
-#else 
+#elseif (PSYCH && PSYCHVER_0.7)
+import states.PlayState;
 import objects.Note;
+#else
+import PlayState;
+import Note;
 #end
 
 using StringTools;

@@ -9,6 +9,9 @@ import states.PlayState;
 import game.Note;
 import game.StrumNote;
 import game.Conductor;
+#elseif (PSYCH && PSYCHVER_0.7)
+import states.PlayState;
+import objects.Note;
 #else 
 import PlayState;
 import Note;
@@ -568,13 +571,22 @@ class MiniModifier extends Modifier
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
     {
         var col = (lane%NoteMovement.keyCount);
+        var daswitch = 1;
+        if (instance != null)
+            if (ModchartUtil.getDownscroll(instance))
+                daswitch = -1;
+
+        var midFix = false;
+        if (instance != null)
+            if (ModchartUtil.getMiddlescroll(instance))
+                midFix = true;
         //noteData.x -= (NoteMovement.arrowSizes[lane]-(NoteMovement.arrowSizes[lane]*currentValue))*col;
 
         //noteData.x += (NoteMovement.arrowSizes[lane]*currentValue*NoteMovement.keyCount*0.5);
         noteData.scaleX *= currentValue;
         noteData.scaleY *= currentValue;
         noteData.x -= ((NoteMovement.arrowSizes[lane]/2)*(noteData.scaleX-NoteMovement.defaultScale[lane]));
-        noteData.y -= ((NoteMovement.arrowSizes[lane]/2)*(noteData.scaleY-NoteMovement.defaultScale[lane]));
+        noteData.y += daswitch * ((NoteMovement.arrowSizes[lane]/2)*(noteData.scaleY-NoteMovement.defaultScale[lane]));
     }
     override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
     {
@@ -696,7 +708,11 @@ class BounceYModifier extends Modifier
     }
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
     {
-        noteData.y += currentValue * NoteMovement.arrowSizes[lane] * Math.abs(FlxMath.fastSin(curPos*0.005*subValues.get('speed').value));
+        var daswitch = 1;
+        if (instance != null)
+            if (ModchartUtil.getDownscroll(instance))
+                daswitch = -1;
+        noteData.y += (currentValue * daswitch) * NoteMovement.arrowSizes[lane] * Math.abs(FlxMath.fastSin(curPos*0.005*subValues.get('speed').value));
     }
 }
 class BounceZModifier extends Modifier
@@ -877,33 +893,30 @@ class WaveZModifier extends Modifier
 
 class TimeStopModifier extends Modifier
 {
+    override function setupSubValues()
+    {
+        subValues.set('stop', new ModifierSubValue(0.0));
+        subValues.set('continue', new ModifierSubValue(0.0));
+    }
     override function curPosMath(lane:Int, curPos:Float, pf:Int)
-        {
-            if (curPos <= -1250)
-                {
-                    curPos = -1250 + (curPos*0.02);
-                }
-            return curPos;
-        }
+    {
+        if (curPos <= (subValues.get('stop').value*-1000))
+            {
+                curPos = (subValues.get('stop').value*-1000) + (curPos*0.02);
+            }
+        return curPos;
+    }
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
     {
-        //desaturate the notes
-        if (curPos <= -1250)
+        if (curPos <= (subValues.get('stop').value*-1000))
         {
-            curPos = -1250 + (curPos*0.02);
-            // notes.members[noteData.index].colorSwap.saturation = -0.95;
-            // notes.members[noteData.index].colorSwap.brightness = -0.2;
+            curPos = (subValues.get('stop').value*-1000) + (curPos*0.02);
         } 
-        else if (curPos <= -700)
+        else if (curPos <= (subValues.get('continue').value*-100))
         {
-            var a = (700-Math.abs(curPos))/(700-1250); //lerp out the desat
-            // notes.members[noteData.index].colorSwap.saturation = -0.95*a;
-            // notes.members[noteData.index].colorSwap.brightness = -0.2*a;
-        }
-        else 
-        {
-            // notes.members[noteData.index].colorSwap.saturation = 0;
-            // notes.members[noteData.index].colorSwap.brightness = 0;
+            var a = ((subValues.get('continue').value*100)-Math.abs(curPos))/((subValues.get('continue').value*100)+(subValues.get('stop').value*-1000));
+        }else{
+            //yep, nothing here lmao
         }
     }
     override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
@@ -1028,7 +1041,7 @@ class YDModifier extends Modifier
     }
 }
 
-class StealthBoostModifier extends Modifier
+class SuddenModifier extends Modifier
 {
     override function setupSubValues()
     {
@@ -1048,7 +1061,7 @@ class StealthBoostModifier extends Modifier
     }
 }
 
-class StealthBrakeModifier extends Modifier
+class HiddenModifier extends Modifier
 {
     override function setupSubValues()
     {
@@ -1072,14 +1085,19 @@ class SkewModifier extends Modifier
 {
     override function setupSubValues()
     {
+        baseValue = 0.0;
         currentValue = 1.0;
         subValues.set('x', new ModifierSubValue(0.0));
         subValues.set('y', new ModifierSubValue(0.0));
     }
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
     {
-        noteData.skewX += subValues.get('x').value;
-        noteData.skewY += subValues.get('y').value;
+        var daswitch = -1;
+        if (instance != null)
+            if (ModchartUtil.getDownscroll(instance))
+                daswitch = 1;
+        noteData.skewX += subValues.get('x').value * daswitch;
+        noteData.skewY += subValues.get('y').value * daswitch;
     }
     override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
     {
@@ -1095,7 +1113,11 @@ class SkewXModifier extends Modifier
     }
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
     {
-        noteData.skewX += currentValue;
+        var daswitch = -1;
+        if (instance != null)
+            if (ModchartUtil.getDownscroll(instance))
+                daswitch = 1;
+        noteData.skewX += currentValue * daswitch;
     }
     override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
     {
@@ -1111,10 +1133,96 @@ class SkewYModifier extends Modifier
     }
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
     {
-        noteData.skewY += currentValue;
+        var daswitch = -1;
+        if (instance != null)
+            if (ModchartUtil.getDownscroll(instance))
+                daswitch = 1;
+        noteData.skewY += currentValue * daswitch;
     }
     override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
     {
         noteMath(noteData, lane, 0, pf);
+    }
+}
+
+class DizzyModifier extends Modifier
+{
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        noteData.angle += currentValue*curPos;
+    }
+}
+
+class NotesModifier extends Modifier
+{
+    override function setupSubValues()
+    {
+        baseValue = 0.0;
+        currentValue = 1.0;
+        subValues.set('x', new ModifierSubValue(0.0));
+        subValues.set('y', new ModifierSubValue(0.0));
+        subValues.set('angle', new ModifierSubValue(0.0));
+        subValues.set('z', new ModifierSubValue(0.0));
+        subValues.set('skewx', new ModifierSubValue(0.0));
+        subValues.set('skewy', new ModifierSubValue(0.0));
+    }
+
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        var daswitch = 1;
+        if (instance != null)
+            if (ModchartUtil.getDownscroll(instance))
+                daswitch = -1;
+
+        noteData.x += subValues.get('x').value;
+        noteData.y += subValues.get('y').value * daswitch;
+        noteData.angle += subValues.get('angle').value;
+        noteData.z += subValues.get('z').value;
+        noteData.skewX += subValues.get('skewx').value * -daswitch;
+        noteData.skewY += subValues.get('skewy').value * -daswitch;
+    }
+
+    override function reset()
+    {
+        super.reset();
+        baseValue = 0.0;
+        currentValue = 1.0;
+    }
+}
+
+class LanesModifier extends Modifier
+{
+    override function setupSubValues()
+    {
+        baseValue = 0.0;
+        currentValue = 1.0;
+        subValues.set('x', new ModifierSubValue(0.0));
+        subValues.set('y', new ModifierSubValue(0.0));
+        subValues.set('angle', new ModifierSubValue(0.0));
+        subValues.set('z', new ModifierSubValue(0.0));
+        subValues.set('skewx', new ModifierSubValue(0.0));
+        subValues.set('skewy', new ModifierSubValue(0.0));
+    }
+
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        var daswitch = 1;
+        if (instance != null)
+            if (ModchartUtil.getDownscroll(instance))
+                daswitch = -1;
+
+        noteData.x += subValues.get('x').value;
+        noteData.y += subValues.get('y').value * daswitch;
+        noteData.angle += subValues.get('angle').value;
+        noteData.z += subValues.get('z').value;
+        noteData.skewX += subValues.get('skewx').value * -daswitch;
+        noteData.skewY += subValues.get('skewy').value * -daswitch;
+    }
+
+    override function reset()
+    {
+        super.reset();
+        baseValue = 0.0;
+        currentValue = 1.0;
     }
 }
