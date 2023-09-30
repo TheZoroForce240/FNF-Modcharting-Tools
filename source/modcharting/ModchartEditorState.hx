@@ -113,7 +113,7 @@ class ModchartEditorEvent extends FlxSprite
     #end
 }
 #if ((PSYCH || LEATHER))
-class ModchartEditorState extends MusicBeatState
+class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) backend.MusicBeatState #else MusicBeatState #end
 {
     var hasUnsavedChanges:Bool = false;
     override function closeSubState() 
@@ -311,7 +311,7 @@ class ModchartEditorState extends MusicBeatState
     var UI_box:FlxUITabMenu;
 
     var textBlockers:Array<FlxUIInputText> = [];
-    var scrollBlockers:Array<FlxUIDropDownMenuCustom> = [];
+    var scrollBlockers:Array<#if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end> = [];
 
     var playbackSpeed:Float = 1;
 
@@ -340,7 +340,7 @@ class ModchartEditorState extends MusicBeatState
 			PlayState.SONG = Song.loadFromJson('tutorial');
 
 		Conductor.mapBPMChanges(PlayState.SONG);
-		Conductor.bpm = PlayState.SONG.bpm;
+		Conductor.changeBPM(PlayState.SONG.bpm);
 
         FlxG.mouse.visible = true;
 
@@ -371,8 +371,10 @@ class ModchartEditorState extends MusicBeatState
 
         #end
 
-        #if PSYCH
-		strumLine = new FlxSprite(ClientPrefs.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, 50).makeGraphic(FlxG.width, 10);
+        #if (PSYCH && PSYCHVERSION == 0.7)
+        strumLine = new FlxSprite(ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, 50).makeGraphic(FlxG.width, 10);
+        #elseif (PSYCH && !PSYCHVERSION == 0.7)
+        strumLine = new FlxSprite(ClientPrefs.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, 50).makeGraphic(FlxG.width, 10);
         if(ModchartUtil.getDownscroll(this)) strumLine.y = FlxG.height - 150;
         #else
         strumLine = new FlxSprite(0, 100).makeGraphic(FlxG.width, 10);
@@ -546,10 +548,12 @@ class ModchartEditorState extends MusicBeatState
             if (i.hasFocus)
             {
                 blockInput = true;
-                #if PSYCH
-                FlxG.sound.muteKeys = [];
-				FlxG.sound.volumeDownKeys = [];
-				FlxG.sound.volumeUpKeys = [];
+                #if (PSYCH && PSYCHVERSION == 0.7)
+                    ClientPrefs.toggleVolumeKeys(false);
+                #elseif (PSYCH && !PSYCHVERSION == 0.7)
+                    FlxG.sound.muteKeys = [];
+				    FlxG.sound.volumeDownKeys = [];
+				    FlxG.sound.volumeUpKeys = [];
                 #end
             }
                 
@@ -560,10 +564,12 @@ class ModchartEditorState extends MusicBeatState
 
         if (!blockInput)
         {
-            #if PSYCH
-            FlxG.sound.muteKeys = TitleState.muteKeys;
-			FlxG.sound.volumeDownKeys = TitleState.volumeDownKeys;
-			FlxG.sound.volumeUpKeys = TitleState.volumeUpKeys;
+            #if (PSYCH && PSYCHVERSION == 0.7)
+                ClientPrefs.toggleVolumeKeys(true);
+            #elseif (PSYCH && !PSYCHVERSION == 0.7)
+                FlxG.sound.muteKeys = TitleState.muteKeys;
+			    FlxG.sound.volumeDownKeys = TitleState.volumeDownKeys;
+			    FlxG.sound.volumeUpKeys = TitleState.volumeUpKeys;
             #end
             if (FlxG.keys.justPressed.SPACE)
             {
@@ -784,8 +790,10 @@ class ModchartEditorState extends MusicBeatState
                 FlxG.sound.music.stop();
                 if(vocals != null) vocals.stop();
                 
-                #if PSYCH 
-                StageData.loadDirectory(PlayState.SONG);
+                #if (PSYCH && PSYCHVERSION == 0.7)
+                    backend.StageData.loadDirectory(PlayState.SONG);
+                #elseif (PSYCH && !PSYCHVERSION == 0.7)
+                    StageData.loadDirectory(PlayState.SONG);
                 #end
                 LoadingState.loadAndSwitchState(new PlayState());
             };
@@ -807,7 +815,7 @@ class ModchartEditorState extends MusicBeatState
         if (curBpmChange.bpm != Conductor.bpm)
         {
             //trace('changed bpm to ' + curBpmChange.bpm);
-            Conductor.bpm = curBpmChange.bpm;
+            Conductor.changeBPM(curBpmChange.bpm);
         }
 
 
@@ -982,7 +990,7 @@ class ModchartEditorState extends MusicBeatState
     {
 
         var songData = PlayState.SONG;
-        Conductor.bpm = songData.bpm;
+        Conductor.changeBPM(songData.bpm);
 
         if (PlayState.SONG.needsVoices)
         {
@@ -1049,13 +1057,20 @@ class ModchartEditorState extends MusicBeatState
                     oldNote = null;
 
 
-                #if PSYCH 
-                var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, false);
-                swagNote.sustainLength = songNotes[2];
-                swagNote.mustPress = gottaHitNote;
-                swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
-                swagNote.noteType = songNotes[3];
-                if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
+                #if (PSYCH && PSYCHVERSION == 0.7)
+                    var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
+                    swagNote.sustainLength = songNotes[2];
+                    swagNote.mustPress = gottaHitNote;
+                    swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
+                    swagNote.noteType = songNotes[3];
+                    if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = states.editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
+                #elseif (PSYCH && !PSYCHVERSION == 0.7)
+                    var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, false);
+                    swagNote.sustainLength = songNotes[2];
+                    swagNote.mustPress = gottaHitNote;
+                    swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
+                    swagNote.noteType = songNotes[3];
+                    if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
                 #elseif LEATHER 
                 var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, 0, songNotes[4], null, [0], gottaHitNote);
                 swagNote.sustainLength = songNotes[2];
@@ -1122,9 +1137,12 @@ class ModchartEditorState extends MusicBeatState
             var targetAlpha:Float = 1;
             if (player < 1)
             {
-                #if PSYCH
-                if(!ClientPrefs.opponentStrums) targetAlpha = 0;
-                else if(ClientPrefs.middleScroll) targetAlpha = 0.35;
+                #if (PSYCH && PSYCHVERSION == 0.7)
+                    if(!ClientPrefs.data.opponentStrums) targetAlpha = 0;
+                    else if(ClientPrefs.data.middleScroll) targetAlpha = 0.35;
+                #elseif (PSYCH && !PSYCHVERSION == 0.7)
+                    if(!ClientPrefs.opponentStrums) targetAlpha = 0;
+                    else if(ClientPrefs.middleScroll) targetAlpha = 0.35;
                 #end
             }
 
@@ -1151,10 +1169,14 @@ class ModchartEditorState extends MusicBeatState
 			babyArrow.y = strumLine.y - (babyArrow.height / 2);
 			babyArrow.x += 100 - ((usedKeyCount - 4) * 16) + (usedKeyCount >= 10 ? 30 : 0);
 			babyArrow.x += ((FlxG.width / 2) * player);
-            #elseif PSYCH 
-            var babyArrow:StrumNote = new StrumNote(ClientPrefs.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, strumLine.y, i, player);
-            babyArrow.downScroll = ClientPrefs.downScroll;
-            babyArrow.alpha = targetAlpha;
+            #elseif (PSYCH && PSYCHVERSION == 0.7)
+                var babyArrow:StrumNote = new StrumNote(ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, strumLine.y, i, player);
+                babyArrow.downScroll = ClientPrefs.data.downScroll;
+                babyArrow.alpha = targetAlpha;
+            #elseif (PSYCH && !PSYCHVERSION == 0.7)
+                var babyArrow:StrumNote = new StrumNote(ClientPrefs.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, strumLine.y, i, player);
+                babyArrow.downScroll = ClientPrefs.downScroll;
+                babyArrow.alpha = targetAlpha;
             #end
 
 
@@ -1164,14 +1186,22 @@ class ModchartEditorState extends MusicBeatState
             }
             else
             {
-                #if PSYCH 
-                if(ClientPrefs.middleScroll)
-                {
-                    babyArrow.x += 310;
-                    if(i > 1) { //Up and Right
-                        babyArrow.x += FlxG.width / 2 + 25;
+                #if (PSYCH && PSYCHVERSION == 0.7)
+                    if(ClientPrefs.data.middleScroll)
+                        {
+                            babyArrow.x += 310;
+                            if(i > 1) { //Up and Right
+                                babyArrow.x += FlxG.width / 2 + 25;
+                            }
+                        }
+                #elseif (PSYCH && !PSYCHVERSION == 0.7)
+                    if(ClientPrefs.middleScroll)
+                    {
+                        babyArrow.x += 310;
+                        if(i > 1) { //Up and Right
+                            babyArrow.x += FlxG.width / 2 + 25;
+                        }
                     }
-                }
                 #end
                 opponentStrums.add(babyArrow);
             }
@@ -1236,7 +1266,7 @@ class ModchartEditorState extends MusicBeatState
     var modTypeInputText:FlxUIInputText;
     var playfieldStepper:FlxUINumericStepper;
     var targetLaneStepper:FlxUINumericStepper;
-    var modifierDropDown:FlxUIDropDownMenuCustom;
+    var modifierDropDown:#if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end;
     var mods:Array<String> = [];
     var subMods:Array<String> = [""];
     
@@ -1247,8 +1277,8 @@ class ModchartEditorState extends MusicBeatState
             mods.push(playfieldRenderer.modchart.data.modifiers[i][MOD_NAME]);
         if (mods.length == 0)
             mods.push('');
-        modifierDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(mods, true));
-        eventModifierDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(mods, true));
+        modifierDropDown.setData(#if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end.makeStrIdLabelArray(mods, true));
+        eventModifierDropDown.setData(#if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end.makeStrIdLabelArray(mods, true));
 
     }
     function updateSubModList(modName:String)
@@ -1261,7 +1291,7 @@ class ModchartEditorState extends MusicBeatState
                 subMods.push(subModName);
             }
         }
-        subModDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(subMods, true));
+        subModDropDown.setData(#if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end.makeStrIdLabelArray(subMods, true));
     }
     function setupModifierUI()
     {
@@ -1275,7 +1305,7 @@ class ModchartEditorState extends MusicBeatState
         if (mods.length == 0)
             mods.push('');
 
-        modifierDropDown = new FlxUIDropDownMenuCustom(25, 50, FlxUIDropDownMenuCustom.makeStrIdLabelArray(mods, true), function(mod:String)
+        modifierDropDown = new #if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end(25, 50, #if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end.makeStrIdLabelArray(mods, true), function(mod:String)
         {
             var modName = mods[Std.parseInt(mod)];
             for (i in 0...playfieldRenderer.modchart.data.modifiers.length)
@@ -1358,7 +1388,7 @@ class ModchartEditorState extends MusicBeatState
             modClassList.push(Std.string(modifierList[i]).replace("modcharting.", ""));
         }
             
-        var modClassDropDown = new FlxUIDropDownMenuCustom(modClassInputText.x, modClassInputText.y+30, FlxUIDropDownMenuCustom.makeStrIdLabelArray(modClassList, true), function(mod:String)
+        var modClassDropDown = new #if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end(modClassInputText.x, modClassInputText.y+30, #if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end.makeStrIdLabelArray(modClassList, true), function(mod:String)
         {
             modClassInputText.text = modClassList[Std.parseInt(mod)];
             if (modClassInputText.text != '')
@@ -1366,7 +1396,7 @@ class ModchartEditorState extends MusicBeatState
         });
         centerXToObject(modClassInputText, modClassDropDown);
         var modTypeList = ["All", "Player", "Opponent", "Lane"];
-        var modTypeDropDown = new FlxUIDropDownMenuCustom(modTypeInputText.x, modClassInputText.y+30, FlxUIDropDownMenuCustom.makeStrIdLabelArray(modTypeList, true), function(mod:String)
+        var modTypeDropDown = new #if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end(modTypeInputText.x, modClassInputText.y+30, #if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end.makeStrIdLabelArray(modTypeList, true), function(mod:String)
         {
             modTypeInputText.text = modTypeList[Std.parseInt(mod)];
         });
@@ -1406,7 +1436,6 @@ class ModchartEditorState extends MusicBeatState
     }
 
     //Thanks to glowsoony for the idea lol
-        //Thanks to glowsoony for the idea lol
     function modifierExplain(modifiersName:String):String
     {
         var explainString:String = '';
@@ -1659,17 +1688,17 @@ class ModchartEditorState extends MusicBeatState
     var eventModInputText:FlxUIInputText;
     var eventValueInputText:FlxUIInputText;
     var eventDataInputText:FlxUIInputText;
-    var eventModifierDropDown:FlxUIDropDownMenuCustom;
-    var eventTypeDropDown:FlxUIDropDownMenuCustom;
+    var eventModifierDropDown:#if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end;
+    var eventTypeDropDown:#if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end;
     var eventEaseInputText:FlxUIInputText;
     var eventTimeInputText:FlxUIInputText;
     var selectedEventDataStepper:FlxUINumericStepper;
     var repeatCheckbox:FlxUICheckBox;
     var repeatBeatGapStepper:FlxUINumericStepper;
     var repeatCountStepper:FlxUINumericStepper;
-    var easeDropDown:FlxUIDropDownMenuCustom;
-    var subModDropDown:FlxUIDropDownMenuCustom;
-    var builtInModDropDown:FlxUIDropDownMenuCustom;
+    var easeDropDown:#if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end;
+    var subModDropDown:#if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end;
+    var builtInModDropDown:#if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end;
     var stackedEventStepper:FlxUINumericStepper;
     function setupEventUI()
     {
@@ -1748,7 +1777,7 @@ class ModchartEditorState extends MusicBeatState
         });
         centerXToObject(stackedEventStepper, addStacked);
 
-        eventTypeDropDown = new FlxUIDropDownMenuCustom(25 + 500, 50, FlxUIDropDownMenuCustom.makeStrIdLabelArray(eventTypes, true), function(mod:String)
+        eventTypeDropDown = new #if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end(25 + 500, 50, #if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end.makeStrIdLabelArray(eventTypes, true), function(mod:String)
         {
             var et = eventTypes[Std.parseInt(mod)];
             trace(et);
@@ -1795,7 +1824,7 @@ class ModchartEditorState extends MusicBeatState
             hasUnsavedChanges = true;
         }
 
-        easeDropDown = new FlxUIDropDownMenuCustom(25, eventEaseInputText.y+30, FlxUIDropDownMenuCustom.makeStrIdLabelArray(easeList, true), function(ease:String)
+        easeDropDown = new #if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end(25, eventEaseInputText.y+30, #if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end.makeStrIdLabelArray(easeList, true), function(ease:String)
         {
             var easeStr = easeList[Std.parseInt(ease)];
             eventEaseInputText.text = easeStr;
@@ -1805,7 +1834,7 @@ class ModchartEditorState extends MusicBeatState
         centerXToObject(eventEaseInputText, easeDropDown);
 
 
-        eventModifierDropDown = new FlxUIDropDownMenuCustom(25, 50+20, FlxUIDropDownMenuCustom.makeStrIdLabelArray(mods, true), function(mod:String)
+        eventModifierDropDown = new #if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end(25, 50+20, #if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end.makeStrIdLabelArray(mods, true), function(mod:String)
         {
             var modName = mods[Std.parseInt(mod)];
             eventModInputText.text = modName;
@@ -1815,7 +1844,7 @@ class ModchartEditorState extends MusicBeatState
         });
         centerXToObject(eventModInputText, eventModifierDropDown);
         
-        subModDropDown = new FlxUIDropDownMenuCustom(25, 50+80, FlxUIDropDownMenuCustom.makeStrIdLabelArray(subMods, true), function(mod:String)
+        subModDropDown = new #if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end(25, 50+80, #if (PSYCH && PSYCHVERSION == 0.7) FlxUIDropDownMenu #else FlxUIDropDownMenuCustom #end.makeStrIdLabelArray(subMods, true), function(mod:String)
         {
             var modName = subMods[Std.parseInt(mod)];
             var splitShit = eventModInputText.text.split(":"); //use to get the normal mod
