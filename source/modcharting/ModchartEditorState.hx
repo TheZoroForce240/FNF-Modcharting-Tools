@@ -373,6 +373,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) backend.Mus
 
         #if (PSYCH && PSYCHVERSION == 0.7)
         strumLine = new FlxSprite(ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, 50).makeGraphic(FlxG.width, 10);
+        if(ModchartUtil.getDownscroll(this)) strumLine.y = FlxG.height - 150;
         #elseif (PSYCH && !PSYCHVERSION == 0.7)
         strumLine = new FlxSprite(ClientPrefs.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, 50).makeGraphic(FlxG.width, 10);
         if(ModchartUtil.getDownscroll(this)) strumLine.y = FlxG.height - 150;
@@ -484,10 +485,17 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) backend.Mus
         hideNotes.y -= hideNotes.height;
         add(hideNotes);
         
+        var hidenHud:Bool = false;
         var hideUI:FlxButton = new FlxButton(FlxG.width, FlxG.height, 'Show/Hide UI', function ()
         {
-            UI_box.visible = !UI_box.visible;
-            debugText.visible = !debugText.visible;
+            hidenHud = !hidenHud;
+            if (hidenHud){
+                UI_box.alpha = 0;
+                debugText.alpha = 0; 
+            }else{
+                UI_box.alpha = 1;
+                debugText.alpha = 1;
+            }
             //camGame.visible = !camGame.visible;
         });
         hideUI.y -= hideUI.height;

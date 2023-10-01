@@ -371,16 +371,16 @@ class CustomModifierScript
 		interp.variables.set('FlxTimer', flixel.util.FlxTimer);
 		interp.variables.set('FlxTween', flixel.tweens.FlxTween);
 		interp.variables.set('FlxEase', flixel.tweens.FlxEase);
-		interp.variables.set('PlayState', PlayState);
-		interp.variables.set('game', PlayState.instance);
-		interp.variables.set('Paths', Paths);
-		interp.variables.set('Conductor', Conductor);
+		interp.variables.set('PlayState', #if (PSYCH && PSYCHVERSION == 0.7) states.PlayState #else PlayState #end);
+		interp.variables.set('game', #if (PSYCH && PSYCHVERSION == 0.7) states.PlayState.instance #else PlayState.instance #end);
+		interp.variables.set('Paths', #if (PSYCH && PSYCHVERSION == 0.7) backend.Paths #else Paths #end);
+		interp.variables.set('Conductor', #if (PSYCH && PSYCHVERSION == 0.7) backend.Conductor #else Conductor #end);
         interp.variables.set('StringTools', StringTools);
-        interp.variables.set('Note', Note);
+        interp.variables.set('Note', #if (PSYCH && PSYCHVERSION == 0.7) objects.Note #else Note #end);
 
         #if PSYCH
-        interp.variables.set('ClientPrefs', ClientPrefs);
-        interp.variables.set('ColorSwap', ColorSwap);
+        interp.variables.set('ClientPrefs', #if (PSYCHVERSION == 0.7) backend.ClientPrefs #else ClientPrefs #end);
+        interp.variables.set('ColorSwap', #if (PSYCHVERSION == 0.7) shaders.ColorSwap #else ColorSwap #end);
         #end
 
         

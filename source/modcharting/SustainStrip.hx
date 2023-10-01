@@ -4,6 +4,10 @@ import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
 import openfl.geom.Vector3D;
 #if LEATHER
 import game.Note;
+#elseif (PSYCH && PSYCHVERSION == 0.7)
+import objects.Note;
+#else
+import Note;
 #end
 import flixel.FlxStrip;
 

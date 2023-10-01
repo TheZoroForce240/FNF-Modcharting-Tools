@@ -28,9 +28,11 @@ import game.Conductor;
 #elseif (PSYCH && PSYCHVERSION == 0.7)
 import states.PlayState;
 import objects.Note;
+import objects.StrumNote;
 #else
 import PlayState;
 import Note;
+import StrumNote;
 #end
 
 using StringTools;
