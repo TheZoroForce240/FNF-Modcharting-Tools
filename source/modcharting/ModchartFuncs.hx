@@ -235,8 +235,11 @@ class ModchartFuncs
         {
             instance.playfieldRenderer.modchart.data.events.push(["set", [0, value+","+name+":"+subValName]]);
         }
-        if (instance.playfieldRenderer.modifierTable.modifiers.exists(name))
-            instance.playfieldRenderer.modifierTable.modifiers.get(name).subValues.get(subValName).value = value;
+        if (instance.playfieldRenderer.modifiers.exists(name))
+            if (instance.playfieldRenderer.modifiers.get(name).subValues.exists(subValName))
+                instance.playfieldRenderer.modifiers.get(name).subValues.get(subValName).value = value;
+            else
+                instance.playfieldRenderer.modifiers.get(name).subValues.set(subValName,new Modifier.ModifierSubValue(value));
     }
     public static function setModTargetLane(name:String, value:Int, ?instance:ModchartMusicBeatState = null)
     {
