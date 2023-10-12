@@ -66,16 +66,16 @@ override public function create()
       
       
 ```
+- If Psych in FunkinLua.hx, if Leather then ModchartUtilities.hx:
 
 ```haxe
 
 // (at the bottom of create())
-
-ModchartFuncs.loadLuaFunctions(); //add this if you want lua functions in scripts
+#if desktop DiscordClient.addLuaCallbacks(this); #end
+ModchartFuncs.loadLuaFunctions(this); //add this if you want lua functions in scripts
 //being used in psych engine as an example
 
-callOnLuas('onCreatePost', []);
-super.create();
+callOnLuas('onCreate', []);
 
 ```
 ```haxe
