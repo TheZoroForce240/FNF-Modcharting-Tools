@@ -69,7 +69,8 @@ override public function create()
 - If Psych in FunkinLua.hx, if Leather then ModchartUtilities.hx:
 
 ```haxe
-
+// at the start of the HX
+import modcharting.ModchartFuncs; //to fix any crash lmao
 // (at the bottom of create())
 #if desktop DiscordClient.addLuaCallbacks(this); #end
 ModchartFuncs.loadLuaFunctions(this); //add this if you want lua functions in scripts
