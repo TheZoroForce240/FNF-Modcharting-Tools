@@ -28,7 +28,7 @@ class ModchartUtil
     {
         //need to test each engine
         //not expecting all to work
-        #if (PSYCH && !PSYCHVERSION == 0.7)
+        #if (PSYCH && PSYCHVERSION != 0.7)
         return ClientPrefs.downScroll;
         #elseif (PSYCH && PSYCHVERSION == 0.7)
         return ClientPrefs.data.downScroll;
@@ -50,7 +50,7 @@ class ModchartUtil
     }
     public static function getMiddlescroll(instance:ModchartMusicBeatState)
     {
-        #if (PSYCH && !PSYCHVERSION == 0.7)
+        #if (PSYCH && PSYCHVERSION != 0.7)
         return ClientPrefs.middleScroll;
         #elseif (PSYCH && PSYCHVERSION == 0.7)
         return ClientPrefs.data.middleScroll;

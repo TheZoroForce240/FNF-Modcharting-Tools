@@ -63,10 +63,16 @@ override public function create()
   add(playfieldRenderer);
   add(grpNoteSplashes); /*place splashes in front (add this if the engine has splashes).
   If you have added this: remove(or something) the add(grpNoteSplashes); which is by default below the add(strumLineNotes);*/
-      
+
+  //if you use PSYCH 0.6.3 use this code
+  ModchartFuncs.loadLuaFunctions(this); //add this if you want lua functions in scripts
+  //being used in psych engine as an example
+
+callOnLuas('onCreatePost', []);
       
 ```
-- If Psych in FunkinLua.hx, if Leather then ModchartUtilities.hx:
+
+- If Psych and it's 0.7.0 in FunkinLua.hx, if Leather then ModchartUtilities.hx:
 
 ```haxe
 // at the start of the HX

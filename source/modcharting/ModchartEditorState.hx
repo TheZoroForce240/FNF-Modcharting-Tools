@@ -374,7 +374,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) backend.Mus
         #if (PSYCH && PSYCHVERSION == 0.7)
         strumLine = new FlxSprite(ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, 50).makeGraphic(FlxG.width, 10);
         if(ModchartUtil.getDownscroll(this)) strumLine.y = FlxG.height - 150;
-        #elseif (PSYCH && !PSYCHVERSION == 0.7)
+        #elseif (PSYCH && PSYCHVERSION != 0.7)
         strumLine = new FlxSprite(ClientPrefs.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, 50).makeGraphic(FlxG.width, 10);
         if(ModchartUtil.getDownscroll(this)) strumLine.y = FlxG.height - 150;
         #else
@@ -558,7 +558,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) backend.Mus
                 blockInput = true;
                 #if (PSYCH && PSYCHVERSION == 0.7)
                     ClientPrefs.toggleVolumeKeys(false);
-                #elseif (PSYCH && !PSYCHVERSION == 0.7)
+                #elseif (PSYCH && PSYCHVERSION != 0.7)
                     FlxG.sound.muteKeys = [];
 				    FlxG.sound.volumeDownKeys = [];
 				    FlxG.sound.volumeUpKeys = [];
@@ -574,7 +574,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) backend.Mus
         {
             #if (PSYCH && PSYCHVERSION == 0.7)
                 ClientPrefs.toggleVolumeKeys(true);
-            #elseif (PSYCH && !PSYCHVERSION == 0.7)
+            #elseif (PSYCH && PSYCHVERSION != 0.7)
                 FlxG.sound.muteKeys = TitleState.muteKeys;
 			    FlxG.sound.volumeDownKeys = TitleState.volumeDownKeys;
 			    FlxG.sound.volumeUpKeys = TitleState.volumeUpKeys;
@@ -800,7 +800,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) backend.Mus
                 
                 #if (PSYCH && PSYCHVERSION == 0.7)
                     backend.StageData.loadDirectory(PlayState.SONG);
-                #elseif (PSYCH && !PSYCHVERSION == 0.7)
+                #elseif (PSYCH && PSYCHVERSION != 0.7)
                     StageData.loadDirectory(PlayState.SONG);
                 #end
                 LoadingState.loadAndSwitchState(new PlayState());
@@ -1072,7 +1072,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) backend.Mus
                     swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
                     swagNote.noteType = songNotes[3];
                     if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = states.editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
-                #elseif (PSYCH && !PSYCHVERSION == 0.7)
+                #elseif (PSYCH && PSYCHVERSION != 0.7)
                     var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, false);
                     swagNote.sustainLength = songNotes[2];
                     swagNote.mustPress = gottaHitNote;
@@ -1148,7 +1148,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) backend.Mus
                 #if (PSYCH && PSYCHVERSION == 0.7)
                     if(!ClientPrefs.data.opponentStrums) targetAlpha = 0;
                     else if(ClientPrefs.data.middleScroll) targetAlpha = 0.35;
-                #elseif (PSYCH && !PSYCHVERSION == 0.7)
+                #elseif (PSYCH && PSYCHVERSION != 0.7)
                     if(!ClientPrefs.opponentStrums) targetAlpha = 0;
                     else if(ClientPrefs.middleScroll) targetAlpha = 0.35;
                 #end
@@ -1181,7 +1181,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) backend.Mus
                 var babyArrow:StrumNote = new StrumNote(ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, strumLine.y, i, player);
                 babyArrow.downScroll = ClientPrefs.data.downScroll;
                 babyArrow.alpha = targetAlpha;
-            #elseif (PSYCH && !PSYCHVERSION == 0.7)
+            #elseif (PSYCH && PSYCHVERSION != 0.7)
                 var babyArrow:StrumNote = new StrumNote(ClientPrefs.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, strumLine.y, i, player);
                 babyArrow.downScroll = ClientPrefs.downScroll;
                 babyArrow.alpha = targetAlpha;
@@ -1202,7 +1202,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) backend.Mus
                                 babyArrow.x += FlxG.width / 2 + 25;
                             }
                         }
-                #elseif (PSYCH && !PSYCHVERSION == 0.7)
+                #elseif (PSYCH && PSYCHVERSION != 0.7)
                     if(ClientPrefs.middleScroll)
                     {
                         babyArrow.x += 310;
