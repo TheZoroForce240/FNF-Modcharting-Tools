@@ -40,10 +40,10 @@ class ModchartFuncs
         #if (PSYCHVERSION != 0.7)
         for (funkin in PlayState.instance.luaArray)
         {
-        #end
             #if hscript
             funkin.initHaxeModule();
             #end
+        #end
             Lua_helper.add_callback(funkin.lua, 'startMod', function(name:String, modClass:String, type:String = '', pf:Int = -1){
                 startMod(name,modClass,type,pf);
 
