@@ -82,7 +82,8 @@ class ModchartFuncs
             Lua_helper.add_callback(funkin.lua, 'ease', function(beat:Float, time:Float, easeStr:String, argsAsString:String){
                 ease(beat, time, easeStr, argsAsString);                
             });
-        #if (PSYCHVERSION != 0.7) } #end
+            #if (PSYCHVERSION != 0.7) } #end
+            
             #if (PSYCHVERSION == 0.7)
                 loadHaxeFunctions(funkin);
             #end
