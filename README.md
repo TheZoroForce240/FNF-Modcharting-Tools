@@ -65,28 +65,12 @@ override public function create()
   If you have added this: remove(or something) the add(grpNoteSplashes); which is by default below the add(strumLineNotes);*/
 
   //if you use PSYCH 0.6.3 use this code
-  ModchartFuncs.loadLuaFunctions(this); //add this if you want lua functions in scripts
+  ModchartFuncs.loadLuaFunctions(); //add this if you want lua functions in scripts
   //being used in psych engine as an example
 
 callOnLuas('onCreatePost', []);
       
-```
-
-- If Psych and it's 0.7.0 in FunkinLua.hx, if Leather then ModchartUtilities.hx:
-
-```haxe
-// at the start of the HX
-import modcharting.ModchartFuncs; //to fix any crash lmao
-// (at the bottom of create())
-#if desktop DiscordClient.addLuaCallbacks(this); #end
-ModchartFuncs.loadLuaFunctions(this); //add this if you want lua functions in scripts
-//being used in psych engine as an example
-
-callOnLuas('onCreate', []);
-
-```
-```haxe
-
+  //Find this line and then add it
 public function startCountdown():Void
 {
   generateStaticArrows(0);
@@ -94,7 +78,6 @@ public function startCountdown():Void
   
   //add after generating strums
   NoteMovement.getDefaultStrumPos(this);
-
 ```
 
 - In StrumNote.hx:
@@ -121,13 +104,32 @@ class Note extends FlxSkewedSprite
 
 ```
 
+- In ModchartUtilities.hx (Leather Exclusive):
+
+```haxe
+// at the start of the HX
+import modcharting.ModchartFuncs; //to fix any crash lmao
+// (at the bottom of create())
+#if desktop DiscordClient.addLuaCallbacks(this); #end
+ModchartFuncs.loadLuaFunctions(this); //add this if you want lua functions in scripts
+//being used in leather engine as an example
+
+callOnLuas('onCreate', []);
+
+```
+
 - In FunkinLua.hx (0.7.X exclusive!):
 ```haxe
-
+// at the start of the HX
+    import modcharting.ModchartFuncs; //to fix any crash lmao
 class FunkinLua
 {
   //add this variable bellow "public var closed:Bool = false;"
   	public static var instance:FunkinLua = null;
+    // (at the bottom of create())
+    #if desktop DiscordClient.addLuaCallbacks(this); #end
+    ModchartFuncs.loadLuaFunctions(this); //add this if you want lua functions in scripts
+    //being used in psych engine as an example
 
 ```
 
@@ -165,7 +167,7 @@ Note: If you use psych engine you should add this
 
 ```
 
-to get 0.7+ and up
+to get 0.7+ and up,
 leave it as another value to use 0.6.3 edition 
 
 

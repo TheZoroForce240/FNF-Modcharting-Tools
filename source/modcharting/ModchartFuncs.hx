@@ -33,7 +33,7 @@ using StringTools;
 //for lua and hscript
 class ModchartFuncs
 {
-    public static function loadLuaFunctions(#if (PSYCH && PSYCHVERSION != 0.7 || LEATHER)funkin:FunkinLua#end)
+    public static function loadLuaFunctions(#if (PSYCH && PSYCHVERSION == 0.7 || LEATHER)funkin:FunkinLua#end)
     {
         #if PSYCH
         #if LUA_ALLOWED
