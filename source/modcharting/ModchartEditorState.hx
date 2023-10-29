@@ -210,19 +210,42 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) backend.Mus
     //pain
     //tried using a macro but idk how to use them lol
     public static var modifierList:Array<Class<Modifier>> = [
-        DrunkXModifier, DrunkYModifier, DrunkZModifier,
-        TipsyXModifier, TipsyYModifier, TipsyZModifier,
-        ReverseModifier, IncomingAngleModifier, RotateModifier, StrumLineRotateModifier,
-        BumpyModifier,
-        XModifier, YModifier, YDModifier, ZModifier, ConfusionModifier, DizzyModifier, 
-        ScaleModifier, ScaleXModifier, ScaleYModifier, SkewModifier, SkewXModifier, SkewYModifier, SpeedModifier, 
-        StealthModifier, NoteStealthModifier, LaneStealthModifier, InvertModifier, FlipModifier, 
-        MiniModifier, ShrinkModifier, BeatXModifier, BeatYModifier, BeatZModifier, 
-        BounceXModifier, BounceYModifier, BounceZModifier, 
-        EaseCurveModifier, EaseCurveXModifier, EaseCurveYModifier, EaseCurveZModifier, EaseCurveAngleModifier,
-        InvertSineModifier, BoostModifier, BrakeModifier, JumpModifier, WaveXModifier, WaveYModifier,
-        WaveZModifier, TimeStopModifier, StrumAngleModifier, JumpTargetModifier, JumpNotesModifier, EaseXModifier,
-        SuddenModifier, HiddenModifier, NotesModifier, LanesModifier
+       //Basic Modifiers with no curpos math
+       XModifier, YModifier, YDModifier, ZModifier, 
+       ConfusionModifier, MiniModifier,
+       ScaleModifier, ScaleXModifier, ScaleYModifier, 
+       SkewModifier, SkewXModifier, SkewYModifier,
+       //Modifiers with curpos math!!!
+       //Drunk Modifiers
+       DrunkXModifier, DrunkYModifier, DrunkZModifier,
+       TanDrunkXModifier, TanDrunkYModifier, TanDrunkZModifier,
+       CosecantXModifier, CosecantYModifier, CosecantZModifier,
+       //Tipsy Modifiers
+       TipsyXModifier, TipsyYModifier, TipsyZModifier,
+       //Wave Modifiers
+       WaveXModifier, WaveYModifier, WaveZModifier,
+       TanWaveXModifier, TanWaveYModifier, TanWaveZModifier,
+       //Scroll Modifiers
+       ReverseModifier,
+       SpeedModifier, BoostModifier, BrakeModifier,
+       TwirlModifier, RollModifier,
+       //Stealth Modifiers
+       StealthModifier, NoteStealthModifier, LaneStealthModifier,
+       SuddenModifier, HiddenModifier, BlinkModifier,
+       //Path Modifiers
+       IncomingAngleModifier, InvertSineModifier, DizzyModifier,
+       EaseCurveModifier, EaseCurveXModifier, EaseCurveYModifier, EaseCurveZModifier, EaseCurveAngleModifier,
+       BounceXModifier, BounceYModifier, BounceZModifier, BumpyModifier, BeatXModifier, BeatYModifier, BeatZModifier, 
+       ShrinkModifier,
+       //Target Modifiers
+       RotateModifier, StrumLineRotateModifier, JumpTargetModifier,
+       LanesModifier,
+       //Notes Modifiers
+       TimeStopModifier, JumpNotesModifier,
+       NotesModifier,
+       //Misc Modifiers
+       InvertModifier, FlipModifier, JumpModifier,
+       StrumAngleModifier, EaseXModifier,
     ];
     public static var easeList:Array<String> = [
         "backIn",
@@ -1568,6 +1591,30 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) backend.Mus
         explainString = "Modifier based from other modifiers but only affects notes and no targets";
             case 'LanesModifier':
         explainString = "Modifier based from other modifiers but only affects targets and no notes";
+            case 'TanDrunkXModifier':
+        explainString = "Modifier similar to drunk but uses tan instead of sin in X";
+            case 'TanDrunkYModifier':
+        explainString = "Modifier similar to drunk but uses tan instead of sin in Y";
+            case 'TanDrunkZModifier':
+        explainString = "Modifier similar to drunk but uses tan instead of sin in Z";
+            case 'TanWaveXModifier':
+        explainString = "Modifier similar to wave but uses tan instead of sin in X";
+            case 'TanWaveYModifier':
+        explainString = "Modifier similar to wave but uses tan instead of sin in Y";
+            case 'TanWaveZModifier':
+        explainString = "Modifier similar to wave but uses tan instead of sin in Z";
+            case 'TwirlModifier':
+        explainString = "Modifier that makes the notes incoming rotating in a circle in X";
+            case 'RollModifier':
+        explainString = "Modifier that makes the notes incoming rotating in a circle in Y";
+            case 'BlinkModifier':
+        explainString = "Modifier that makes the notes alpha go to 0 and go back to 1 constantly";
+            case 'CosecantXModifier':
+        explainString = "Modifier similar to TanDrunk but uses cosecant instead of tan in X";
+            case 'CosecantYModifier':
+        explainString = "Modifier similar to TanDrunk but uses cosecant instead of tan in Y";
+            case 'CosecantZModifier':
+        explainString = "Modifier similar to TanDrunk but uses cosecant instead of tan in Z";
         }
 
        return explainString;
