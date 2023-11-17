@@ -9,13 +9,12 @@ import states.PlayState;
 import game.Note;
 import game.StrumNote;
 import game.Conductor;
-#elseif (PSYCH && PSYCHVERSION == 0.7)
-import states.PlayState;
-import objects.Note;
 #else 
 import PlayState;
 import Note;
 #end
+import lime.math.Vector4;
+import haxe.ds.List;
 import flixel.group.FlxGroup.FlxTypedGroup;
 
 enum ModifierType
@@ -25,6 +24,21 @@ enum ModifierType
     OPPONENTONLY;
     LANESPECIFIC;   
 }
+
+class TimeVector extends Vector4 {
+    public var startDist: Float;
+    public var endDist: Float;
+    public var next: TimeVector;
+    
+    public function new(x: Float = 0, y: Float = 0, z: Float = 0, w: Float = 0) {
+        super(x, y, z, w);
+        startDist = 0.0;
+        endDist = 0.0;
+        next = null;
+    }
+
+}
+
 
 class ModifierSubValue 
 {
@@ -103,6 +117,7 @@ class Modifier
     public dynamic function curPosMath(lane:Int, curPos:Float, pf:Int) { return curPos; }
     public dynamic function noteDistMath(noteDist:Float, lane:Int, curPos:Float, pf:Int):Float { return noteDist; }
     public dynamic function setupSubValues() {}
+    public dynamic function setupNotePath(startDist:Float, endDist:Float, next:TimeVector) {}
 
     public function checkPlayField(pf:Int):Bool //returns true if should display on current playfield
     {
@@ -138,6 +153,7 @@ class Modifier
         mod.incomingAngleMath = this.incomingAngleMath;
         mod.curPosMath = this.curPosMath;
         mod.noteDistMath = this.noteDistMath;
+        mod.setupNotePath = this.setupNotePath;
         mod.currentValue = this.currentValue;
         mod.baseValue = this.currentValue;
         mod.subValues = this.subValues;
@@ -1026,6 +1042,40 @@ class EaseXModifier extends Modifier
     }
 }
 
+class EaseYModifier extends Modifier 
+{
+    override function setupSubValues()
+    {
+        subValues.set('speed', new ModifierSubValue(1.0));
+    }
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        noteData.y += currentValue * (FlxMath.fastCos( ((Conductor.songPosition*0.001) + ((lane%NoteMovement.keyCount)*0.2) 
+        *(10/FlxG.height)) * (subValues.get('speed').value*0.2)) * Note.swagWidth*0.5);
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteMath(noteData, lane, 0, pf); //just reuse same thing
+    }
+}
+
+class EaseZModifier extends Modifier 
+{
+    override function setupSubValues()
+    {
+        subValues.set('speed', new ModifierSubValue(1.0));
+    }
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        noteData.z += currentValue * (FlxMath.fastCos( ((Conductor.songPosition*0.001) + ((lane%NoteMovement.keyCount)*0.2) 
+        *(10/FlxG.height)) * (subValues.get('speed').value*0.2)) * Note.swagWidth*0.5);
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteMath(noteData, lane, 0, pf); //just reuse same thing
+    }
+}
+
 class YDModifier extends Modifier 
 {
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
@@ -1070,14 +1120,36 @@ class HiddenModifier extends Modifier
     }
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
     {
-        if (curPos >= (subValues.get('offset').value*-100) && curPos <= ((subValues.get('offset').value*-100)-200))
-        {
-            noteData.alpha *=(0+currentValue);
-        } 
-        else if (curPos > ((subValues.get('offset').value*-100)-100))
+        if (curPos > ((subValues.get('offset').value*-100)-100))
         {
             var hmult = (curPos-(subValues.get('offset').value*-100))/200;
             noteData.alpha *=(1-hmult);
+        }
+    }
+}
+
+class VanishModifier extends Modifier
+{
+    override function setupSubValues()
+    {
+        subValues.set('offsetIn', new ModifierSubValue(1.0));
+        subValues.set('offsetOut', new ModifierSubValue(0.0));
+    }
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        if (curPos <= (subValues.get('offsetOut').value*-100) && curPos >= ((subValues.get('offsetOut').value*-100)-200))
+        {
+            var hmult = -(curPos-(subValues.get('offsetOut').value*-100))/200;
+            noteData.alpha *=(1-hmult)*currentValue;
+        }
+        else if (curPos > ((subValues.get('offsetIn').value*-100)-100))
+        {
+            var hmult = (curPos-(subValues.get('offsetIn').value*-100))/200;
+            noteData.alpha *=(1-hmult);
+        }
+        else if (curPos < ((subValues.get('offsetOut').value*-100)-100))
+        {
+            noteData.alpha *=(1-currentValue);
         }
     }
 }
@@ -1456,5 +1528,224 @@ class CosecantZModifier extends Modifier
     override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
     {
         noteMath(noteData, lane, 0, pf); //just reuse same thing
+    }
+}
+
+class WaveAngleModifier extends Modifier 
+{
+    override function setupSubValues()
+    {
+        subValues.set('speed', new ModifierSubValue(1.0));
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteData.angle += 260*currentValue*Math.sin(((Conductor.songPosition) * (subValues.get('speed').value)*0.0008)+(lane/4))*0.2;
+    }
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        strumMath(noteData,lane,pf);
+    }
+}
+
+class TanWaveAngleModifier extends Modifier 
+{
+    override function setupSubValues()
+    {
+        subValues.set('speed', new ModifierSubValue(1.0));
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteData.angle += 260*currentValue*Math.tan(((Conductor.songPosition) * (subValues.get('speed').value)*0.0008)+(lane/4))*0.2;
+    }
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        strumMath(noteData,lane,pf);
+    }
+}
+
+class DrunkAngleModifier extends Modifier 
+{
+    override function setupSubValues()
+    {
+        subValues.set('speed', new ModifierSubValue(1.0));
+    }
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        noteData.angle += currentValue * (FlxMath.fastCos( ((Conductor.songPosition*0.001) + ((lane%NoteMovement.keyCount)*0.2) + 
+        (curPos*0.45)*(10/FlxG.height)) * (subValues.get('speed').value*0.2)) * Note.swagWidth*0.5);
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteMath(noteData, lane, 0, pf); //just reuse same thing
+    }
+}
+
+class TanDrunkAngleModifier extends Modifier
+{
+    override function setupSubValues()
+    {
+        subValues.set('period', new ModifierSubValue(1.0));
+        subValues.set('offset', new ModifierSubValue(1.0));
+        subValues.set('spacing', new ModifierSubValue(1.0));
+        subValues.set('speed', new ModifierSubValue(1.0));
+        subValues.set('size', new ModifierSubValue(1.0));
+    }
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        noteData.angle += currentValue * (Math.tan( ((Conductor.songPosition*(0.001*subValues.get('period').value)) + ((lane%NoteMovement.keyCount)*0.2) + 
+        (curPos*(0.225*subValues.get('offset').value))*((subValues.get('spacing').value*10)/FlxG.height)) * 
+        (subValues.get('speed').value*0.2)) * Note.swagWidth*(0.5*subValues.get('size').value));
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteMath(noteData, lane, 0, pf); //just reuse same thing
+    }
+}
+
+
+//OH MY FUCKING GOD, thanks to @noamlol for the code of this thing// once i figure how to make it work with the other modchart editor ill add a update instantly!
+class ArrowPath extends Modifier {
+    public var _path: List<TimeVector> = null;
+    public var _pathDistance: Float = 0;
+
+    override public function noteMath(noteData: NotePositionData, lane: Int, curPos: Float, pf: Int) {
+        var newPosition = executePath(0, curPos, lane, lane < 4 ? 0 : 1, new Vector4(noteData.x, noteData.y, noteData.z, 0));
+        noteData.x = newPosition.x;
+        noteData.y = newPosition.y;
+        noteData.z = newPosition.z;
+    }
+    override function setupSubValues()
+        {
+            subValues.set('x', new ModifierSubValue(0.0));
+            subValues.set('y', new ModifierSubValue(0.0));
+            currentValue = 1.0;
+        }
+    override function incomingAngleMath(lane:Int, curPos:Float, pf:Int)
+        {
+            return [subValues.get('x').value, subValues.get('y').value];
+        }
+    override function reset()
+        {
+            super.reset();
+            currentValue = 1.0; //the code that stop the mod from running gets confused when it resets in the editor i guess??
+        }
+    public function loadPath() {
+        var file = CoolUtil.coolTextFile(Paths.txt("pathTest"));
+        var path = new List<TimeVector>();
+        var _g = 0;
+        while (_g < file.length) {
+            var line = file[_g];
+            _g++;
+            var coords = line.split(";");
+            var vec = new TimeVector(Std.parseFloat(coords[0]), Std.parseFloat(coords[1]), Std.parseFloat(coords[2]), Std.parseFloat(coords[3]));
+            vec.x *= 200;
+            vec.y *= 200;
+            vec.z *= 200;
+            path.add(vec);
+            // trace(coords);
+        }
+        _pathDistance = calculatePathDistances(path);
+        _path = path;
+    }
+
+    public function calculatePathDistances(path:List<TimeVector>): Float {
+        @:privateAccess 
+        var iterator_head = path.h;
+        var val = iterator_head.item;
+        iterator_head = iterator_head.next;
+        var last = val;
+        last.startDist = 0;
+        var dist = 0.0;
+        while (iterator_head != null) {
+            var val = iterator_head.item;
+            iterator_head = iterator_head.next;
+            var current = val;
+            var result = new Vector4();
+            result.x = current.x - last.x;
+            result.y = current.y - last.y;
+            result.z = current.z - last.z;
+            var differential = result;
+            dist += Math.sqrt(differential.x * differential.x + differential.y * differential.y + differential.z * differential.z);
+            current.startDist = dist;
+            last.next = current;
+            last.endDist = current.startDist;
+            last = current;
+        }
+        return dist;
+    }
+
+    public function getPointAlongPath(distance: Float): TimeVector {
+        @:privateAccess 
+        var _g_head = this._path.h;
+        while (_g_head != null) {
+            var val = _g_head.item;
+            _g_head = _g_head.next;
+            var vec = val;
+            var Min = vec.startDist;
+            var Max = vec.endDist;
+            // looks like a FlxMath function could be that
+            if ((Min == 0 || distance >= Min) && (Max == 0 || distance <= Max) && vec.next != null) {
+                var ratio = distance - vec.startDist;
+                var _this = vec.next;
+                var result = new Vector4();
+                result.x = _this.x - vec.x;
+                result.y = _this.y - vec.y;
+                result.z = _this.z - vec.z;
+                var ratio1 = ratio / Math.sqrt(result.x * result.x + result.y * result.y + result.z * result.z);
+                var vec2 = vec.next;
+                var out1 = new Vector4(vec.x, vec.y, vec.z, vec.w);
+                var s = 1 - ratio1;
+                out1.x *= s;
+                out1.y *= s;
+                out1.z *= s;
+                var out2 = new Vector4(vec2.x, vec2.y, vec2.z, vec2.w);
+                out2.x *= ratio1;
+                out2.y *= ratio1;
+                out2.z *= ratio1;
+                var result1 = new Vector4();
+                result1.x = out1.x + out2.x;
+                result1.y = out1.y + out2.y;
+                result1.z = out1.z + out2.z;
+                return new TimeVector(result1.x, result1.y, result1.z, result1.w);
+            }
+        }
+        return _path.first();
+    }
+
+    // var strumTimeDiff = Conductor.songPosition - note.strumTime;     -- saw this in the Groovin.js
+    public function executePath(currentBeat, strumTimeDiff:Float, column, player, pos): Vector4 {
+        if (_path == null) {
+            loadPath();
+        }
+        var path = getPointAlongPath(strumTimeDiff / -1500.0 * _pathDistance);
+        var a = new Vector4(FlxG.width / 2, FlxG.height / 2 + 280, column % 4 * getOtherPercent("arrowshapeoffset", player) + pos.z);
+        var result = new Vector4();
+        result.x = path.x + a.x;
+        result.y = path.y + a.y;
+        result.z = path.z + a.z;
+        var vec2 = result;
+        var lerp = getPercent(player);
+        var out1 = new Vector4(pos.x, pos.y, pos.z, pos.w);
+        var s = 1 - lerp;
+        out1.x *= s;
+        out1.y *= s;
+        out1.z *= s;
+        var out2 = new Vector4(vec2.x, vec2.y, vec2.z, vec2.w);
+        out2.x *= lerp;
+        out2.y *= lerp;
+        out2.z *= lerp;
+        var result = new Vector4();
+        result.x = out1.x + out2.x;
+        result.y = out1.y + out2.y;
+        result.z = out1.z + out2.z;
+        return result;
+    }
+
+    public function getPercent(player: Int): Float {
+        return 1;
+    }
+
+    public function getOtherPercent(modName: String, player: Int): Float {
+        return 1;
     }
 }

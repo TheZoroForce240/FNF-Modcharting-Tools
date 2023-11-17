@@ -217,21 +217,21 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) backend.Mus
        SkewModifier, SkewXModifier, SkewYModifier,
        //Modifiers with curpos math!!!
        //Drunk Modifiers
-       DrunkXModifier, DrunkYModifier, DrunkZModifier,
-       TanDrunkXModifier, TanDrunkYModifier, TanDrunkZModifier,
+       DrunkXModifier, DrunkYModifier, DrunkZModifier, DrunkAngleModifier,
+       TanDrunkXModifier, TanDrunkYModifier, TanDrunkZModifier, TanDrunkAngleModifier,
        CosecantXModifier, CosecantYModifier, CosecantZModifier,
        //Tipsy Modifiers
        TipsyXModifier, TipsyYModifier, TipsyZModifier,
        //Wave Modifiers
-       WaveXModifier, WaveYModifier, WaveZModifier,
-       TanWaveXModifier, TanWaveYModifier, TanWaveZModifier,
+       WaveXModifier, WaveYModifier, WaveZModifier, WaveAngleModifier,
+       TanWaveXModifier, TanWaveYModifier, TanWaveZModifier, TanWaveAngleModifier,
        //Scroll Modifiers
        ReverseModifier,
        SpeedModifier, BoostModifier, BrakeModifier,
        TwirlModifier, RollModifier,
        //Stealth Modifiers
        StealthModifier, NoteStealthModifier, LaneStealthModifier,
-       SuddenModifier, HiddenModifier, BlinkModifier,
+       SuddenModifier, HiddenModifier, VanishModifier, BlinkModifier,
        //Path Modifiers
        IncomingAngleModifier, InvertSineModifier, DizzyModifier,
        EaseCurveModifier, EaseCurveXModifier, EaseCurveYModifier, EaseCurveZModifier, EaseCurveAngleModifier,
@@ -245,7 +245,8 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) backend.Mus
        NotesModifier,
        //Misc Modifiers
        InvertModifier, FlipModifier, JumpModifier,
-       StrumAngleModifier, EaseXModifier,
+       StrumAngleModifier, EaseXModifier, EaseYModifier, EaseZModifier,
+       ArrowPath
     ];
     public static var easeList:Array<String> = [
         "backIn",
@@ -1474,147 +1475,163 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) backend.Mus
         switch modifiersName
         {
             case 'DrunkXModifier':
-		explainString = "Modifier used to do a wave at X poss of the notes and targets";
-            case 'DrunkYModifier':
-		explainString = "Modifier used to do a wave at Y poss of the notes and targets";
-            case 'DrunkZModifier':
-		explainString = "Modifier used to do a wave at Z (Far, Close) poss of the notes and targets";
-            case 'TipsyXModifier':
-		explainString = "Modifier similar to DrunkX but don't affect notes poss";
-            case 'TipsyYModifier':
-		explainString = "Modifier similar to DrunkY but don't affect notes poss";
-            case 'TipsyZModifier':
-		explainString = "Modifier similar to DrunkZ but don't affect notes poss";
-            case 'ReverseModifier':
-		explainString = "Flip the scroll type (Upscroll/Downscroll)";
-            case 'IncomingAngleModifier':
-		explainString = "Modifier that changes how notes come to the target (if X and Y aplied it will use Z)";
-            case 'RotateModifier': 
-		explainString = "Modifier used to rotate the lanes poss between a value aplied with rotatePoint (can be used with Y and X)";
-            case 'StrumLineRotateModifier':
-		explainString = "Modifier similar to RotateModifier but this one doesn't need a extra value (can be used with Y, X and Z)";
-            case 'BumpyModifier':
-		explainString = "Modifier used to make notes jump a bit in their own Perspective poss";
-            case 'XModifier':
-		explainString = "Moves notes and targets X";
-            case 'YModifier':
-		explainString = "Moves notes and targets Y";
-            case 'YDModifier':
-        explainString = "Moves notes and targets Y (Automatically reverses in downscroll)";
-            case 'ZModifier':
-		explainString = "Moves notes and targets Z (Far, Close)";
-            case 'ConfusionModifier':
-		explainString = "Changes notes and targets angle";
-            case 'DizzyModifier':
-        explainString = "Changes notes angle making a visual on them";
-            case 'ScaleModifier':
-		explainString = "Modifier used to make notes and targets bigger or smaller";
-            case 'ScaleXModifier':
-		explainString = "Modifier used to make notes and targets bigger or smaller (Only in X)";
-            case 'ScaleYModifier':
-		explainString = "Modifier used to make notes and targets bigger or smaller (Only in Y)";
-            case 'SpeedModifier':
-		explainString = "Modifier used to make notes be faster or slower";
-            case 'StealthModifier':
-		explainString = "Modifier used to change notes and targets alpha";
-            case 'NoteStealthModifier':
-		explainString = "Modifier used to change notes alpha";
-            case 'LaneStealthModifier':
-		explainString = "Modifier used to change targets alpha";
-            case 'InvertModifier':
-		explainString = "Modifier used to invert notes and targets X poss (down/left/right/up)";
-            case 'FlipModifier':
-		explainString = "Modifier used to flip notes and targets X poss (right/up/down/left)";
-            case 'MiniModifier':
-		explainString = "Modifier similar to ScaleModifier but this one does Z perspective";
-            case 'ShrinkModifier':
-		explainString = "Modifier used to add a boost of the notes (the more value the less scale it will be at the start)";
-            case 'BeatXModifier':
-		explainString = "Modifier used to move notes and targets X with a small jump effect";
-            case 'BeatYModifier':
-		explainString = "Modifier used to move notes and targets Y with a small jump effect";
-            case 'BeatZModifier':
-		explainString = "Modifier used to move notes and targets Z with a small jump effect";
-            case 'BounceXModifier':
-		explainString = "Modifier similar to beatX but it only affect notes X with a jump effect";
-            case 'BounceYModifier':
-		explainString = "Modifier similar to beatY but it only affect notes Y with a jump effect";
-            case 'BounceZModifier':
-		explainString = "Modifier similar to beatZ but it only affect notes Z with a jump effect";
-            case 'EaseCurveModifier':
-		explainString = "This enables the EaseModifiers";
-            case 'EaseCurveXModifier':
-		explainString = "Modifier similar to IncomingAngleMod (X), it will make notes come faster at X poss";
-            case 'EaseCurveYModifier':
-		explainString = "Modifier similar to IncomingAngleMod (Y), it will make notes come faster at Y poss";
-            case 'EaseCurveZModifier':
-		explainString = "Modifier similar to IncomingAngleMod (X+Y), it will make notes come faster at Z perspective";
-            case 'EaseCurveScaleModifier':
-		explainString = "Modifier similar to All easeCurve, it will make notes scale change, usually next to target";
-            case 'EaseCurveAngleModifier':
-		explainString = "Modifier similar to All easeCurve, it will make notes angle change, usually next to target";
-            case 'InvertSineModifier':
-		explainString = "Modifier used to do a curve in the notes it will be different for notes (Down and Right / Left and Up)";
-            case 'BoostModifier':
-		explainString = "Modifier used to make notes come faster to target";
-            case 'BrakeModifier':
-		explainString = "Modifier used to make notes come slower to target";
-            case 'JumpModifier':
-		explainString = "Modifier used to make notes and target jump";
-            case 'WaveXModifier':
-		explainString = "Modifier similar to drunkX but this one will simulate a true wave in X (don't affect the notes)";
-            case 'WaveYModifier':
-		explainString = "Modifier similar to drunkY but this one will simulate a true wave in Y (don't affect the notes)";
-            case 'WaveZModifier':
-		explainString = "Modifier similar to drunkZ but this one will simulate a true wave in Z (don't affect the notes)";
-            case 'TimeStopModifier':
-		explainString = "Modifier used to stop the notes at the top/bottom part of your screen to make it hard to read";
-            case 'StrumAngleModifier':
-		explainString = "Modifier combined between strumRotate, Confusion, IncomingAngleY, making a rotation easily";
-            case 'JumpTargetModifier':
-		explainString = "Modifier similar to jump but only target aplied";
-            case 'JumpNotesModifier':
-		explainString = "Modifier similar to jump but only notes aplied";
-            case 'EaseXModifier':
-		explainString = "Modifier used to make notes go left to right on the screen";
-            case 'HiddenModifier':
-        explainString = "Modifier used to make an alpha boost on notes";
-            case 'SuddenModifier':
-        explainString = "Modifier used to make an alpha brake on notes";
-            case 'SkewModifier':
-        explainString = "Modifier used to make note effects (skew)";
-            case 'SkewXModifier':
-        explainString = "Modifier based from SkewModifier but only in X";
-            case 'SkewYModifier':
-        explainString = "Modifier based from SkewModifier but only in Y";
-            case 'NotesModifier':
-        explainString = "Modifier based from other modifiers but only affects notes and no targets";
-            case 'LanesModifier':
-        explainString = "Modifier based from other modifiers but only affects targets and no notes";
-            case 'TanDrunkXModifier':
-        explainString = "Modifier similar to drunk but uses tan instead of sin in X";
-            case 'TanDrunkYModifier':
-        explainString = "Modifier similar to drunk but uses tan instead of sin in Y";
-            case 'TanDrunkZModifier':
-        explainString = "Modifier similar to drunk but uses tan instead of sin in Z";
-            case 'TanWaveXModifier':
-        explainString = "Modifier similar to wave but uses tan instead of sin in X";
-            case 'TanWaveYModifier':
-        explainString = "Modifier similar to wave but uses tan instead of sin in Y";
-            case 'TanWaveZModifier':
-        explainString = "Modifier similar to wave but uses tan instead of sin in Z";
-            case 'TwirlModifier':
-        explainString = "Modifier that makes the notes incoming rotating in a circle in X";
-            case 'RollModifier':
-        explainString = "Modifier that makes the notes incoming rotating in a circle in Y";
-            case 'BlinkModifier':
-        explainString = "Modifier that makes the notes alpha go to 0 and go back to 1 constantly";
-            case 'CosecantXModifier':
-        explainString = "Modifier similar to TanDrunk but uses cosecant instead of tan in X";
-            case 'CosecantYModifier':
-        explainString = "Modifier similar to TanDrunk but uses cosecant instead of tan in Y";
-            case 'CosecantZModifier':
-        explainString = "Modifier similar to TanDrunk but uses cosecant instead of tan in Z";
+                explainString = "Modifier used to do a wave at X poss of the notes and targets";
+                    case 'DrunkYModifier':
+                explainString = "Modifier used to do a wave at Y poss of the notes and targets";
+                    case 'DrunkZModifier':
+                explainString = "Modifier used to do a wave at Z (Far, Close) poss of the notes and targets";
+                    case 'TipsyXModifier':
+                explainString = "Modifier similar to DrunkX but don't affect notes poss";
+                    case 'TipsyYModifier':
+                explainString = "Modifier similar to DrunkY but don't affect notes poss";
+                    case 'TipsyZModifier':
+                explainString = "Modifier similar to DrunkZ but don't affect notes poss";
+                    case 'ReverseModifier':
+                explainString = "Flip the scroll type (Upscroll/Downscroll)";
+                    case 'IncomingAngleModifier':
+                explainString = "Modifier that changes how notes come to the target (if X and Y aplied it will use Z)";
+                    case 'RotateModifier': 
+                explainString = "Modifier used to rotate the lanes poss between a value aplied with rotatePoint (can be used with Y and X)";
+                    case 'StrumLineRotateModifier':
+                explainString = "Modifier similar to RotateModifier but this one doesn't need a extra value (can be used with Y, X and Z)";
+                    case 'BumpyModifier':
+                explainString = "Modifier used to make notes jump a bit in their own Perspective poss";
+                    case 'XModifier':
+                explainString = "Moves notes and targets X";
+                    case 'YModifier':
+                explainString = "Moves notes and targets Y";
+                    case 'YDModifier':
+                explainString = "Moves notes and targets Y (Automatically reverses in downscroll)";
+                    case 'ZModifier':
+                explainString = "Moves notes and targets Z (Far, Close)";
+                    case 'ConfusionModifier':
+                explainString = "Changes notes and targets angle";
+                    case 'DizzyModifier':
+                explainString = "Changes notes angle making a visual on them";
+                    case 'ScaleModifier':
+                explainString = "Modifier used to make notes and targets bigger or smaller";
+                    case 'ScaleXModifier':
+                explainString = "Modifier used to make notes and targets bigger or smaller (Only in X)";
+                    case 'ScaleYModifier':
+                explainString = "Modifier used to make notes and targets bigger or smaller (Only in Y)";
+                    case 'SpeedModifier':
+                explainString = "Modifier used to make notes be faster or slower";
+                    case 'StealthModifier':
+                explainString = "Modifier used to change notes and targets alpha";
+                    case 'NoteStealthModifier':
+                explainString = "Modifier used to change notes alpha";
+                    case 'LaneStealthModifier':
+                explainString = "Modifier used to change targets alpha";
+                    case 'InvertModifier':
+                explainString = "Modifier used to invert notes and targets X poss (down/left/right/up)";
+                    case 'FlipModifier':
+                explainString = "Modifier used to flip notes and targets X poss (right/up/down/left)";
+                    case 'MiniModifier':
+                explainString = "Modifier similar to ScaleModifier but this one does Z perspective";
+                    case 'ShrinkModifier':
+                explainString = "Modifier used to add a boost of the notes (the more value the less scale it will be at the start)";
+                    case 'BeatXModifier':
+                explainString = "Modifier used to move notes and targets X with a small jump effect";
+                    case 'BeatYModifier':
+                explainString = "Modifier used to move notes and targets Y with a small jump effect";
+                    case 'BeatZModifier':
+                explainString = "Modifier used to move notes and targets Z with a small jump effect";
+                    case 'BounceXModifier':
+                explainString = "Modifier similar to beatX but it only affect notes X with a jump effect";
+                    case 'BounceYModifier':
+                explainString = "Modifier similar to beatY but it only affect notes Y with a jump effect";
+                    case 'BounceZModifier':
+                explainString = "Modifier similar to beatZ but it only affect notes Z with a jump effect";
+                    case 'EaseCurveModifier':
+                explainString = "This enables the EaseModifiers";
+                    case 'EaseCurveXModifier':
+                explainString = "Modifier similar to IncomingAngleMod (X), it will make notes come faster at X poss";
+                    case 'EaseCurveYModifier':
+                explainString = "Modifier similar to IncomingAngleMod (Y), it will make notes come faster at Y poss";
+                    case 'EaseCurveZModifier':
+                explainString = "Modifier similar to IncomingAngleMod (X+Y), it will make notes come faster at Z perspective";
+                    case 'EaseCurveScaleModifier':
+                explainString = "Modifier similar to All easeCurve, it will make notes scale change, usually next to target";
+                    case 'EaseCurveAngleModifier':
+                explainString = "Modifier similar to All easeCurve, it will make notes angle change, usually next to target";
+                    case 'InvertSineModifier':
+                explainString = "Modifier used to do a curve in the notes it will be different for notes (Down and Right / Left and Up)";
+                    case 'BoostModifier':
+                explainString = "Modifier used to make notes come faster to target";
+                    case 'BrakeModifier':
+                explainString = "Modifier used to make notes come slower to target";
+                    case 'JumpModifier':
+                explainString = "Modifier used to make notes and target jump";
+                    case 'WaveXModifier':
+                explainString = "Modifier similar to drunkX but this one will simulate a true wave in X (don't affect the notes)";
+                    case 'WaveYModifier':
+                explainString = "Modifier similar to drunkY but this one will simulate a true wave in Y (don't affect the notes)";
+                    case 'WaveZModifier':
+                explainString = "Modifier similar to drunkZ but this one will simulate a true wave in Z (don't affect the notes)";
+                    case 'TimeStopModifier':
+                explainString = "Modifier used to stop the notes at the top/bottom part of your screen to make it hard to read";
+                    case 'StrumAngleModifier':
+                explainString = "Modifier combined between strumRotate, Confusion, IncomingAngleY, making a rotation easily";
+                    case 'JumpTargetModifier':
+                explainString = "Modifier similar to jump but only target aplied";
+                    case 'JumpNotesModifier':
+                explainString = "Modifier similar to jump but only notes aplied";
+                    case 'EaseXModifier':
+                explainString = "Modifier used to make notes go left to right on the screen";
+                    case 'EaseYModifier':
+                explainString = "Modifier used to make notes go up to down on the screen";
+                    case 'EaseZModifier':
+                explainString = "Modifier used to make notes go far to near right on the screen";
+                    case 'HiddenModifier':
+                explainString = "Modifier used to make an alpha boost on notes";
+                    case 'SuddenModifier':
+                explainString = "Modifier used to make an alpha brake on notes";
+                    case 'VanishModifier':
+                explainString = "Modifier fushion between sudden and hidden";
+                    case 'SkewModifier':
+                explainString = "Modifier used to make note effects (skew)";
+                    case 'SkewXModifier':
+                explainString = "Modifier based from SkewModifier but only in X";
+                    case 'SkewYModifier':
+                explainString = "Modifier based from SkewModifier but only in Y";
+                    case 'NotesModifier':
+                explainString = "Modifier based from other modifiers but only affects notes and no targets";
+                    case 'LanesModifier':
+                explainString = "Modifier based from other modifiers but only affects targets and no notes";
+                    case 'TanDrunkXModifier':
+                explainString = "Modifier similar to drunk but uses tan instead of sin in X";
+                    case 'TanDrunkYModifier':
+                explainString = "Modifier similar to drunk but uses tan instead of sin in Y";
+                    case 'TanDrunkZModifier':
+                explainString = "Modifier similar to drunk but uses tan instead of sin in Z";
+                    case 'TanWaveXModifier':
+                explainString = "Modifier similar to wave but uses tan instead of sin in X";
+                    case 'TanWaveYModifier':
+                explainString = "Modifier similar to wave but uses tan instead of sin in Y";
+                    case 'TanWaveZModifier':
+                explainString = "Modifier similar to wave but uses tan instead of sin in Z";
+                    case 'TwirlModifier':
+                explainString = "Modifier that makes the notes incoming rotating in a circle in X";
+                    case 'RollModifier':
+                explainString = "Modifier that makes the notes incoming rotating in a circle in Y";
+                    case 'BlinkModifier':
+                explainString = "Modifier that makes the notes alpha go to 0 and go back to 1 constantly";
+                    case 'CosecantXModifier':
+                explainString = "Modifier similar to TanDrunk but uses cosecant instead of tan in X";
+                    case 'CosecantYModifier':
+                explainString = "Modifier similar to TanDrunk but uses cosecant instead of tan in Y";
+                    case 'CosecantZModifier':
+                explainString = "Modifier similar to TanDrunk but uses cosecant instead of tan in Z";
+                    case 'TanDrunkAngleModifier':
+                explainString = "Modifier similar to TanDrunk but in angle";
+                    case 'DrunkAngleModifier':
+                explainString = "Modifier similar to Drunk but in angle";
+                    case 'WaveAngleModifier':
+                explainString = "Modifier similar to Wave but in angle";
+                    case 'TanWaveAngleModifier':
+                explainString = "Modifier similar to TanWave but in angle";
+                    case 'ArrowPath':
+                explainString = "This modifier its still a work in progress (IT MAY CRASH THE GAME IF SOMETHING GOES WRONG)";
         }
 
        return explainString;
