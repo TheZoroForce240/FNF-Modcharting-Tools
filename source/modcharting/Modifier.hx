@@ -117,7 +117,6 @@ class Modifier
     public dynamic function curPosMath(lane:Int, curPos:Float, pf:Int) { return curPos; }
     public dynamic function noteDistMath(noteDist:Float, lane:Int, curPos:Float, pf:Int):Float { return noteDist; }
     public dynamic function setupSubValues() {}
-    public dynamic function setupNotePath(startDist:Float, endDist:Float, next:TimeVector) {}
 
     public function checkPlayField(pf:Int):Bool //returns true if should display on current playfield
     {
@@ -153,7 +152,6 @@ class Modifier
         mod.incomingAngleMath = this.incomingAngleMath;
         mod.curPosMath = this.curPosMath;
         mod.noteDistMath = this.noteDistMath;
-        mod.setupNotePath = this.setupNotePath;
         mod.currentValue = this.currentValue;
         mod.baseValue = this.currentValue;
         mod.subValues = this.subValues;
@@ -1609,10 +1607,12 @@ class ArrowPath extends Modifier {
     public var _pathDistance: Float = 0;
 
     override public function noteMath(noteData: NotePositionData, lane: Int, curPos: Float, pf: Int) {
-        var newPosition = executePath(0, curPos, lane, lane < 4 ? 0 : 1, new Vector4(noteData.x, noteData.y, noteData.z, 0));
-        noteData.x = newPosition.x;
-        noteData.y = newPosition.y;
-        noteData.z = newPosition.z;
+        if (Paths.fileExists("data/"+PlayState.SONG.song.toLowerCase()+"/customMods/path.txt", TEXT)){
+            var newPosition = executePath(0, curPos, lane, lane < 4 ? 0 : 1, new Vector4(noteData.x, noteData.y, noteData.z, 0));
+            noteData.x = newPosition.x;
+            noteData.y = newPosition.y;
+            noteData.z = newPosition.z;
+        }
     }
     override function setupSubValues()
         {
@@ -1630,11 +1630,24 @@ class ArrowPath extends Modifier {
             currentValue = 1.0; //the code that stop the mod from running gets confused when it resets in the editor i guess??
         }
     public function loadPath() {
-        var file = CoolUtil.coolTextFile(Paths.txt("pathTest"));
+        var file = CoolUtil.coolTextFile(Paths.modFolders("data/"+PlayState.SONG.song.toLowerCase()+"/customMods/path.txt"));
+        var file2 = CoolUtil.coolTextFile(Paths.getPreloadPath("data/"+PlayState.SONG.song.toLowerCase()+"/customMods/path.txt"));
+
+        var filePath = null;
+        if (file != null) {
+            filePath = file;
+        }else if (file2 != null) {
+            filePath = file2;
+        }else{
+            return;
+        }
+
+        // trace(filePath);
+
         var path = new List<TimeVector>();
         var _g = 0;
-        while (_g < file.length) {
-            var line = file[_g];
+        while (_g < filePath.length) {
+            var line = filePath[_g];
             _g++;
             var coords = line.split(";");
             var vec = new TimeVector(Std.parseFloat(coords[0]), Std.parseFloat(coords[1]), Std.parseFloat(coords[2]), Std.parseFloat(coords[3]));
