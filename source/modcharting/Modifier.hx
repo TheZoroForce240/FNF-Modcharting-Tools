@@ -67,7 +67,7 @@ class Modifier
     public var renderer:PlayfieldRenderer = null;
     public static var beat:Float = 0;
     public var notes:FlxTypedGroup<Note>;
-
+    
     public function new(tag:String, ?type:ModifierType = ALL, ?playfield:Int = -1)
     {
         this.tag = tag;
@@ -295,6 +295,13 @@ class ReverseModifier extends Modifier
 
 class SplitModifier extends Modifier 
 {
+    override function setupSubValues()
+    {
+        baseValue = 0.0;
+        currentValue = 1.0;
+        subValues.set('VarA', new ModifierSubValue(0.0));
+        subValues.set('VarB', new ModifierSubValue(0.0));
+    }
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
     {
         var scrollSwitch = 520;
@@ -303,26 +310,46 @@ class SplitModifier extends Modifier
                 scrollSwitch *= -1;
 
         var laneThing = lane % NoteMovement.keyCount;
+
         if (laneThing > 1)
-            noteData.y += scrollSwitch * currentValue;
+            noteData.y += scrollSwitch * subValues.get('VarA').value;
+
+        if (laneThing < 2)
+            noteData.y += scrollSwitch * subValues.get('VarB').value;
     }
     override function noteDistMath(noteDist:Float, lane:Int, curPos:Float, pf:Int)
     {
         var laneThing = lane % NoteMovement.keyCount;
+
         if (laneThing > 1)
-            return noteDist * (1-(currentValue*2));
+            return noteDist * (1-(subValues.get('VarA').value*2));
+
+        if (laneThing < 2)
+            return noteDist * (1-(subValues.get('VarB').value*2));
+
         return noteDist;
     }
     override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
     {
-        var laneThing = lane % NoteMovement.keyCount;
-        if (laneThing > 1)
-            noteMath(noteData, lane, 0, pf); //just reuse same thing
+        noteMath(noteData, lane, 0, pf); //just reuse same thing
+    }
+    override function reset()
+    {
+        super.reset();
+        baseValue = 0.0;
+        currentValue = 1.0;
     }
 }
 
 class CrossModifier extends Modifier 
 {
+    override function setupSubValues()
+    {
+        baseValue = 0.0;
+        currentValue = 1.0;
+        subValues.set('VarA', new ModifierSubValue(0.0));
+        subValues.set('VarB', new ModifierSubValue(0.0));
+    }
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
     {
         var scrollSwitch = 520;
@@ -331,47 +358,80 @@ class CrossModifier extends Modifier
                 scrollSwitch *= -1;
 
         var laneThing = lane % NoteMovement.keyCount;
+
         if (laneThing > 0 && laneThing < 3)
-            noteData.y += scrollSwitch * currentValue;
+            noteData.y += scrollSwitch * subValues.get('VarA').value;
+
+        if (laneThing == 0 || laneThing == 3)
+            noteData.y += scrollSwitch * subValues.get('VarB').value;
     }
     override function noteDistMath(noteDist:Float, lane:Int, curPos:Float, pf:Int)
     {
         var laneThing = lane % NoteMovement.keyCount;
+
         if (laneThing > 0 && laneThing < 3)
-            return noteDist * (1-(currentValue*2));
+            return noteDist * (1-(subValues.get('VarA').value*2));
+
+        if (laneThing == 0 || laneThing == 3)
+            return noteDist * (1-(subValues.get('VarB').value*2));
+
         return noteDist;
     }
     override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
     {
-        var laneThing = lane % NoteMovement.keyCount;
-        if (laneThing > 0 && laneThing < 3)
-            noteMath(noteData, lane, 0, pf); //just reuse same thing
+        noteMath(noteData, lane, 0, pf); //just reuse same thing
+    }
+    override function reset()
+    {
+        super.reset();
+        baseValue = 0.0;
+        currentValue = 1.0;
     }
 }
 
 class AlternateModifier extends Modifier 
 {
+    override function setupSubValues()
+    {
+        baseValue = 0.0;
+        currentValue = 1.0;
+        subValues.set('VarA', new ModifierSubValue(0.0));
+        subValues.set('VarB', new ModifierSubValue(0.0));
+    }
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
     {
         var scrollSwitch = 520;
         if (instance != null)
             if (ModchartUtil.getDownscroll(instance))
                 scrollSwitch *= -1;
-        if ((lane)%2 == 1)
-            noteData.y += scrollSwitch * currentValue;
+        if (lane%2 == 1)
+            noteData.y += scrollSwitch * subValues.get('VarA').value;
+
+        if (lane%2 == 0)
+            noteData.y += scrollSwitch * subValues.get('VarB').value;
     }
     override function noteDistMath(noteDist:Float, lane:Int, curPos:Float, pf:Int)
     {
-        if ((lane)%2 == 1)
-            return noteDist * (1-(currentValue*2));
+        if (lane%2 == 1)
+            return noteDist * (1-(subValues.get('VarA').value*2));
+
+        if (lane%2 == 0)
+            return noteDist * (1-(subValues.get('VarB').value*2));
+
         return noteDist;
     }
     override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
     {
-        if ((lane)%2 == 1)
-            noteMath(noteData, lane, 0, pf); //just reuse same thing
+        noteMath(noteData, lane, 0, pf); //just reuse same thing
+    }
+    override function reset()
+    {
+        super.reset();
+        baseValue = 0.0;
+        currentValue = 1.0;
     }
 }
+
 
 class IncomingAngleModifier extends Modifier 
 {
@@ -919,6 +979,33 @@ class BrakeModifier extends Modifier
         return curPos+yOffset;
     }
 }
+
+class BoomerangModifier extends Modifier
+{
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    { 
+        noteData.y += (FlxMath.fastSin(curPos/-700) * 400 + (curPos/3.5)) * (-currentValue);
+        noteData.alpha *= FlxMath.bound(1-(curPos/-600-3.5), 0, 1);
+    }
+    override function curPosMath(lane:Int, curPos:Float, pf:Int)
+    {
+        return curPos * 0.75;
+    }
+}
+
+class WaveingModifier extends Modifier
+{
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    { 
+        var distance = curPos * 0.01;
+        noteData.y += (FlxMath.fastSin(distance*0.3)*50) * currentValue; //don't mind me i just figured it out
+    }
+    override function noteDistMath(noteDist:Float, lane:Int, curPos:Float, pf:Int)
+    {
+        return noteDist * (0.4+((FlxMath.fastSin(curPos*0.007)*0.1) * currentValue));
+    }
+}
+
 class JumpModifier extends Modifier //custom thingy i made
 {
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
@@ -1262,6 +1349,12 @@ class SkewModifier extends Modifier
     {
         noteMath(noteData, lane, 0, pf);
     }
+    override function reset()
+    {
+        super.reset();
+        baseValue = 0.0;
+        currentValue = 1.0;
+    }
 }
 
 class SkewXModifier extends Modifier
@@ -1398,6 +1491,60 @@ class LanesModifier extends Modifier
         currentValue = 1.0;
     }
 }
+
+class StrumsModifier extends Modifier
+{
+    override function setupSubValues()
+    {
+        baseValue = 0.0;
+        currentValue = 1.0;
+        subValues.set('x', new ModifierSubValue(0.0));
+        subValues.set('y', new ModifierSubValue(0.0));
+        subValues.set('yD', new ModifierSubValue(0.0));
+        subValues.set('angle', new ModifierSubValue(0.0));
+        subValues.set('z', new ModifierSubValue(0.0));
+        subValues.set('skewx', new ModifierSubValue(0.0));
+        subValues.set('skewy', new ModifierSubValue(0.0));
+        subValues.set('invert', new ModifierSubValue(0.0));
+        subValues.set('flip', new ModifierSubValue(0.0));
+    }
+
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        var daswitch = 1;
+        if (instance != null)
+            if (ModchartUtil.getDownscroll(instance))
+                daswitch = -1;
+
+        noteData.x += subValues.get('x').value;
+        noteData.y += subValues.get('y').value;
+        noteData.y += subValues.get('yD').value * daswitch;
+        noteData.angle += subValues.get('angle').value;
+        noteData.z += subValues.get('z').value;
+        noteData.skewX += subValues.get('skewx').value * -daswitch;
+        noteData.skewY += subValues.get('skewy').value * -daswitch;
+
+        noteData.x += NoteMovement.arrowSizes[lane] * (lane % 2 == 0 ? 1 : -1) * subValues.get('invert').value;
+
+        var nd = lane % NoteMovement.keyCount;
+        var newPos = FlxMath.remapToRange(nd, 0, NoteMovement.keyCount, NoteMovement.keyCount, -NoteMovement.keyCount);
+        noteData.x += NoteMovement.arrowSizes[lane] * newPos * subValues.get('flip').value;
+        noteData.x -= NoteMovement.arrowSizes[lane] * subValues.get('flip').value;
+    }
+
+    override function reset()
+    {
+        super.reset();
+        baseValue = 0.0;
+        currentValue = 1.0;
+    }
+    
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteMath(noteData, lane, 0, pf);
+    }
+}
+
 
 class TanDrunkXModifier extends Modifier
 {
@@ -1682,8 +1829,59 @@ class TanDrunkAngleModifier extends Modifier
     }
 }
 
+class ShakyNotesModifier extends Modifier
+{
+    override function setupSubValues()
+    {
+        subValues.set('speed', new ModifierSubValue(1.0));
+    }
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        noteData.x += FlxMath.fastSin(500)+currentValue * (Math.cos(Conductor.songPosition * 4*0.2) + ((lane%NoteMovement.keyCount)*0.2) - 0.002)
+        * (Math.sin(100 - (120 * subValues.get('speed').value * 0.4))) /** (BeatXModifier.getShift(noteData, lane, curPos, pf) / 2)*/;
+        
+        noteData.y += FlxMath.fastSin(500)+currentValue * (Math.cos(Conductor.songPosition * 8*0.2) + ((lane%NoteMovement.keyCount)*0.2) - 0.002)
+        * (Math.sin(100 - (120 * subValues.get('speed').value * 0.4))) /** (BeatXModifier.getShift(noteData, lane, curPos, pf) / 2)*/;
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteMath(noteData, lane, 0, pf);
+    }
+}
 
-//OH MY FUCKING GOD, thanks to @noamlol for the code of this thing// once i figure how to make it work with the other modchart editor ill add a update instantly!
+// class ShakeNotesModifier extends Modifier
+// {
+//     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+//     {
+//         noteData.x += FlxMath.fastSin(1)*(currentValue * FlxG.random.int(1, 20));
+//         noteData.y += FlxMath.fastSin(1)*(currentValue * FlxG.random.int(1, 20));
+//     }
+//     override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+//     {
+//         noteMath(noteData, lane, 0, pf);
+//     }
+// }
+    
+// class TordnadoModifier extends Modifier
+// {
+//     override function setupSubValues()
+//     {
+//         subValues.set('speed', new ModifierSubValue(1.0));
+//     }
+//     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+//     {
+//         // thank you 4mbr0s3 & andromeda for the modifier lol
+//         var playerColumn = lane % NoteMovement.keyCount;
+//         var columnPhaseShift = playerColumn * Math.PI / 3;
+//         var phaseShift = lane / 135;
+//         var returnReceptorToZeroOffsetX = (-Math.cos(-columnPhaseShift) + 1) / 2 * Note.swagWidth * 3;
+//         var offsetX = (Math.cos(phaseShift - columnPhaseShift) + 1) / 2 * Note.swagWidth * 3 - returnReceptorToZeroOffsetX;
+        
+//         noteData.x += FlxMath.fastSin(offsetX + (curPos*0.004))*(NoteMovement.arrowSizes[lane] * currentValue*0.5); //idk if tornado will do shit but ig i tried?
+//     }
+// }
+
+//OH MY FUCKING GOD, thanks to @noamlol for the code of this thing//
 class ArrowPath extends Modifier {
     public var _path: List<TimeVector> = null;
     public var _pathDistance: Float = 0;
