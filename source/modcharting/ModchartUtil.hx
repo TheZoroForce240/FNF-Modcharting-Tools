@@ -10,6 +10,7 @@ import flixel.FlxG;
 import states.PlayState;
 import game.Note;
 import game.Conductor;
+import game.StrumNote;
 #elseif (PSYCH && PSYCHVERSION == 0.7)
 import states.PlayState;
 import objects.Note;

@@ -1,0 +1,117 @@
+        DrunkXModifier, DrunkYModifier, DrunkZModifier
+
+        TipsyXModifier, TipsyYModifier, TipsyZModifier
+
+        ReverseModifier, IncomingAngleModifier, RotateModifier, StrumLineRotateModifier, (the last 3 ones works with [X Y Z, for StrumLine IncomingAngle and Rotate] [rotatePointX and rotatePointY, for Rotate and StrumLine])
+
+        BumpyModifier,
+
+        XModifier, YModifier, ZModifier, ConfusionModifier,
+
+        ScaleModifier, ScaleXModifier, ScaleYModifier, 
+
+	SkewModifier, SkewYModifier, SkewXModifier, SpeedModifier,
+ 
+        StealthModifier, NoteStealthModifier, InvertModifier, FlipModifier,
+
+        MiniModifier, ShrinkModifier, BeatXModifier, BeatYModifier, BeatZModifier,
+
+        BounceXModifier, BounceYModifier, BounceZModifier,
+
+        EaseCurveModifier, EaseCurveXModifier, EaseCurveYModifier, EaseCurveZModifier, EaseCurveAngleModifier,
+
+        InvertSineModifier, BoostModifier, BrakeModifier, JumpModifier
+
+--some shits added by me (ed) lmao
+	
+	WaveXModifier, WaveYModifier, WaveZModifier,
+
+	TimeStopModifier, StrumAngleModifier, JumpTargetModifier, JumpNotesModifier,
+
+	LaneStealthModifier, EaseXModifier, HiddenModifier, SuddenModifier, NotesModifier, TargetsModifier
+
+--To move betwen center right and left i show you this shits
+MIDSCROLL:
+
+340 for right
+-340 for left
+0 to center again
+
+RIGHTSCROLL:
+
+-370 to center
+-670 to left
+0 to right
+
+--FOR OPONNENT
+
+MIDSCROLL:
+
+340 for center (0,1 strumLines)
+-340 for center (2,3 strumLines)
+665 for right (0,1 strumLines)
+-665 for left (2,3 strumLines)
+0 to original again
+
+RIGHTSCROLL:
+
+370 to center
+670 to left
+0 to right
+
+--------------MODCHART VARS----------------
+startMod(name,modClass,type,pf) --To start a modifier
+
+setMod(name, value) --set a variable for the modifier
+
+setSubMod(name, subValName,value) --A submodifier variable
+
+setModTargetLane(name, value) --Strum Specific modifier value
+
+setModPlayfield(name,value) --Extra line value
+
+addPlayfield(x,y,z) --Add a extra line
+
+removePlayfield(idx) --Remove a extra line
+
+tweenModifier(modifier,val,time,ease) --do a modifier with a tween in seconds
+
+tweenModifierSubValue(modifier,subValue,val,time,ease) --do a modifier with a subValue
+
+setModEaseFunc(name,ease) --A mod ease with a value
+
+set(beat, argsAsString) --Add a working variable in a beat
+
+ease(beat, time, easeStr, argsAsString) --Add a working variable with movement in a beat
+--------------APPLY A MODCHART--------------
+startMod('Whatever','BoostModifier','',0) --'modName','modifiername','lines(strumsToApply, player, opponent, custom, leave [""] for all, playfield 0 = default playfield
+
+--start time, ease time, ease, modifier data (value, name)
+        ease(beat, 2, 'expoOut', [[
+            0.5, DrunkY,
+        ]])
+--Notes moves funky and cool, sustains also do curve effect
+
+--Check example for more info about this lmao -Ed
+--------------SOME CHANGES SHITS LMAO----------------
+ModName:speed
+ModName:x
+ModName:y
+ModName:z
+ModName:rotatePointX
+ModName:rotatePointY
+---------------LANES YOU CAN USE-------------
+case 'player':
+PLAYERONLY;
+
+case 'opponent':
+OPPONENTONLY;
+
+case 'lane' | 'lanespecific':
+LANESPECIFIC;
+--------------DIFERENCE BETWEN HX AND LUA CUSTOM MODIFIERS-----------------
+--LUA
+ game.playfieldRenderer.modifiers.get("customModTest").math
+
+--HX
+ mod.math

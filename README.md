@@ -13,7 +13,7 @@ Still very WIP and not everything is supported yet!
 ### Support for multiple engines
 - Base Game (not tested)
 - [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine) (working 0.6.3 and 0.7.x, includes lua functions)
-- [Leather Engine](https://github.com/Leather128/LeatherEngine) (working 0.4.2)
+- [Leather Engine](https://github.com/Leather128/LeatherEngine) (working 0.5.0)
 - [Kade Engine](https://github.com/KadeDev/Kade-Engine) (not tested)
 - [Yoshi Engine](https://github.com/YoshiCrafter29/YoshiCrafterEngine) (not tested)
 - [Forever Engine Legacy](https://github.com/Yoshubs/Forever-Engine-Legacy) (not tested)
@@ -34,7 +34,7 @@ Still very WIP and not everything is supported yet!
 - [Slushi_Github](https://github.com/Slushi-Github) - Help with reorganisation with haxelib edition
 
 ## Installation 
-You need the most recent version of HaxeFlixel for it to work. (5.2.1 as of writing)
+You need the most recent version of HaxeFlixel for it to work. (5.5.0 as of writing)
 ### With Source:
 1. Install the haxelib by typing `haxelib git fnf-modcharting-tools https://github.com/EdwhakKB/FNF-Modcharting-Tools` in the console
 2. Now you only need to make a few small additions to get everything working,

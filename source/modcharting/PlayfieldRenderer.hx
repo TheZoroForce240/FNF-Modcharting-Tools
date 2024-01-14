@@ -411,8 +411,9 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
                 drawStrum(noteData);
             else if (!notes.members[noteData.index].isSustainNote) //draw regular note
                 drawNote(noteData);
-            else //draw sustain
-                drawSustainNote(noteData);
+            else{ //draw sustain
+                #if LEATHER /*disable the funny sustains options for low-end pc lol*/if(utilities.Options.getData("optimizedModcharts")) drawNote(noteData) else #end drawSustainNote(noteData);
+            }
 
         }
     }

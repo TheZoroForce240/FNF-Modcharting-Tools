@@ -8,6 +8,7 @@ import lime.utils.Assets;
 import states.PlayState;
 import game.Note;
 import game.Conductor;
+import utilities.CoolUtil;
 #if polymod
 import polymod.backends.PolymodAssets;
 #end
@@ -62,8 +63,10 @@ class ModchartFile
     {
         #if (PSYCH && PSYCHVERSION == 0.7)
             data = loadFromJson(PlayState.SONG.song.toLowerCase(), Difficulty.getString().toLowerCase() == null ? Difficulty.defaultList[PlayState.storyDifficulty] : Difficulty.getString().toLowerCase());
-        #else
+        #elseif (PSYCH && PSYCHVERSION <= 0.7)
             data = loadFromJson(PlayState.SONG.song.toLowerCase(), CoolUtil.difficultyString().toLowerCase() == null ? CoolUtil.difficulties[PlayState.storyDifficulty] : CoolUtil.difficultyString().toLowerCase());
+        #else 
+            data = loadFromJson(PlayState.SONG.song.toLowerCase(), PlayState.storyDifficultyStr);
         #end
         this.renderer = renderer;
         renderer.modchart = this;
@@ -79,8 +82,8 @@ class ModchartFile
 
         var folderShit:String = "";
 
-        var moddyFile:String = Paths.json(Paths.formatToSongPath(folder) + '/modchart-' + difficulty.toLowerCase());
-        var moddyFile2:String = Paths.json(Paths.formatToSongPath(folder) + '/modchart');
+        var moddyFile:String = Paths.json(#if PSYCH Paths.formatToSongPath(folder)#else PlayState.SONG.song #end + '/modchart-' + difficulty.toLowerCase());
+        var moddyFile2:String = Paths.json(#if PSYCH Paths.formatToSongPath(folder)#else PlayState.SONG.song #end + '/modchart');
 
         #if MODS_ALLOWED
         var moddyFileMods:String = Paths.modsJson(Paths.formatToSongPath(folder) + '/modchart-' + difficulty.toLowerCase());
