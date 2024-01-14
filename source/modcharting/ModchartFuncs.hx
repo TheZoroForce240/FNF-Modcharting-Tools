@@ -13,7 +13,9 @@ import llua.Convert;
 #if LEATHER
 import states.PlayState;
 import game.Conductor;
+#if linc_luajit
 import modding.ModchartUtilities;
+#end
 import modding.scripts.languages.HScript;
 #end
 
@@ -105,7 +107,7 @@ class ModchartFuncs
             #end
         #end
 
-        #elseif LEATHER
+        #elseif (LEATHER && linc_luajit)
         @:privateAccess
         {
             ModchartUtilities.instance.setLuaFunction('startMod', function(name:String, modClass:String, type:String = '', pf:Int = -1){
