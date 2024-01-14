@@ -362,6 +362,9 @@ class CustomModifierScript
         interp.variables.set('PlayfieldRenderer', PlayfieldRenderer);
         interp.variables.set('ModchartUtil', ModchartUtil);
         interp.variables.set('Modifier', Modifier);
+        #if LEATHER
+        interp.variables.set('mod', Modifier); //the game crashes without this???????? what???????????
+        #end
         interp.variables.set('ModifierSubValue', Modifier.ModifierSubValue);
         interp.variables.set('BeatXModifier', Modifier.BeatXModifier);
         interp.variables.set('NoteMovement', NoteMovement);

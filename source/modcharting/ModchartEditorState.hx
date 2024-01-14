@@ -94,7 +94,11 @@ class ModchartEditorEvent extends FlxSprite
     {
         this.data = data;
         super(-300, 0);
+        #if LEATHER
+        frames = flixel.graphics.frames.FlxAtlasFrames.fromSparrow("assets/shared/images/eventArrowModchart.png", "assets/shared/images/eventArrowModchart.xml"); //Paths.getSparrowAtlas() returns null for some reason??
+        #else
         frames = Paths.getSparrowAtlas('eventArrowModchart', 'shared');
+        #end
         animation.addByPrefix('note', 'idle0');
         setGraphicSize(ModchartEditorState.gridSize, ModchartEditorState.gridSize);
         updateHitbox();
