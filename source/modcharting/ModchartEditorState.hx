@@ -94,17 +94,12 @@ class ModchartEditorEvent extends FlxSprite
     {
         this.data = data;
         super(-300, 0);
-        #if LEATHER 
-        frames = Paths.getSparrowAtlas("ui skins/" + utilities.Options.getData("uiSkin") + "/arrows/default", 'shared');
-        animation.addByPrefix('note', 'left0');
+        #if LEATHER
+        frames = flixel.graphics.frames.FlxAtlasFrames.fromSparrow("assets/shared/images/eventArrowModchart.png", "assets/shared/images/eventArrowModchart.xml"); //Paths.getSparrowAtlas() returns null for some reason??
         #else
         frames = Paths.getSparrowAtlas('eventArrowModchart', 'shared');
-        animation.addByPrefix('note', 'idle0');
         #end
-        //makeGraphic(48, 48);
-        
-        
-        animation.play('note');
+        animation.addByPrefix('note', 'idle0');
         setGraphicSize(ModchartEditorState.gridSize, ModchartEditorState.gridSize);
         updateHitbox();
         antialiasing = true;
@@ -908,21 +903,6 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) backend.Mus
 
     function updateEventSprites()
     {
-        // var i = eventSprites.length - 1;
-        // while (i >= 0) {
-        //     var daEvent:ModchartEditorEvent = eventSprites.members[i];
-        //     var beat:Float = playfieldRenderer.modchart.data.events[i][1][0];
-        //     if(curBeat < beat-4 && curBeat > beat+16)
-        //     {
-        //         daEvent.active = false;
-        //         daEvent.visible = false;
-        //         daEvent.alpha = 0;
-        //         eventSprites.remove(daEvent, true);
-        //         trace(daEvent.getBeatTime());
-        //         trace("removed event sprite "+ daEvent.getBeatTime());
-        //     }
-        //     --i;
-        // }
         eventSprites.clear();
         for (i in 0...playfieldRenderer.modchart.data.events.length)
         {
