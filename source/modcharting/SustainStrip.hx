@@ -4,7 +4,7 @@ import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
 import openfl.geom.Vector3D;
 #if LEATHER
 import game.Note;
-#elseif (PSYCH && PSYCHVERSION == 0.7)
+#elseif (PSYCH && PSYCHVERSION >= "0.7")
 import objects.Note;
 #else
 import Note;
@@ -87,6 +87,4 @@ class SustainStrip extends FlxStrip
         }
         vertices = new DrawData(12, true, verts);
     }
-
-
 }

@@ -25,10 +25,14 @@ import states.PlayState;
 import game.Note;
 import game.StrumNote;
 import game.Conductor;
-#elseif (PSYCH && PSYCHVERSION == 0.7)
+#elseif (PSYCH && PSYCHVERSION >= "0.7" || SCEModchartingTools)
 import states.PlayState;
 import objects.Note;
+#if !SCEModchartingTools
 import objects.StrumNote;
+#else
+import objects.StrumArrow;
+#end
 #else
 import PlayState;
 import Note;
@@ -46,7 +50,8 @@ using StringTools;
 //start documenting more stuff idk
 
 typedef StrumNoteType = 
-#if (PSYCH || LEATHER) StrumNote
+#if ((PSYCH || LEATHER) && !SCEModchartingTools) StrumNote
+#elseif SCEModchartingTools StrumArrow
 #elseif KADE StaticArrow
 #elseif FOREVER_LEGACY UIStaticArrow
 #elseif ANDROMEDA Receptor
@@ -130,7 +135,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     }
 
 
-    private function addDataToStrum(strumData:NotePositionData, strum:StrumNote)
+    private function addDataToStrum(strumData:NotePositionData, strum:StrumNoteType)
     {
         strum.x = strumData.x;
         strum.y = strumData.y;
@@ -312,8 +317,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         var thisNotePos = ModchartUtil.calculatePerspective(new Vector3D(noteData.x+(strumNote.width/2), noteData.y+(strumNote.height/2), noteData.z*0.001), 
         ModchartUtil.defaultFOV*(Math.PI/180), -(strumNote.width/2), -(strumNote.height/2));
 
-        var skewX = ModchartUtil.getStrumSkew(strumNote, false);
-        var skewY = ModchartUtil.getStrumSkew(strumNote, true);
         noteData.x = thisNotePos.x;
         noteData.y = thisNotePos.y;
         noteData.scaleX *= (1/-thisNotePos.z);
@@ -334,8 +337,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         var thisNotePos = ModchartUtil.calculatePerspective(new Vector3D(noteData.x+(daNote.width/2)+ModchartUtil.getNoteOffsetX(daNote, instance), noteData.y+(daNote.height/2), noteData.z*0.001), 
         ModchartUtil.defaultFOV*(Math.PI/180), -(daNote.width/2), -(daNote.height/2));
 
-        var skewX = ModchartUtil.getNoteSkew(daNote, false);
-        var skewY = ModchartUtil.getNoteSkew(daNote, true);
         noteData.x = thisNotePos.x;
         noteData.y = thisNotePos.y;
         noteData.scaleX *= (1/-thisNotePos.z);
@@ -376,8 +377,13 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
             timeToNextSustain *= -1; //weird shit that fixes upscroll lol
             // timeToNextSustain = -ModchartUtil.getFakeCrochet()/4; //weird shit that fixes upscroll lol
 
+        #if !SCEModchartingTools
         var nextHalfNotePos = getSustainPoint(noteData, timeToNextSustain*0.5);
         var nextNotePos = getSustainPoint(noteData, timeToNextSustain);
+        #else
+        var nextHalfNotePos = getSustainPoint(noteData, timeToNextSustain*0.548);
+        var nextNotePos = getSustainPoint(noteData, timeToNextSustain-2.2);
+        #end
 
         var flipGraphic = false;
 
@@ -480,10 +486,12 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     {
         if (modchart != null)
         {
+            #if hscript
             for (customMod in modchart.customModifiers)
             {
                 customMod.destroy(); //make sure the interps are dead
             }
+            #end
         }
         super.destroy();
     }

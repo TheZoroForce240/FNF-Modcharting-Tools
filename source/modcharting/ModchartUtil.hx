@@ -10,15 +10,12 @@ import flixel.FlxG;
 import states.PlayState;
 import game.Note;
 import game.Conductor;
-import game.StrumNote;
-#elseif (PSYCH && PSYCHVERSION == 0.7)
+#elseif (PSYCH && PSYCHVERSION >= "0.7")
 import states.PlayState;
 import objects.Note;
-import objects.StrumNote;
 #else
 import PlayState;
 import Note;
-import StrumNote;
 #end
 
 using StringTools;
@@ -29,9 +26,9 @@ class ModchartUtil
     {
         //need to test each engine
         //not expecting all to work
-        #if (PSYCH && PSYCHVERSION != 0.7)
+        #if (PSYCH && !(PSYCHVERSION >= "0.7"))
         return ClientPrefs.downScroll;
-        #elseif (PSYCH && PSYCHVERSION == 0.7)
+        #elseif (PSYCH && PSYCHVERSION >= "0.7")
         return ClientPrefs.data.downScroll;
         #elseif LEATHER
         return utilities.Options.getData("downscroll");
@@ -51,9 +48,9 @@ class ModchartUtil
     }
     public static function getMiddlescroll(instance:ModchartMusicBeatState)
     {
-        #if (PSYCH && PSYCHVERSION != 0.7)
+        #if (PSYCH && !(PSYCHVERSION >= "0.7"))
         return ClientPrefs.middleScroll;
-        #elseif (PSYCH && PSYCHVERSION == 0.7)
+        #elseif (PSYCH && PSYCHVERSION >= "0.7")
         return ClientPrefs.data.middleScroll;
         #elseif LEATHER
         return utilities.Options.getData("middlescroll");
@@ -128,24 +125,6 @@ class ModchartUtil
         #else 
         return (daNote.isSustainNote ? 37 : 0); //the magic number
         #end
-    }
-    
-    public static function getNoteSkew(daNote:Note, isSkewY:Bool)
-    {
-        if (!isSkewY){
-            return daNote.skew.x;
-        }else{
-            return daNote.skew.y;  
-        }
-    }
-
-    public static function getStrumSkew(daNote:StrumNote, isSkewY:Bool)
-    {
-        if (!isSkewY){
-            return daNote.skew.x;
-        }else{
-            return daNote.skew.y;  
-        }
     }
 
     static var currentFakeCrochet:Float = -1;

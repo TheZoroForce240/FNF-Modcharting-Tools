@@ -159,16 +159,18 @@ class Conductor
 You need to define which engine you're using to fix compiling issues, or it would default to base game settings (downscroll won't work etc).
 Available ones: PSYCH, KADE(notTested), LEATHER, FOREVER_LEGACY(notTested), YOSHI(notTested), FPSPLUS(notTested)
 
-Note: If you use psych engine you should add this
+Note: If you use psych engine you should add this (have in mind "ver" is the version you want to use, do not add the text, use the brain)
+(just in case minimal ver is 0.6.0 to 0.7.3)
+and no if psych 0.7.4 or more releases i won't port this due some changes Psych has (they break MT to it max so srry :D)
 
 ```xml
 
-<define name="PSYCHVERSION" value="0.7"/>
+<define name="PSYCHVERSION" value="ver"/>
 
 ```
 
-to get 0.7+ and up,
-leave it as another value to use 0.6.3 edition 
+to get 0.7.X and up add a higher version than 0.7 (example 0.7.3),
+leave it as another value to use 0.6.3 edition
 
 
 3. Now if your game compiles successfully then you should be all good to go.

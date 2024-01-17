@@ -1,14 +1,9 @@
 package modcharting;
 
-import flixel.math.FlxMath;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.FlxSprite;
-import flixel.FlxG;
-
 #if LEATHER
 import states.PlayState;
 import game.Note;
-#elseif (PSYCH && PSYCHVERSION == 0.7)
+#elseif (PSYCH && PSYCHVERSION >= "0.7")
 import states.PlayState;
 import objects.Note;
 #else
@@ -34,6 +29,7 @@ class NoteMovement
     #if LEATHER
     public static var leatherEngineOffsetStuff:Map<String, Float> = [];
     #end
+
     public static function getDefaultStrumPos(game:PlayState)
     {
         defaultStrumX = []; //reset
@@ -42,8 +38,21 @@ class NoteMovement
         defaultSkewY = []; 
         defaultScale = [];
         arrowSizes = [];
+        #if SCEModchartingTools
+        if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll)
+        {
+            keyCount = #if (LEATHER || KADE) PlayState.strumLineNotes.length-PlayState.opponentStrums.length #else game.strumLineNotes.length-game.opponentStrums.length #end; //base game doesnt have opponent strums as group
+            playerKeyCount = #if (LEATHER || KADE) PlayState.opponentStrums.length #else game.opponentStrums.length #end;
+        }
+        else
+        {
+            keyCount = #if (LEATHER || KADE) PlayState.strumLineNotes.length-PlayState.playerStrums.length #else game.strumLineNotes.length-game.playerStrums.length #end; //base game doesnt have opponent strums as group
+            playerKeyCount = #if (LEATHER || KADE) PlayState.playerStrums.length #else game.playerStrums.length #end;
+        }
+        #else
         keyCount = #if (LEATHER || KADE) PlayState.strumLineNotes.length-PlayState.playerStrums.length #else game.strumLineNotes.length-game.playerStrums.length #end; //base game doesnt have opponent strums as group
         playerKeyCount = #if (LEATHER || KADE) PlayState.playerStrums.length #else game.playerStrums.length #end;
+        #end
 
         for (i in #if (LEATHER || KADE) 0...PlayState.strumLineNotes.members.length #else 0...game.strumLineNotes.members.length #end)
         {
@@ -71,7 +80,7 @@ class NoteMovement
         #end
         totalKeyCount = keyCount + playerKeyCount;
     }
-    public static function getDefaultStrumPosEditor(game:ModchartEditorState)
+    public static function getDefaultStrumPosEditor(game:modcharting.ModchartEditorState)
     {
         #if ((PSYCH || LEATHER) && !DISABLE_MODCHART_EDITOR)
         defaultStrumX = []; //reset
@@ -80,8 +89,21 @@ class NoteMovement
         defaultSkewY = [];
         defaultScale = [];
         arrowSizes = [];
-        keyCount = game.strumLineNotes.length-game.playerStrums.length; //base game doesnt have opponent strums as group
-        playerKeyCount = game.playerStrums.length;
+        #if SCEModchartingTools
+        if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll)
+        {
+            keyCount = game.strumLineNotes.length-game.opponentStrums.length; //base game doesnt have opponent strums as group
+            playerKeyCount = game.opponentStrums.length;
+        }
+        else
+        {
+            keyCount = game.strumLineNotes.length-game.playerStrums.length; //base game doesnt have opponent strums as group
+            playerKeyCount = game.playerStrums.length;
+        }
+        #else
+        keyCount = game.strumLineNotes.length-game.opponentStrums.length; //base game doesnt have opponent strums as group
+        playerKeyCount = game.opponentStrums.length;
+        #end
 
         for (i in 0...game.strumLineNotes.members.length)
         {

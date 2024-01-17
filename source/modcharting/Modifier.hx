@@ -10,7 +10,7 @@ import game.Note;
 import game.StrumNote;
 import game.Conductor;
 import utilities.CoolUtil;
-#elseif (PSYCH && PSYCHVERSION == 0.7)
+#elseif (PSYCH && PSYCHVERSION >= "0.7")
 import states.PlayState;
 import objects.Note;
 #else 
@@ -1888,7 +1888,12 @@ class ArrowPath extends Modifier {
     public var _pathDistance: Float = 0;
 
     override public function noteMath(noteData: NotePositionData, lane: Int, curPos: Float, pf: Int) {
-        if (#if PSYCH Paths.fileExists("data/"+PlayState.SONG.song.toLowerCase()+"/customMods/path.txt", TEXT) #elseif LEATHER openfl.utils.Assets.exists(Paths.txt(PlayState.SONG.song.toLowerCase()+"/customMods/path"))#end){
+        #if PSYCH 
+        if (Paths.fileExists("data/"+PlayState.SONG.song.toLowerCase()+"/customMods/path.txt", TEXT))
+        #elseif LEATHER 
+        if (openfl.utils.Assets.exists(Paths.txt(PlayState.SONG.song.toLowerCase()+"/customMods/path")))
+        #end
+        {
             var newPosition = executePath(0, curPos, lane, lane < 4 ? 0 : 1, new Vector4(noteData.x, noteData.y, noteData.z, 0));
             noteData.x = newPosition.x;
             noteData.y = newPosition.y;
@@ -1913,7 +1918,7 @@ class ArrowPath extends Modifier {
     public function loadPath() {
         var file = CoolUtil.coolTextFile(Paths#if PSYCH .modFolders #else .txt#end(#if PSYCH "data/"+#end PlayState.SONG.song.toLowerCase()+"/customMods/path"#if PSYCH +".txt"#end));
         @:privateAccess
-        var file2 = CoolUtil.coolTextFile(Paths.getPreloadPath("data/"+PlayState.SONG.song.toLowerCase()+"/customMods/path.txt"));
+        var file2 = CoolUtil.coolTextFile(#if (PSYCH && PSYCHVERSION >= "0.7.3") Paths.getSharedPath #else Paths.getPreloadPath #end("data/"+PlayState.SONG.song.toLowerCase()+"/customMods/path.txt"));
 
         var filePath = null;
         if (file != null) {

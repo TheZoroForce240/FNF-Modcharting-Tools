@@ -64,7 +64,8 @@ class ModTable
         add(new YModifier('y'));
         add(new ZModifier('z'));
         add(new ConfusionModifier('confusion'));
-        for (i in 0...((NoteMovement.keyCount+NoteMovement.playerKeyCount)))
+    
+        for (i in 0...(NoteMovement.keyCount+NoteMovement.playerKeyCount))
         {
             add(new XModifier('x'+i, ModifierType.LANESPECIFIC));
             add(new YModifier('y'+i, ModifierType.LANESPECIFIC));

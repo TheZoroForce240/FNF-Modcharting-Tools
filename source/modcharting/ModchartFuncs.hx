@@ -1,6 +1,5 @@
 package modcharting;
 
-
 import haxe.Json;
 import openfl.net.FileReference;
 #if LUA_ALLOWED
@@ -19,9 +18,11 @@ import modding.ModchartUtilities;
 import modding.scripts.languages.HScript;
 #end
 
-#if (PSYCH && PSYCHVERSION == 0.7)
+#if (PSYCH && PSYCHVERSION >= "0.7")
+#if LUA_ALLOWED
 import psychlua.FunkinLua;
 import psychlua.HScript as FunkinHScript;
+#end
 #end
 
 import modcharting.Modifier;
@@ -37,11 +38,11 @@ using StringTools;
 //for lua and hscript
 class ModchartFuncs
 {
-    public static function loadLuaFunctions(#if (PSYCH && PSYCHVERSION == 0.7)funkin:FunkinLua#end)
+    public static function loadLuaFunctions(#if (PSYCH && PSYCHVERSION >= "0.7") funkin:FunkinLua #end)
     {
         #if PSYCH
         #if LUA_ALLOWED
-        #if (PSYCHVERSION != 0.7)
+        #if !(PSYCHVERSION >= "0.7")
         for (funkin in PlayState.instance.luaArray)
         {
             #if hscript
@@ -86,13 +87,13 @@ class ModchartFuncs
             Lua_helper.add_callback(funkin.lua, 'ease', function(beat:Float, time:Float, easeStr:String, argsAsString:String){
                 ease(beat, time, easeStr, argsAsString);                
             });
-            #if (PSYCHVERSION != 0.7) } #end
+            #if !(PSYCHVERSION >= "0.7") } #end
             
-            #if (PSYCHVERSION == 0.7)
+            #if (PSYCHVERSION >= "0.7")
                 loadHaxeFunctions(funkin);
             #end
         #end
-        #if (PSYCHVERSION != 0.7)
+        #if !(PSYCHVERSION >= "0.7")
             #if hscript
             if (FunkinLua.hscript != null)
             {
@@ -156,21 +157,31 @@ class ModchartFuncs
     }
 
     
-    public static function loadHaxeFunctions(#if PSYCHfunkin:FunkinLua#end)
+    public static function loadHaxeFunctions(#if PSYCH funkin:FunkinLua#end)
         {
-            #if (PSYCH && PSYCHVERSION == 0.7)
+            #if (PSYCH && PSYCHVERSION >= "0.7")
             #if HSCRIPT_ALLOWED
             FunkinHScript.initHaxeModule(funkin);
     
             if (funkin.hscript != null)
             {
-                funkin.hscript.set('Math', Math);
-                funkin.hscript.set('PlayfieldRenderer', PlayfieldRenderer);
-                funkin.hscript.set('ModchartUtil', ModchartUtil);
-                funkin.hscript.set('Modifier', Modifier);
-                funkin.hscript.set('NoteMovement', NoteMovement);
-                funkin.hscript.set('NotePositionData', NotePositionData);
-                funkin.hscript.set('ModchartFile', ModchartFile);
+                #if (SScript >= "6.1.80")
+                    funkin.hscript.setClass(Math);
+                    funkin.hscript.setClass(PlayfieldRenderer);
+                    funkin.hscript.setClass(ModchartUtil);
+                    funkin.hscript.setClass(Modifier);
+                    funkin.hscript.setClass(NoteMovement);
+                    funkin.hscript.setClass(NotePositionData);
+                    funkin.hscript.setClass(ModchartFile);
+                #else
+                    funkin.hscript.set('Math', Math);
+                    funkin.hscript.set('PlayfieldRenderer', PlayfieldRenderer);
+                    funkin.hscript.set('ModchartUtil', ModchartUtil);
+                    funkin.hscript.set('Modifier', Modifier);
+                    funkin.hscript.set('NoteMovement', NoteMovement);
+                    funkin.hscript.set('NotePositionData', NotePositionData);
+                    funkin.hscript.set('ModchartFile', ModchartFile);
+                #end
             }
             #end
             #elseif LEATHER
@@ -396,5 +407,3 @@ class ModchartFuncs
     }
     
 }
-
-

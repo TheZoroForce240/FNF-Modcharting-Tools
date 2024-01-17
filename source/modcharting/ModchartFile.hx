@@ -8,16 +8,17 @@ import lime.utils.Assets;
 import states.PlayState;
 import game.Note;
 import game.Conductor;
-import utilities.CoolUtil;
 #if polymod
 import polymod.backends.PolymodAssets;
 #end
 #end
 #if sys
-import sys.io.File;
 import sys.FileSystem;
+import sys.io.File;
 #end
+#if hscript
 import hscript.*;
+#end
 using StringTools;
 
 typedef ModchartJson = 
@@ -27,10 +28,8 @@ typedef ModchartJson =
     var playfields:Int;
 }
 
-
 class ModchartFile
 {
-
     //used for indexing
     public static final MOD_NAME = 0; //the modifier name
     public static final MOD_CLASS = 1; //the class/custom mod it uses
@@ -56,14 +55,16 @@ class ModchartFile
     public var data:ModchartJson = null;
     private var renderer:PlayfieldRenderer;
     public var scriptListen:Bool = false;
+    #if hscript
     public var customModifiers:Map<String, CustomModifierScript> = new Map<String, CustomModifierScript>();
+    #end
     public var hasDifficultyModchart:Bool = false; //so it loads false as default!
     
     public function new(renderer:PlayfieldRenderer)
     {
-        #if (PSYCH && PSYCHVERSION == 0.7)
+        #if (PSYCH && PSYCHVERSION >= "0.7")
             data = loadFromJson(PlayState.SONG.song.toLowerCase(), Difficulty.getString().toLowerCase() == null ? Difficulty.defaultList[PlayState.storyDifficulty] : Difficulty.getString().toLowerCase());
-        #elseif (PSYCH && PSYCHVERSION <= 0.7)
+        #elseif (PSYCH && PSYCHVERSION <= "0.7")
             data = loadFromJson(PlayState.SONG.song.toLowerCase(), CoolUtil.difficultyString().toLowerCase() == null ? CoolUtil.difficulties[PlayState.storyDifficulty] : CoolUtil.difficultyString().toLowerCase());
         #else 
             data = loadFromJson(PlayState.SONG.song.toLowerCase(), PlayState.storyDifficultyStr);
@@ -81,19 +82,20 @@ class ModchartFile
         var filePath = null;
 
         var folderShit:String = "";
-
-        var moddyFile:String = Paths.json(#if PSYCH Paths.formatToSongPath(folder)#else PlayState.SONG.song #end + '/modchart-' + difficulty.toLowerCase());
-        var moddyFile2:String = Paths.json(#if PSYCH Paths.formatToSongPath(folder)#else PlayState.SONG.song #end + '/modchart');
+        
+        var moddyFile:String = Paths.json('songs/' + Paths.formatToSongPath(folder) + '/modchart-' + difficulty.toLowerCase());
+        var moddyFile2:String = Paths.json('songs/' + Paths.formatToSongPath(folder) + '/modchart');
 
         #if MODS_ALLOWED
-        var moddyFileMods:String = Paths.modsJson(Paths.formatToSongPath(folder) + '/modchart-' + difficulty.toLowerCase());
-        var moddyFileMods2:String = Paths.modsJson(Paths.formatToSongPath(folder) + '/modchart');
+        var moddyFileMods:String = Paths.modsJson('songs/' + Paths.formatToSongPath(folder) + '/modchart-' + difficulty.toLowerCase());
+        var moddyFileMods2:String = Paths.modsJson('songs/' + Paths.formatToSongPath(folder) + '/modchart');
         #end
 
-        #if sys
         #if PSYCH
         try 
         {
+
+            #if sys
             #if MODS_ALLOWED
             if(FileSystem.exists(moddyFileMods) && difficulty.toLowerCase() != null) 
                 hasDifficultyModchart = true;
@@ -139,12 +141,58 @@ class ModchartFile
 
                 trace('${difficulty} Mochart Has Not Been Found! loading modchart.json');
             }
+            #else
+            #if MODS_ALLOWED
+            if(Assets.exists(moddyFileMods) && difficulty.toLowerCase() != null) 
+                hasDifficultyModchart = true;
+                if (Assets.exists(moddyFileMods2) && !Assets.exists(moddyFileMods))
+                    hasDifficultyModchart = false;
+            else if(Assets.exists(moddyFileMods2) && difficulty.toLowerCase() == null && !Assets.exists(moddyFileMods)) hasDifficultyModchart = false;
+            #end
+
+            if(Assets.exists(moddyFile) && difficulty.toLowerCase() != null) 
+                hasDifficultyModchart = true;
+                if (Assets.exists(moddyFile) && !Assets.exists(moddyFile))
+                    hasDifficultyModchart = false;
+            else if(Assets.exists(moddyFile2) && difficulty.toLowerCase() == null && !Assets.exists(moddyFile)) hasDifficultyModchart = false;
+
+            #if MODS_ALLOWED
+            if (hasDifficultyModchart)
+            {
+                rawJson = File.getContent(moddyFileMods).trim();
+                folderShit = moddyFileMods.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/");
+
+                trace('${difficulty} Mochart Found In Mods! loading modchart-${difficulty.toLowerCase()}.json');
+            }
+            else
+            {
+                rawJson = File.getContent(moddyFileMods2).trim();
+                folderShit = moddyFileMods2.replace("modchart.json", "customMods/");
+
+                trace('${difficulty} Mochart Has Not Been Found In Mods! loading modchart.json');
+            }
+            #end
+
+            if (hasDifficultyModchart)
+            {
+                rawJson = File.getContent(moddyFile).trim();
+                folderShit = moddyFile.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/");
+
+                trace('${difficulty} Mochart Found! loading modchart-${difficulty.toLowerCase()}.json');
+            }
+            else
+            {
+                rawJson = File.getContent(moddyFile2).trim();
+                folderShit = moddyFile2.replace("modchart.json", "customMods/");
+
+                trace('${difficulty} Mochart Has Not Been Found! loading modchart.json');
+            }
+            #end
         }
         catch(e:Dynamic)
         {
             trace(e);
         }
-        #end
         #end
         
         if (rawJson == null)
@@ -159,7 +207,7 @@ class ModchartFile
                         filePath = Paths.modsJson("song data/" + folder + '/modchart-' + difficulty.toLowerCase());
                         folderShit = PolymodAssets.getPath(filePath.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/"));
                     #else 
-                        filePath = Paths.modsJson(folder + '/modchart-' + difficulty.toLowerCase());
+                        filePath = Paths.modsJson('songs/' + folder + '/modchart-' + difficulty.toLowerCase());
                         folderShit = filePath.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/");
                     #end
 
@@ -171,11 +219,11 @@ class ModchartFile
                         filePath = Paths.modsJson("song data/" + folder + '/modchart');
                         folderShit = PolymodAssets.getPath(filePath.replace("modchart.json", "customMods/"));
                     #else 
-                        filePath = Paths.modsJson(folder + '/modchart');
+                        filePath = Paths.modsJson('songs/' + folder + '/modchart');
                         folderShit = filePath.replace("modchart.json", "customMods/");
                     #end
 
-                    trace('${difficulty} Mochart Has No FolderShit Found In Mods! loading modchart.json');
+                    trace('${difficulty} Modchart Has No FolderShit Found In Mods! loading modchart.json');
                 }
                 #end
 
@@ -186,7 +234,7 @@ class ModchartFile
                         filePath = Paths.json("song data/" + folder + '/modchart-' + difficulty.toLowerCase());
                         folderShit = PolymodAssets.getPath(filePath.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/"));
                     #else 
-                        filePath = Paths.json(folder + '/modchart-' + difficulty.toLowerCase());
+                        filePath = Paths.json('songs/' + folder + '/modchart-' + difficulty.toLowerCase());
                         folderShit = filePath.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/");
                     #end
 
@@ -198,11 +246,11 @@ class ModchartFile
                         filePath = Paths.json("song data/" + folder + '/modchart');
                         folderShit = PolymodAssets.getPath(filePath.replace("modchart.json", "customMods/"));
                     #else 
-                        filePath = Paths.json(folder + '/modchart');
+                        filePath = Paths.json('songs/' + folder + '/modchart');
                         folderShit = filePath.replace("modchart.json", "customMods/");
                     #end
 
-                    trace('${difficulty} Mochart Has No FolderShit Found! loading modchart.json');
+                    trace('${difficulty} Modchart Has No FolderShit Found! loading modchart.json');
                 }
             }
             catch(e:Dynamic)
@@ -211,7 +259,6 @@ class ModchartFile
             }
             
             trace(filePath);
-
             #if sys
             if(FileSystem.exists(filePath))
                 rawJson = File.getContent(filePath).trim();
@@ -224,22 +271,22 @@ class ModchartFile
         if (rawJson != null)
         {
             for (i in 0...difficulty.length)
-                json = cast Json.parse(rawJson); //idk why but if i remove this it don't works
-            //trace('loaded json');
+                json = cast Json.parse(rawJson);
+            trace('loaded json');
             trace(folderShit);
-            #if sys
+            #if (hscript && sys)
             if (FileSystem.isDirectory(folderShit))
             {
-                //trace("folder le exists");
+                trace("folder le exists");
                 for (file in FileSystem.readDirectory(folderShit))
                 {
-                    //trace(file);
+                    trace(file);
                     if(file.endsWith('.hx')) //custom mods!!!!
                     {
                         var scriptStr = File.getContent(folderShit + file);
                         var script = new CustomModifierScript(scriptStr);
                         customModifiers.set(file.replace(".hx", ""), script);
-                        //trace('loaded custom mod: ' + file);
+                        trace('loaded custom mod: ' + file);
                     }
                 }
             }
@@ -327,6 +374,7 @@ class ModchartFile
     }
 }
 
+#if hscript
 class CustomModifierScript
 {
     public var interp:Interp = null;
@@ -362,9 +410,6 @@ class CustomModifierScript
         interp.variables.set('PlayfieldRenderer', PlayfieldRenderer);
         interp.variables.set('ModchartUtil', ModchartUtil);
         interp.variables.set('Modifier', Modifier);
-        #if LEATHER
-        interp.variables.set('mod', Modifier); //the game crashes without this???????? what???????????
-        #end
         interp.variables.set('ModifierSubValue', Modifier.ModifierSubValue);
         interp.variables.set('BeatXModifier', Modifier.BeatXModifier);
         interp.variables.set('NoteMovement', NoteMovement);
@@ -377,16 +422,16 @@ class CustomModifierScript
 		interp.variables.set('FlxTimer', flixel.util.FlxTimer);
 		interp.variables.set('FlxTween', flixel.tweens.FlxTween);
 		interp.variables.set('FlxEase', flixel.tweens.FlxEase);
-		interp.variables.set('PlayState', #if (PSYCH && PSYCHVERSION == 0.7) states.PlayState #else PlayState #end);
-		interp.variables.set('game', #if (PSYCH && PSYCHVERSION == 0.7) states.PlayState.instance #else PlayState.instance #end);
-		interp.variables.set('Paths', #if (PSYCH && PSYCHVERSION == 0.7) backend.Paths #else Paths #end);
-		interp.variables.set('Conductor', #if (PSYCH && PSYCHVERSION == 0.7) backend.Conductor #else Conductor #end);
+		interp.variables.set('PlayState', #if (PSYCH && PSYCHVERSION >= "0.7") states.PlayState #else PlayState #end);
+		interp.variables.set('game', #if (PSYCH && PSYCHVERSION >= "0.7") states.PlayState.instance #else PlayState.instance #end);
+		interp.variables.set('Paths', #if (PSYCH && PSYCHVERSION >= "0.7") backend.Paths #else Paths #end);
+		interp.variables.set('Conductor', #if (PSYCH && PSYCHVERSION >= "0.7") backend.Conductor #else Conductor #end);
         interp.variables.set('StringTools', StringTools);
-        interp.variables.set('Note', #if (PSYCH && PSYCHVERSION == 0.7) objects.Note #else Note #end);
+        interp.variables.set('Note', #if (PSYCH && PSYCHVERSION >= "0.7") objects.Note #else Note #end);
 
         #if PSYCH
-        interp.variables.set('ClientPrefs', #if (PSYCHVERSION == 0.7) backend.ClientPrefs #else ClientPrefs #end);
-        interp.variables.set('ColorSwap', #if (PSYCHVERSION == 0.7) shaders.ColorSwap #else ColorSwap #end);
+        interp.variables.set('ClientPrefs', #if (PSYCHVERSION >= "0.7") backend.ClientPrefs #else ClientPrefs #end);
+        interp.variables.set('ColorSwap', #if (PSYCHVERSION >= "0.7") shaders.ColorSwap #else ColorSwap #end);
         #end
 
         
@@ -420,3 +465,4 @@ class CustomModifierScript
         interp = null;
     }
 }
+#end
