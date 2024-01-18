@@ -83,12 +83,12 @@ class ModchartFile
 
         var folderShit:String = "";
         
-        var moddyFile:String = Paths.json('songs/' + Paths.formatToSongPath(folder) + '/modchart-' + difficulty.toLowerCase());
-        var moddyFile2:String = Paths.json('songs/' + Paths.formatToSongPath(folder) + '/modchart');
+        var moddyFile:String = Paths.json('songs/' + #if PSYCH Paths.formatToSongPath(folder) #else PlayState.SONG.song #end + '/modchart-' + difficulty.toLowerCase());
+        var moddyFile2:String = Paths.json('songs/' + #if PSYCH Paths.formatToSongPath(folder) #else PlayState.SONG.song #end + '/modchart');
 
         #if MODS_ALLOWED
-        var moddyFileMods:String = Paths.modsJson('songs/' + Paths.formatToSongPath(folder) + '/modchart-' + difficulty.toLowerCase());
-        var moddyFileMods2:String = Paths.modsJson('songs/' + Paths.formatToSongPath(folder) + '/modchart');
+        var moddyFileMods:String = Paths.modsJson('songs/' + #if PSYCH Paths.formatToSongPath(folder) #else PlayState.SONG.song #end + '/modchart-' + difficulty.toLowerCase());
+        var moddyFileMods2:String = Paths.modsJson('songs/' + #if PSYCH Paths.formatToSongPath(folder) #else PlayState.SONG.song #end + '/modchart');
         #end
 
         #if PSYCH

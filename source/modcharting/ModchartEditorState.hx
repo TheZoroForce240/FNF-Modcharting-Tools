@@ -1098,7 +1098,7 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
         try {
             if (PlayState.SONG.needsVoices){
                 #if LEATHER 
-                vocals.loadEmbedded(Paths.voices(PlayState.SONG.songId, (PlayState.SONG.specialAudioName == null ? PlayState.storyDifficultyStr.toLowerCase() : PlayState.SONG.specialAudioName)));
+                vocals.loadEmbedded(Paths.voices(PlayState.SONG.song, (PlayState.SONG.specialAudioName == null ? PlayState.storyDifficultyStr.toLowerCase() : PlayState.SONG.specialAudioName)));
                 #elseif (PSYCH && !(PSYCHVERSION >= "0.7"))
                 vocals.loadEmbedded(Paths.voices(PlayState.SONG.song));
                 #end
@@ -1350,7 +1350,7 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
         usedKeyCount = 4;
         #end
 
-        var strumLineX:Float = #if (PSYCH && PSYCHVERSION >= "0.7") ClientPrefs.data.middleScroll #else ClientPrefs.middleScroll #end ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X;
+        var strumLineX:Float = #if (PSYCH && PSYCHVERSION >= "0.7") ClientPrefs.data.middleScroll #elseif (PSYCH && PSYCHVERSION < "0.7") ClientPrefs.middleScroll #elseif LEATHER utilities.Options.getData("middlescroll") #end #if PSYCH ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X #end;
 
 		var TRUE_STRUM_X:Float = strumLineX;
 
@@ -1409,10 +1409,12 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
 
             var middleScroll:Bool = false;
 
-            #if (PSYCHVERSION >= "0.7")
+            #if (PSYCHVERSION >= "0.7" && PSYCH)
             middleScroll = ClientPrefs.data.middleScroll;
-            #elseif !(PSYCHVERSION >= "0.7")
+            #elseif (PSYCHVERSION < "0.7" && PSYCH)
             middleScroll = ClientPrefs.middleScroll;
+            #elseif LEATHER
+            middleScroll = utilities.Options.getData("middlescroll");
             #end
 
             #if SCEModchartingTools
