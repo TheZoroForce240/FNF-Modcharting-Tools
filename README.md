@@ -32,6 +32,7 @@ Still very WIP and not everything is supported yet!
 - [Edwhak_KB](https://github.com/EdwhakKB) - Added some modifiers and fixed stuff + skewNotes
 - [Glowsoony](https://github.com/glowsoony) - Help with some 0.7.X stuff! + skewNotes too
 - [Slushi_Github](https://github.com/Slushi-Github) - Help with reorganisation with haxelib edition
+- [2JENO](https://github.com/2JENO) - Help with the Import.hx thing (fixes some things so thanks!)
 
 ## Installation 
 You need the most recent version of HaxeFlixel for it to work. (5.5.0 as of writing)
@@ -148,6 +149,8 @@ class Conductor
 	  }
 
 ```
+- In Import.hx, you should copy what mine adds and paste it there
+
 - In Project.xml:
 ```xml
 <!--Set this to the engine you're using!-->
