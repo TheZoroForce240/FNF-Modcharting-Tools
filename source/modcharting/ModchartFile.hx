@@ -19,6 +19,9 @@ import sys.io.File;
 #if hscript
 import hscript.*;
 #end
+#if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7")
+import psychlua.HScript;
+#end
 using StringTools;
 
 typedef ModchartJson = 
@@ -56,7 +59,7 @@ class ModchartFile
     private var renderer:PlayfieldRenderer;
     public var scriptListen:Bool = false;
     #if hscript
-    public var customModifiers:Map<String, CustomModifierScript> = new Map<String, CustomModifierScript>();
+    public var customModifiers: #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") Map<String, HScript> = new Map<String, HScript>(); #else Map<String, CustomModifierScript> = new Map<String, CustomModifierScript>(); #end
     #end
     public var hasDifficultyModchart:Bool = false; //so it loads false as default!
     
@@ -286,7 +289,7 @@ class ModchartFile
                     if(file.endsWith('.hx')) //custom mods!!!!
                     {
                         var scriptStr = File.getContent(folderShit + file);
-                        var script = new CustomModifierScript(scriptStr);
+			var script = #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") new HScript(null, scriptStr, null) #else new CustomModifierScript(scriptStr) #end;
                         customModifiers.set(file.replace(".hx", ""), script);
                         trace('loaded custom mod: ' + file);
                     }
