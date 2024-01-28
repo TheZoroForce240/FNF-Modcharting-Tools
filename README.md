@@ -182,7 +182,6 @@ override function preset()
 	setClass(modcharting.PlayfieldRenderer);
 	setClass(modcharting.SimpleQuaternion);
 	setClass(modcharting.SustainStrip);
-*/
 ```
 - In Import.hx, you should copy what mine adds and paste it there
 
