@@ -2,6 +2,7 @@ package modcharting;
 
 import haxe.Json;
 import openfl.net.FileReference;
+import flixel.FlxG;
 #if LUA_ALLOWED
 import llua.Lua;
 import llua.LuaL;
