@@ -195,32 +195,82 @@ class ModchartFuncs
             }*/
             #end
         }
+    #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7")
+    public static function loadHScriptFunctions(parent:FunkinHScript)
+    {
+        #if HSCRIPT_ALLOWED
+        parent.set('startMod', function(name:String, modClass:String, type:String = '', pf:Int = -1){
+            startMod(name, modClass, type, pf);
+
+            if (PlayState.instance == FlxG.state && PlayState.instance.playfieldRenderer != null)
+            {
+                PlayState.instance.playfieldRenderer.modifierTable.reconstructTable(); //needs to be reconstructed for lua modcharts
+            }
+        });
+        parent.set('setMod', function(name:String, value:Float){
+            setMod(name, value);
+        });
+        parent.set('setSubMod', function(name:String, subValName:String, value:Float){
+            setSubMod(name, subValName,value);
+        });
+        parent.set('setModTargetLane', function(name:String, value:Int){
+            setModTargetLane(name, value);
+        });
+        parent.set('setModPlayfield', function(name:String, value:Int){
+            setModPlayfield(name,value);
+        });
+        parent.set('addPlayfield', function(?x:Float = 0, ?y:Float = 0, ?z:Float = 0){
+            addPlayfield(x,y,z);
+        });
+        parent.set('removePlayfield', function(idx:Int){
+            removePlayfield(idx);
+        });
+        parent.set('tweenModifier', function(modifier:String, val:Float, time:Float, ease:String){
+            tweenModifier(modifier,val,time,ease);
+        });
+        parent.set('tweenModifierSubValue', function(modifier:String, subValue:String, val:Float, time:Float, ease:String){
+            tweenModifierSubValue(modifier,subValue,val,time,ease);
+        });
+        parent.set('setModEaseFunc', function(name:String, ease:String){
+            setModEaseFunc(name,ease);
+        });
+        parent.set('setModValue', function(beat:Float, argsAsString:String){
+            set(beat, argsAsString);
+        });
+        parent.set('easeModValue', function(beat:Float, time:Float, easeStr:String, argsAsString:String){
+            ease(beat, time, easeStr, argsAsString);
+        });
+        #end
+    }
+    #end
 
     public static function startMod(name:String, modClass:String, type:String = '', pf:Int = -1, ?instance:ModchartMusicBeatState = null)
     {
         if (instance == null)
         {
             instance = PlayState.instance;
-            if (instance.playfieldRenderer.modchart.scriptListen)
-            {
-                instance.playfieldRenderer.modchart.data.modifiers.push([name, modClass, type, pf]);
-                trace(name,modClass,type,pf);
-            }
+            if (instance.playfieldRenderer.modchart != null)
+                if (instance.playfieldRenderer.modchart.scriptListen)
+                {
+                    instance.playfieldRenderer.modchart.data.modifiers.push([name, modClass, type, pf]);
+                    trace(name,modClass,type,pf);
+                }
         }
 
-        if (instance.playfieldRenderer.modchart.customModifiers.exists(modClass))
-        {
-            var modifier = new Modifier(name, getModTypeFromString(type), pf);
-            if (instance.playfieldRenderer.modchart.customModifiers.get(modClass).interp != null)
-                instance.playfieldRenderer.modchart.customModifiers.get(modClass).interp.variables.set('instance', instance);
-            instance.playfieldRenderer.modchart.customModifiers.get(modClass).initMod(modifier); //need to do it this way instead because using current value in the modifier script didnt work
-            //var modifier = instance.playfieldRenderer.modchart.customModifiers.get(modClass).copy();
-            //modifier.tag = name; //set correct stuff because its copying shit
-            //modifier.playfield = pf;
-            //modifier.type = getModTypeFromString(type);
-            instance.playfieldRenderer.modifierTable.add(modifier);
-            return;
-        }
+        if (instance.playfieldRenderer.modchart != null)
+            if (instance.playfieldRenderer.modchart.customModifiers.exists(modClass))
+            {
+                var modifier = new Modifier(name, getModTypeFromString(type), pf);
+                if (instance.playfieldRenderer.modchart.customModifiers.get(modClass).interp != null)
+                    instance.playfieldRenderer.modchart.customModifiers.get(modClass).interp.variables.set('instance', instance);
+                instance.playfieldRenderer.modchart.customModifiers.get(modClass).initMod(modifier); //need to do it this way instead because using current value in the modifier script didnt work
+                //var modifier = instance.playfieldRenderer.modchart.customModifiers.get(modClass).copy();
+                //modifier.tag = name; //set correct stuff because its copying shit
+                //modifier.playfield = pf;
+                //modifier.type = getModTypeFromString(type);
+                instance.playfieldRenderer.modifierTable.add(modifier);
+                return;
+            }
 
         var mod = Type.resolveClass('modcharting.'+modClass);
         if (mod == null) {mod = Type.resolveClass('modcharting.'+modClass+"Modifier");} //dont need to add "Modifier" to the end of every mod
@@ -251,10 +301,11 @@ class ModchartFuncs
     {
         if (instance == null)
             instance = PlayState.instance;
-        if (instance.playfieldRenderer.modchart.scriptListen)
-        {
-            instance.playfieldRenderer.modchart.data.events.push(["set", [0, value+","+name]]);
-        }
+        if (instance.playfieldRenderer.modchart != null)
+            if (instance.playfieldRenderer.modchart.scriptListen)
+            {
+                instance.playfieldRenderer.modchart.data.events.push(["set", [0, value+","+name]]);
+            }
         if (instance.playfieldRenderer.modifierTable.modifiers.exists(name))
             instance.playfieldRenderer.modifierTable.modifiers.get(name).currentValue = value;
     }
@@ -262,10 +313,11 @@ class ModchartFuncs
     {
         if (instance == null)
             instance = PlayState.instance;
-        if (instance.playfieldRenderer.modchart.scriptListen)
-        {
-            instance.playfieldRenderer.modchart.data.events.push(["set", [0, value+","+name+":"+subValName]]);
-        }
+        if (instance.playfieldRenderer.modchart != null)
+            if (instance.playfieldRenderer.modchart.scriptListen)
+            {
+                instance.playfieldRenderer.modchart.data.events.push(["set", [0, value+","+name+":"+subValName]]);
+            }
         if (instance.playfieldRenderer.modifiers.exists(name))
             if (instance.playfieldRenderer.modifiers.get(name).subValues.exists(subValName))
                 instance.playfieldRenderer.modifiers.get(name).subValues.get(subValName).value = value;
@@ -333,10 +385,11 @@ class ModchartFuncs
         if (instance == null)
         {
             instance = PlayState.instance;
-            if (instance.playfieldRenderer.modchart.scriptListen)
-            {
-                instance.playfieldRenderer.modchart.data.events.push(["set", [beat, argsAsString]]);
-            }
+            if (instance.playfieldRenderer.modchart != null)
+                if (instance.playfieldRenderer.modchart.scriptListen)
+                {
+                    instance.playfieldRenderer.modchart.data.events.push(["set", [beat, argsAsString]]);
+                }
         }
         var args = argsAsString.trim().replace(' ', '').split(',');
 
@@ -371,10 +424,11 @@ class ModchartFuncs
         if (instance == null)
         {
             instance = PlayState.instance;
-            if (instance.playfieldRenderer.modchart.scriptListen)
-            {
-                instance.playfieldRenderer.modchart.data.events.push(["ease", [beat, time, ease, argsAsString]]);
-            }
+            if (instance.playfieldRenderer.modchart != null)
+                if (instance.playfieldRenderer.modchart.scriptListen)
+                {
+                    instance.playfieldRenderer.modchart.data.events.push(["ease", [beat, time, ease, argsAsString]]);
+                }
         }
             
         if(Math.isNaN(time))
