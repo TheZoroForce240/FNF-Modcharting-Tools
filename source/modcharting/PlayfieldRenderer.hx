@@ -234,8 +234,9 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     private function getLane(noteIndex:Int)
     {
         //Forgot SCE changes with opponentMode and forgot to add here lmao -glow
+        //Taken the && !ClientPrefs.data.middleScroll Let's see what happens now.
         #if SCEModchartingTools
-        if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll)
+        if (ClientPrefs.getGameplaySetting('opponent'))
             return (notes.members[noteIndex].mustPress ? notes.members[noteIndex].noteData : notes.members[noteIndex].noteData+NoteMovement.keyCount);
         else return (notes.members[noteIndex].mustPress ? notes.members[noteIndex].noteData+NoteMovement.keyCount : notes.members[noteIndex].noteData);
         #else
