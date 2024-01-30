@@ -1,4 +1,4 @@
-package modchartingTools.modcharting;
+package modcharting;
 
 import flixel.math.FlxMath;
 import haxe.Exception;
