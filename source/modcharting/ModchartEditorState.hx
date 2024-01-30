@@ -396,6 +396,9 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
         Conductor.changeBPM(PlayState.SONG.bpm);
         #end
 
+	if(FlxG.sound.music != null)
+		FlxG.sound.music.stop();
+
         FlxG.mouse.visible = true;
 
         #if LEATHER 
