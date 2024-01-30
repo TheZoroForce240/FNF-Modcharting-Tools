@@ -38,21 +38,8 @@ class NoteMovement
         defaultSkewY = []; 
         defaultScale = [];
         arrowSizes = [];
-        #if SCEModchartingTools
-        if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll)
-        {
-            keyCount = #if (LEATHER || KADE) PlayState.strumLineNotes.length-PlayState.opponentStrums.length #else game.strumLineNotes.length-game.opponentStrums.length #end; //base game doesnt have opponent strums as group
-            playerKeyCount = #if (LEATHER || KADE) PlayState.opponentStrums.length #else game.opponentStrums.length #end;
-        }
-        else
-        {
-            keyCount = #if (LEATHER || KADE) PlayState.strumLineNotes.length-PlayState.playerStrums.length #else game.strumLineNotes.length-game.playerStrums.length #end; //base game doesnt have opponent strums as group
-            playerKeyCount = #if (LEATHER || KADE) PlayState.playerStrums.length #else game.playerStrums.length #end;
-        }
-        #else
         keyCount = #if (LEATHER || KADE) PlayState.strumLineNotes.length-PlayState.playerStrums.length #else game.strumLineNotes.length-game.playerStrums.length #end; //base game doesnt have opponent strums as group
         playerKeyCount = #if (LEATHER || KADE) PlayState.playerStrums.length #else game.playerStrums.length #end;
-        #end
 
         for (i in #if (LEATHER || KADE) 0...PlayState.strumLineNotes.members.length #else 0...game.strumLineNotes.members.length #end)
         {
@@ -89,21 +76,9 @@ class NoteMovement
         defaultSkewY = [];
         defaultScale = [];
         arrowSizes = [];
-        #if SCEModchartingTools
-        if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll)
-        {
-            keyCount = game.strumLineNotes.length-game.opponentStrums.length; //base game doesnt have opponent strums as group
-            playerKeyCount = game.opponentStrums.length;
-        }
-        else
-        {
-            keyCount = game.strumLineNotes.length-game.playerStrums.length; //base game doesnt have opponent strums as group
-            playerKeyCount = game.playerStrums.length;
-        }
-        #else
-        keyCount = game.strumLineNotes.length-game.opponentStrums.length; //base game doesnt have opponent strums as group
-        playerKeyCount = game.opponentStrums.length;
-        #end
+        keyCount = game.strumLineNotes.length-game.playerStrums.length; //base game doesnt have opponent strums as group
+        playerKeyCount = game.playerStrums.length;
+
 
         for (i in 0...game.strumLineNotes.members.length)
         {
