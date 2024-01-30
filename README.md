@@ -182,6 +182,15 @@ override function preset()
 	setClass(modcharting.PlayfieldRenderer);
 	setClass(modcharting.SimpleQuaternion);
 	setClass(modcharting.SustainStrip);
+
+//Function initMod -- Init's the mods functions for Hscript (found in psychlua)
+//Place this function anywhere in the HScript class!
+
+public function initMod(mod:modcharting.Modifier)
+{
+	call("initMod", [mod]);
+}
+
 ```
 - In Import.hx, you should copy what mine adds and paste it there
 
