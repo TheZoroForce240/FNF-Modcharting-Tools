@@ -183,6 +183,8 @@ override function preset()
 	setClass(modcharting.SimpleQuaternion);
 	setClass(modcharting.SustainStrip);
 
+	modcharting.ModchartFuncs.loadHScriptFunctions(this);
+
 //Function initMod -- Init's the mods functions for Hscript (found in psychlua)
 //Place this function anywhere in the HScript class!
 
