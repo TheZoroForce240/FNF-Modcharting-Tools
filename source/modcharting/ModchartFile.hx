@@ -63,17 +63,13 @@ class ModchartFile
     public var customModifiers: #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") Map<String, HScript> = new Map<String, HScript>(); #else Map<String, CustomModifierScript> = new Map<String, CustomModifierScript>(); #end
     #end
     public var hasDifficultyModchart:Bool = false; //so it loads false as default!
-    #if SCEModchartingTools
-    public var OMANDMS:Bool = false;
-    #end
     public var suffixForPath:String = ''; //To not do more work lamo.
     
     public function new(renderer:PlayfieldRenderer)
     {
         suffixForPath = '';
         #if SCEModchartingTools
-        OMANDMS = ClientPrefs.getGameplaySetting('opponent');
-        if (OMANDMS) suffixForPath = '-opponentMode';
+        if (ClientPrefs.getGameplaySetting('opponent')) suffixForPath = '-opponentMode';
         #end
         #if (PSYCH)
 	    #if (PSYCHVERSION >= "0.7")
