@@ -71,7 +71,7 @@ class ModchartFile
         #if SCEModchartingTools
         if (ClientPrefs.getGameplaySetting('opponent')) suffixForPath = '-opponentMode';
         #end
-	if (ModchartFuncs.getMiddleScroll(null))
+	if (ModchartFuncs.getMiddlescroll(null))
 		suffixForPath += '-middleScroll';
         #if (PSYCH)
 	    #if (PSYCHVERSION >= "0.7")
