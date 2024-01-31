@@ -71,6 +71,8 @@ class ModchartFile
         #if SCEModchartingTools
         if (ClientPrefs.getGameplaySetting('opponent')) suffixForPath = '-opponentMode';
         #end
+	if (ModchartFuncs.getMiddleScroll(null))
+		suffixForPath += '-middleScroll';
         #if (PSYCH)
 	    #if (PSYCHVERSION >= "0.7")
            	data = loadFromJson(PlayState.SONG.song.toLowerCase(), Difficulty.getString().toLowerCase() == null ? Difficulty.defaultList[PlayState.storyDifficulty] : Difficulty.getString().toLowerCase());
