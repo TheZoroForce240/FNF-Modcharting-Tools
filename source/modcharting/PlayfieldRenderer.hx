@@ -389,8 +389,8 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         var nextHalfNotePos = getSustainPoint(noteData, timeToNextSustain*0.5);
         var nextNotePos = getSustainPoint(noteData, timeToNextSustain);
         #else
-        var nextHalfNotePos = getSustainPoint(noteData, timeToNextSustain*0.548);
-        var nextNotePos = getSustainPoint(noteData, timeToNextSustain-2.2);
+        var nextHalfNotePos = ModchartUtil.getDownscroll(instance) ? getSustainPoint(noteData, timeToNextSustain*0.5) : getSustainPoint(noteData, timeToNextSustain*0.548);
+        var nextNotePos = ModchartUtil.getDownscroll(instance) ?  getSustainPoint(noteData, timeToNextSustain) : getSustainPoint(noteData, timeToNextSustain-2.2);
         #end
 
         var flipGraphic = false;
