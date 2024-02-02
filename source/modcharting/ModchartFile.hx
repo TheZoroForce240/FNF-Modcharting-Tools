@@ -134,7 +134,7 @@ class ModchartFile
             else
             {
                 rawJson = File.getContent(moddyFileMods2).trim();
-                folderShit = moddyFileMods2.replace("modchart.json", "customMods/");
+                folderShit = moddyFileMods2.replace('modchart' + suffixForPath + '.json', "customMods/");
 
                 trace('${difficulty} Modchart Has Not Been Found In Mods! loading modchart.json');
             }
