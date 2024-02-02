@@ -385,7 +385,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
             timeToNextSustain *= -1; //weird shit that fixes upscroll lol
             // timeToNextSustain = -ModchartUtil.getFakeCrochet()/4; //weird shit that fixes upscroll lol
 
-        #if (!SCEModchartingTools || !(PSYCH && PSYCHVERSION >= "0.7"))
+        #if (!SCEModchartingTools || (PSYCH && !(PSYCHVERSION >= "0.7")))
         var nextHalfNotePos = getSustainPoint(noteData, timeToNextSustain*0.5);
         var nextNotePos = getSustainPoint(noteData, timeToNextSustain);
         #else
