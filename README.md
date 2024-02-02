@@ -36,6 +36,7 @@ Still very WIP and not everything is supported yet!
 
 ## Installation 
 You need the most recent version of HaxeFlixel for it to work. (5.5.0 as of writing)
+If your running any (engine or psych) that uses SScript (For Custom Modifiers) then I really recommened using versions 6.1.80 and up. NO LOWER VERSIONS! (If you use older versions, sorry but SScript in older version apperantly has many memory leaks when it comes to any scripts (even without modchartingTools). -glowsoony
 ### With Source:
 1. Install the haxelib by typing `haxelib git fnf-modcharting-tools https://github.com/EdwhakKB/FNF-Modcharting-Tools` in the console
 2. Now you only need to make a few small additions to get everything working,
