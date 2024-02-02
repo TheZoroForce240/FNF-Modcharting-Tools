@@ -63,16 +63,23 @@ class ModchartFile
     public var customModifiers: #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") Map<String, HScript> = new Map<String, HScript>(); #else Map<String, CustomModifierScript> = new Map<String, CustomModifierScript>(); #end
     #end
     public var hasDifficultyModchart:Bool = false; //so it loads false as default!
+
+    //Very useful edwhak, since different modifiers act with different versions of downscroll, middlescroll, and OM for either (leather) or you own engine (SCE)
     public var suffixForPath:String = ''; //To not do more work lamo.
+    public var activeDownscrollSuffix:Bool = false; //Used if you REALLY wanna have custom modcharts for downScroll lmao.
+    public var activeMiddleScrollSuffix:Bool = false; //Used if you REALLY want to have custom middle scroll modcharts.
+    public var activeOpponentmodeSuffix:Bool = false; //Used if you REALLY have custom opponentMode modcharts.
     
     public function new(renderer:PlayfieldRenderer)
     {
         suffixForPath = '';
         #if SCEModchartingTools
-        if (ClientPrefs.getGameplaySetting('opponent')) suffixForPath = '-opponentMode';
+        if (ClientPrefs.getGameplaySetting('opponent') && activeOpponentmodeSuffix) suffixForPath = '-opponentMode';
         #end
-	if (ModchartUtil.getMiddlescroll(null))
+	if (ModchartUtil.getMiddlescroll(null) && activeMiddlescrollSuffix)
 		suffixForPath += '-middleScroll';
+	if (ModchartUtil.getDownscroll(null) && activeDownscrollSuffix)
+		suffixForPath += '-downScroll';
         #if (PSYCH)
 	    #if (PSYCHVERSION >= "0.7")
            	data = loadFromJson(PlayState.SONG.song.toLowerCase(), Difficulty.getString().toLowerCase() == null ? Difficulty.defaultList[PlayState.storyDifficulty] : Difficulty.getString().toLowerCase());
