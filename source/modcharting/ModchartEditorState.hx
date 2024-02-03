@@ -350,7 +350,11 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
         super();
     }
     override public function create()
-    {
+    {	
+	#if PSYCH
+	Paths.clearStoredMemory();
+	Paths.clearUnusedMemory();
+	#end
         #if (PSYCH && PSYCHVERSION >= "0.7.3")
         camGame = initPsychCamera();
 		camHUD = new FlxCamera();
