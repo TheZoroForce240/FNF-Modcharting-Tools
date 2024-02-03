@@ -67,7 +67,7 @@ class ModchartFile
     //Very useful edwhak, since different modifiers act with different versions of downscroll, middlescroll, and OM for either (leather) or you own engine (SCE)
     public var suffixForPath:String = ''; //To not do more work lamo.
     public var activeDownscrollSuffix:Bool = false; //Used if you REALLY wanna have custom modcharts for downScroll lmao.
-    public var activeMiddleScrollSuffix:Bool = false; //Used if you REALLY want to have custom middle scroll modcharts.
+    public var activeMiddlescrollSuffix:Bool = false; //Used if you REALLY want to have custom middle scroll modcharts.
     public var activeOpponentmodeSuffix:Bool = false; //Used if you REALLY have custom opponentMode modcharts.
     
     public function new(renderer:PlayfieldRenderer)
