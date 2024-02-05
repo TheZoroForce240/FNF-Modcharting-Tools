@@ -231,7 +231,7 @@ class ModchartFile
                         filePath = Paths.json("song data/" + folder + '/modchart-' + difficulty.toLowerCase() #if SCEModchartingTools + suffixForPath #end);
                         folderShit = PolymodAssets.getPath(filePath.replace('modchart-' + difficulty.toLowerCase() + #if SCEModchartingTools suffixForPath + #end '.json', "customMods/"));
                     #else 
-                        filePath = Paths.modsJson(#if SCEModchartingTools 'songs/' + #end folder + '/modchart-' + difficulty.toLowerCase() + suffixForPath);
+                        filePath = Paths.modsJson(#if SCEModchartingTools 'songs/' + #end folder + '/modchart-' + difficulty.toLowerCase() #if SCEModchartingTools + suffixForPath #end);
                         folderShit = filePath.replace('modchart-' + difficulty.toLowerCase() + #if SCEModchartingTools suffixForPath + #end '.json', "customMods/");
                     #end
 
