@@ -77,7 +77,7 @@ class ModchartFile
     {
         #if SCEModchartingTools
         suffixForPath = '';
-        
+
         if (ClientPrefs.getGameplaySetting('opponent') && activeOpponentmodeSuffix) suffixForPath = '-opponentMode';
 
         if (ModchartUtil.getMiddlescroll(null) && activeMiddlescrollSuffix)suffixForPath += '-middleScroll';
@@ -256,7 +256,7 @@ class ModchartFile
                 {
                     #if LEATHER
                         filePath = Paths.json("song data/" + folder + '/modchart-' + difficulty.toLowerCase() #if SCEModchartingTools + suffixForPath #end);
-                        folderShit = PolymodAssets.getPath(filePath.replace('modchart-' + difficulty.toLowerCase() + suffixForPath + '.json', "customMods/"));
+                        folderShit = PolymodAssets.getPath(filePath.replace('modchart-' + difficulty.toLowerCase() + #if SCEModchartingTools suffixForPath + #end '.json', "customMods/"));
                     #else 
                         filePath = Paths.json(#if SCEModchartingTools 'songs/' + #end folder + '/modchart-' + difficulty.toLowerCase() #if SCEModchartingTools + suffixForPath #end);
                         folderShit = filePath.replace('modchart-' + difficulty.toLowerCase() + #if SCEModchartingTools suffixForPath + #end '.json', "customMods/");
