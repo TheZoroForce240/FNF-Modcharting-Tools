@@ -345,6 +345,14 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
 
     public var opponentMode:Bool = false;
 
+    #if SCEModchartingTools
+	var col:FlxColor = 0xFFFFD700;
+	var col2:FlxColor = 0xFFFFD700;
+	
+	var beat:Float = 0;
+	var dataStuff:Float = 0;
+    #end
+
     override public function new()
     {
         super();
