@@ -538,7 +538,7 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
         add(debugText);
 
 	#if SCEModchartingTools
-	if (!PlayState.SONG.disableNoteQuant) setUpNoteQuant();
+	if (ClientPrefs.data.quantNotes && !PlayState.SONG.disableNoteRGB && !PlayState.SONG.disableNoteQuantRGB) setUpNoteQuant();
 	#end
 
         super.create(); //do here because tooltips be dumb
@@ -587,7 +587,7 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
 	#if SCEModchartingTools
 	if (finishedSetUpQuantStuff)
 	{
-		if (ClientPrefs.data.quantNotes && !PlayState.SONG.disableNoteRGB)
+		if (ClientPrefs.data.quantNotes && !PlayState.SONG.disableStrumRGB)
 		{
 			var group:FlxTypedGroup<StrumArrow> = playerStrums;
 			for (this2 in group){
@@ -1524,85 +1524,82 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
 		var strumTime:Float = 0;
 		var currentBPM:Float = PlayState.SONG.bpm;
 		var newTime:Float = 0;
-		if (ClientPrefs.data.quantNotes && !PlayState.SONG.disableNoteRGB)
+		for (note in unspawnNotes) 
 		{
-			for (note in unspawnNotes) 
-			{
-				strumTime = note.strumTime;
-				newTime = strumTime;
-				for (i in 0...bpmChanges.length)
-					if (strumTime > bpmChanges[i].songTime){
-						currentBPM = bpmChanges[i].bpm;
-						newTime = strumTime - bpmChanges[i].songTime;
-					}
-				if (note.quantColorsOnNotes && note.rgbShader.enabled){
-					dataStuff = ((currentBPM * (newTime - ClientPrefs.data.noteOffset)) / 1000 / 60);
-					beat = round(dataStuff * 48, 0);
-					
-					if (!note.isSustainNote)
-					{
-						if(beat%(192/4)==0){
-							col = ClientPrefs.data.arrowRGBQuantize[0][0];
-							col2 = ClientPrefs.data.arrowRGBQuantize[0][2];
-						}
-						else if(beat%(192/8)==0){
-							col = ClientPrefs.data.arrowRGBQuantize[1][0];
-							col2 = ClientPrefs.data.arrowRGBQuantize[1][2];
-						}
-						else if(beat%(192/12)==0){
-							col = ClientPrefs.data.arrowRGBQuantize[2][0];
-							col2 = ClientPrefs.data.arrowRGBQuantize[2][2];
-						}
-						else if(beat%(192/16)==0){
-							col = ClientPrefs.data.arrowRGBQuantize[3][0];
-							col2 = ClientPrefs.data.arrowRGBQuantize[3][2];
-						}
-						else if(beat%(192/24)==0){
-							col = ClientPrefs.data.arrowRGBQuantize[4][0];
-							col2 = ClientPrefs.data.arrowRGBQuantize[4][2];
-						}
-						else if(beat%(192/32)==0){
-							col = ClientPrefs.data.arrowRGBQuantize[5][0];
-							col2 = ClientPrefs.data.arrowRGBQuantize[5][2];
-						}
-						else if(beat%(192/48)==0){
-							col = ClientPrefs.data.arrowRGBQuantize[6][0];
-							col2 = ClientPrefs.data.arrowRGBQuantize[6][2];
-						}
-						else if(beat%(192/64)==0){
-							col = ClientPrefs.data.arrowRGBQuantize[7][0];
-							col2 = ClientPrefs.data.arrowRGBQuantize[7][2];
-						}else{
-							col = 0xFF7C7C7C;
-							col2 = 0xFF3A3A3A;
-						}
-						note.rgbShader.r = col;
-						note.rgbShader.g = ClientPrefs.data.arrowRGBQuantize[0][1];
-						note.rgbShader.b = col2;
+			strumTime = note.strumTime;
+			newTime = strumTime;
+			for (i in 0...bpmChanges.length)
+				if (strumTime > bpmChanges[i].songTime){
+					currentBPM = bpmChanges[i].bpm;
+					newTime = strumTime - bpmChanges[i].songTime;
+				}
+			if (note.quantColorsOnNotes && note.rgbShader.enabled){
+				dataStuff = ((currentBPM * (newTime - ClientPrefs.data.noteOffset)) / 1000 / 60);
+				beat = round(dataStuff * 48, 0);
 				
-					}else{
-						note.rgbShader.r = note.prevNote.rgbShader.r;
-						note.rgbShader.g = note.prevNote.rgbShader.g;
-						note.rgbShader.b = note.prevNote.rgbShader.b;  
+				if (!note.isSustainNote)
+				{
+					if(beat%(192/4)==0){
+						col = ClientPrefs.data.arrowRGBQuantize[0][0];
+						col2 = ClientPrefs.data.arrowRGBQuantize[0][2];
 					}
-				}
-			   
+					else if(beat%(192/8)==0){
+						col = ClientPrefs.data.arrowRGBQuantize[1][0];
+						col2 = ClientPrefs.data.arrowRGBQuantize[1][2];
+					}
+					else if(beat%(192/12)==0){
+						col = ClientPrefs.data.arrowRGBQuantize[2][0];
+						col2 = ClientPrefs.data.arrowRGBQuantize[2][2];
+					}
+					else if(beat%(192/16)==0){
+						col = ClientPrefs.data.arrowRGBQuantize[3][0];
+						col2 = ClientPrefs.data.arrowRGBQuantize[3][2];
+					}
+					else if(beat%(192/24)==0){
+						col = ClientPrefs.data.arrowRGBQuantize[4][0];
+						col2 = ClientPrefs.data.arrowRGBQuantize[4][2];
+					}
+					else if(beat%(192/32)==0){
+						col = ClientPrefs.data.arrowRGBQuantize[5][0];
+						col2 = ClientPrefs.data.arrowRGBQuantize[5][2];
+					}
+					else if(beat%(192/48)==0){
+						col = ClientPrefs.data.arrowRGBQuantize[6][0];
+						col2 = ClientPrefs.data.arrowRGBQuantize[6][2];
+					}
+					else if(beat%(192/64)==0){
+						col = ClientPrefs.data.arrowRGBQuantize[7][0];
+						col2 = ClientPrefs.data.arrowRGBQuantize[7][2];
+					}else{
+						col = 0xFF7C7C7C;
+						col2 = 0xFF3A3A3A;
+					}
+					note.rgbShader.r = col;
+					note.rgbShader.g = ClientPrefs.data.arrowRGBQuantize[0][1];
+					note.rgbShader.b = col2;
 			
-				for (this2 in opponentStrums)
-				{
-					this2.rgbShader.r = 0xFFFFFFFF;
-					this2.rgbShader.b = 0xFF000000;  
-					this2.rgbShader.enabled = false;
-				}
-				for (this2 in playerStrums)
-				{
-					this2.rgbShader.r = 0xFFFFFFFF;
-					this2.rgbShader.b = 0xFF000000;  
-					this2.rgbShader.enabled = false;
+				}else{
+					note.rgbShader.r = note.prevNote.rgbShader.r;
+					note.rgbShader.g = note.prevNote.rgbShader.g;
+					note.rgbShader.b = note.prevNote.rgbShader.b;  
 				}
 			}
-			finishedSetUpQuantStuff = true;
-	    }
+		   
+		
+			for (this2 in opponentStrums)
+			{
+				this2.rgbShader.r = 0xFFFFFFFF;
+				this2.rgbShader.b = 0xFF000000;  
+				this2.rgbShader.enabled = false;
+			}
+			for (this2 in playerStrums)
+			{
+				this2.rgbShader.r = 0xFFFFFFFF;
+				this2.rgbShader.b = 0xFF000000;  
+				this2.rgbShader.enabled = false;
+			}
+		}
+		finishedSetUpQuantStuff = true;
 	}
 
 	var finishedSetUpQuantStuff = false;
