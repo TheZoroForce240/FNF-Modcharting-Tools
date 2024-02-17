@@ -384,7 +384,8 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
 		persistentDraw = true;
 
         #if SCEModchartingTools
-        opponentMode = ClientPrefs.getGameplaySetting('opponent');
+        opponentMode = (ClientPrefs.getGameplaySetting('opponent') && !PlayState.SONG.blockOpponentMode)
+	CoolUtil.opponentModeActive = opponentMode;
         #end
 
         var bg:FlxSprite = new FlxSprite(0, 0).loadGraphic(Paths.image('menuDesat'));
