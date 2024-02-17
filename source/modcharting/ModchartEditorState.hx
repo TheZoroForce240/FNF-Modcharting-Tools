@@ -1293,7 +1293,7 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
 		#end
 
                         #if PSYCH
-						var sustainNote:Note = new Note(daStrumTime + #if SCEModchartingTools (Conductor.stepCrochet #else (anotherStepCrochet #end * susNote), daNoteData, oldNote, true #if SCEModchartingTools , PlayState.SONG.arrowSkin  #end);
+						var sustainNote:Note = new Note(daStrumTime + #if !SCEModchartingTools (Conductor.stepCrochet #else (anotherStepCrochet #end * susNote), daNoteData, oldNote, true #if SCEModchartingTools , PlayState.SONG.arrowSkin  #end);
                         sustainNote.mustPress = gottaHitNote;
                         #else 
                         var sustainNote:Note = new Note(daStrumTime + (Std.int(Conductor.stepCrochet) * susNote) + Std.int(Conductor.stepCrochet), daNoteData, oldNote, true, 0, songNotes[4], null, [0], gottaHitNote);
