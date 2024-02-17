@@ -75,7 +75,7 @@ class ModchartFile
     {
         #if SCEModchartingTools
         suffixForPath = '';
-        if (ClientPrefs.getGameplaySetting('opponent') && activeOpponentmodeSuffix) suffixForPath = '-opponentMode';
+        if (CoolUtil.opponentModeActive && activeOpponentmodeSuffix) suffixForPath = '-opponentMode';
         #end
         #if PSYCH
 	    #if (PSYCHVERSION >= "0.7")
