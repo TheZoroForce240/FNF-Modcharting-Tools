@@ -236,7 +236,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         //Forgot SCE changes with opponentMode and forgot to add here lmao -glow
         //Taken the && !ClientPrefs.data.middleScroll Let's see what happens now.
         #if SCEModchartingTools
-        if (ClientPrefs.getGameplaySetting('opponent'))
+        if (CoolUtil.opponentModeActive)
             return (notes.members[noteIndex].mustPress ? notes.members[noteIndex].noteData : notes.members[noteIndex].noteData+NoteMovement.keyCount);
         else return (notes.members[noteIndex].mustPress ? notes.members[noteIndex].noteData+NoteMovement.keyCount : notes.members[noteIndex].noteData);
         #else
