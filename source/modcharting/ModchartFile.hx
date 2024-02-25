@@ -60,7 +60,7 @@ class ModchartFile
     private var renderer:PlayfieldRenderer;
     public var scriptListen:Bool = false;
     #if hscript
-    public var customModifiers:Map<String, Dynamoc> = new Map<String, Dynamic>();
+    public var customModifiers:Map<String, Dynamic> = new Map<String, Dynamic>();
     #end
     public var hasDifficultyModchart:Bool = false; //so it loads false as default!
 
