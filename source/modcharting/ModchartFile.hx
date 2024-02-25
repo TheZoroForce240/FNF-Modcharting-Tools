@@ -72,7 +72,7 @@ class ModchartFile
     #end
 
     #if HScriptImproved
-    public var scripts:ScriptPack;
+    public var scripts:codenameengine.scripting.ScriptPack;
     #end
     
     public function new(renderer:PlayfieldRenderer)
@@ -310,7 +310,7 @@ class ModchartFile
 			var scriptStr = File.getContent(folderShit + file);
 			var script = null;
 			#if HScriptImproved
-			script = Script.create(folderShit + file);
+			script = codenameengine.scripting.Script.create(folderShit + file);
 			scripts.add(script);
 			script.load();
 			#else
