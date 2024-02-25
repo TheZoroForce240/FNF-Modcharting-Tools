@@ -60,7 +60,7 @@ class ModchartFile
     private var renderer:PlayfieldRenderer;
     public var scriptListen:Bool = false;
     #if hscript
-    public var customModifiers: #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") Map<String, HScript> = new Map<String, HScript>(); #else Map<String, CustomModifierScript> = new Map<String, CustomModifierScript>(); #end
+    public var customModifiers: #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") #if HScriptImproved Map<String, codenameengine.scripting.HScript> = new Map<String, codenameengine.scripting.HScript>(); #else Map<String, HScript> = new Map<String, HScript>(); #end #else Map<String, CustomModifierScript> = new Map<String, CustomModifierScript>(); #end
     #end
     public var hasDifficultyModchart:Bool = false; //so it loads false as default!
 
@@ -301,7 +301,8 @@ class ModchartFile
                     if(file.endsWith('.hx')) //custom mods!!!!
                     {
                         var scriptStr = File.getContent(folderShit + file);
-			            var script = #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") new HScript(null, scriptStr) #else new CustomModifierScript(scriptStr) #end;
+			var script = #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") #if HScriptImproved new codenameengine.scripting.HScript(scriptStr)
+					#else new HScript(null, scriptStr) #end #else new CustomModifierScript(scriptStr) #end;
                         customModifiers.set(file.replace(".hx", ""), script);
                         trace('loaded custom mod: ' + file);
                     }
