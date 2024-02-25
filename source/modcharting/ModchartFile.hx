@@ -301,7 +301,7 @@ class ModchartFile
                     if(file.endsWith('.hx')) //custom mods!!!!
                     {
                         var scriptStr = File.getContent(folderShit + file);
-			var script = #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") #if HScriptImproved new codenameengine.scripting.HScript(scriptStr)
+			var script = #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") #if HScriptImproved new codenameengine.scripting.HScript(folderShit + file)
 					#else new HScript(null, scriptStr) #end #else new CustomModifierScript(scriptStr) #end;
                         customModifiers.set(file.replace(".hx", ""), script);
                         trace('loaded custom mod: ' + file);
