@@ -314,7 +314,7 @@ class ModchartFile
 			scripts.add(script);
 			script.load();
 			#else
-			script = #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") new HScript(null, scriptStr) #end #else new CustomModifierScript(scriptStr) #end;
+			script = #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") new HScript(null, scriptStr) #else new CustomModifierScript(scriptStr) #end;
 			#end
                         customModifiers.set(file.replace(".hx", ""), script);
                         trace('loaded custom mod: ' + file);
