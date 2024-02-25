@@ -21,7 +21,7 @@ import sys.io.File;
 import hscript.*;
 #end
 #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7")
-import psychlua.HScript;
+import psychlua.HScript as FunkinHScript;
 #end
 using StringTools;
 
@@ -72,7 +72,6 @@ class ModchartFile
     #end
 
     #if HScriptImproved
-    public var scripts:codenameengine.scripting.ScriptPack;
     public var hasImproved:Bool = false;
     #end
     
@@ -96,9 +95,6 @@ class ModchartFile
         loadPlayfields();
         loadModifiers();
         loadEvents();
-	#if HScriptImproved
-	if (hasImproved) (scripts = new codenameengine.scripting.ScriptPack("ModchartFile")).setParent(this);
-	#end
     }
 
     public function loadFromJson(folder:String, difficulty:String):ModchartJson //load da shit
@@ -308,25 +304,25 @@ class ModchartFile
                     trace(file);
                     if(file.endsWith('.hx')) //custom mods!!!!
                     {
-			var scriptStr = File.getContent(folderShit + file);
-			var justFilePlace = folderShit + file;
-			var script = null;
-			//Only for SCE Ill add support for the editor later....
-			#if HScriptImproved
-			if (justFilePlace.contains('--HSI'))
-			{
-				script = codenameengine.scripting.Script.create(folderShit + file);
-				 if (states.PlayState.instance == flixel.FlxG.state)
-                           		 states.PlayState.instance.scripts.add(script);
-				script.load();
-				hasImproved = true;
-			}else{
-				script = new HScript(null, scriptStr);
-			}
-			#else
-			script = #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") new HScript(null, scriptStr) #else new CustomModifierScript(scriptStr) #end;
-			#end
-                        customModifiers.set(file.replace(".hx", ""), script);
+                        var scriptStr = File.getContent(folderShit + file);
+                        var justFilePlace = folderShit + file;
+                        var scriptInit:Dynamic = null;
+                        //Only for SCE Ill add support for the editor later....
+                        #if HScriptImproved
+                        if (justFilePlace.contains('--HSI'))
+                        {
+                            scriptInit = codenameengine.scripting.Script.create(folderShit + file);
+                            if (states.PlayState.instance == flixel.FlxG.state)
+                                states.PlayState.instance.scripts.add(scriptInit);
+                            scriptInit.load();
+                            hasImproved = true;
+                        }else{
+                            scriptInit = new FunkinHScript(null, scriptStr);
+                        }
+                        #else
+                        scriptInit = #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") new FunkinHScript(null, scriptStr) #else new CustomModifierScript(scriptStr) #end;
+                        #end
+                        customModifiers.set(file.replace(".hx", "").replace("--HSI", ""), scriptInit);
                         trace('loaded custom mod: ' + file);
                     }
                 }
