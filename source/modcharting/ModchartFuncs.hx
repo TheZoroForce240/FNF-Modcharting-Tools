@@ -197,7 +197,7 @@ class ModchartFuncs
             #end
         }
     #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7")
-    public static function loadHScriptFunctions(parent:FunkinHScript)
+    public static function loadHScriptFunctions(parent: #if HScriptImproved codenameengine.scripting.Script #else FunkinHScript #end)
     {
         #if HSCRIPT_ALLOWED
         parent.set('startMod', function(name:String, modClass:String, type:String = '', pf:Int = -1){
