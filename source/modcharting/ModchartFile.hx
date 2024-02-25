@@ -60,7 +60,7 @@ class ModchartFile
     private var renderer:PlayfieldRenderer;
     public var scriptListen:Bool = false;
     #if hscript
-    public var customModifiers: #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") #if HScriptImproved Map<String, codenameengine.scripting.HScript> = new Map<String, codenameengine.scripting.HScript>(); #else Map<String, HScript> = new Map<String, HScript>(); #end #else Map<String, CustomModifierScript> = new Map<String, CustomModifierScript>(); #end
+    public var customModifiers:Map<String, Dynamoc> = new Map<String, Dynamic>();
     #end
     public var hasDifficultyModchart:Bool = false; //so it loads false as default!
 
@@ -69,6 +69,10 @@ class ModchartFile
     #if SCEModchartingTools
     public var suffixForPath:String = ''; //To not do more work lamo.
     public var activeOpponentmodeSuffix:Bool = false; //Used if you REALLY have custom opponentMode modcharts.
+    #end
+
+    #if HScriptImproved
+    public var scripts:ScriptPack;
     #end
     
     public function new(renderer:PlayfieldRenderer)
@@ -91,6 +95,9 @@ class ModchartFile
         loadPlayfields();
         loadModifiers();
         loadEvents();
+	#if HScriptImproved
+	(scripts = new codenameengine.scripting.ScriptPack("ModchartFile")).setParent(this);
+	#end
     }
 
     public function loadFromJson(folder:String, difficulty:String):ModchartJson //load da shit
@@ -300,9 +307,15 @@ class ModchartFile
                     trace(file);
                     if(file.endsWith('.hx')) //custom mods!!!!
                     {
-                        var scriptStr = File.getContent(folderShit + file);
-			var script = #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") #if HScriptImproved new codenameengine.scripting.HScript(folderShit + file)
-					#else new HScript(null, scriptStr) #end #else new CustomModifierScript(scriptStr) #end;
+			var scriptStr = File.getContent(folderShit + file);
+			var script = null;
+			#if HScriptImproved
+			script = Script.create(folderShit + file);
+			scripts.add(script);
+			script.load();
+			#else
+			script = #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") new HScript(null, scriptStr) #end #else new CustomModifierScript(scriptStr) #end;
+			#end
                         customModifiers.set(file.replace(".hx", ""), script);
                         trace('loaded custom mod: ' + file);
                     }
