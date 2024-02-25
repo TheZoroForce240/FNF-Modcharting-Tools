@@ -73,6 +73,7 @@ class ModchartFile
 
     #if HScriptImproved
     public var scripts:codenameengine.scripting.ScriptPack;
+    public var hasImproved:Bool = false;
     #end
     
     public function new(renderer:PlayfieldRenderer)
@@ -96,7 +97,7 @@ class ModchartFile
         loadModifiers();
         loadEvents();
 	#if HScriptImproved
-	(scripts = new codenameengine.scripting.ScriptPack("ModchartFile")).setParent(this);
+	if (hasImproved) (scripts = new codenameengine.scripting.ScriptPack("ModchartFile")).setParent(this);
 	#end
     }
 
@@ -308,11 +309,20 @@ class ModchartFile
                     if(file.endsWith('.hx')) //custom mods!!!!
                     {
 			var scriptStr = File.getContent(folderShit + file);
+			var justFilePlace = folderShit + file;
 			var script = null;
+			//Only for SCE Ill add support for the editor later....
 			#if HScriptImproved
-			script = codenameengine.scripting.Script.create(folderShit + file);
-			scripts.add(script);
-			script.load();
+			if (justFilePlace.contains('--HSI'))
+			{
+				script = codenameengine.scripting.Script.create(folderShit + file);
+				 if (states.PlayState.instance == flixel.FlxG.state)
+                           		 states.PlayState.instance.scripts.add(script);
+				script.load();
+				hasImproved = true;
+			}else{
+				script = new HScript(null, scriptStr);
+			}
 			#else
 			script = #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") new HScript(null, scriptStr) #else new CustomModifierScript(scriptStr) #end;
 			#end
