@@ -338,9 +338,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
             ModchartUtil.defaultFOV*(Math.PI/180), -(strumNote.width/2), -(strumNote.height/2));
         else
             thisNotePos = new Vector3D(noteData.x, noteData.y, 0);
-
-        var skewX = ModchartUtil.getStrumSkew(strumNote, false);
-        var skewY = ModchartUtil.getStrumSkew(strumNote, true);
+        
         noteData.x = thisNotePos.x;
         noteData.y = thisNotePos.y;
         if (changeX) {
@@ -368,8 +366,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         else
             thisNotePos = new Vector3D(noteData.x, noteData.y, 0);
 
-        var skewX = ModchartUtil.getNoteSkew(daNote, false);
-        var skewY = ModchartUtil.getNoteSkew(daNote, true);
         noteData.x = thisNotePos.x;
         noteData.y = thisNotePos.y;
         if (changeX) {
