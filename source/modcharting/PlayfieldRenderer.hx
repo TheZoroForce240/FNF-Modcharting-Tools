@@ -1,6 +1,7 @@
 package modcharting;
 
-
+import flixel.tweens.misc.BezierPathTween;
+import flixel.tweens.misc.BezierPathNumTween;
 import flixel.util.FlxTimer.FlxTimerManager;
 import flixel.math.FlxMath;
 import flixel.tweens.FlxTween;
@@ -115,9 +116,13 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
 
     override function update(elapsed:Float) 
     {
-        eventManager.update(elapsed);
-        tweenManager.update(elapsed); //should be automatically paused when you pause in game
-        timerManager.update(elapsed);
+        try {
+            eventManager.update(elapsed);
+            tweenManager.update(elapsed); //should be automatically paused when you pause in game
+            timerManager.update(elapsed);
+        } catch(e) {
+            trace(e);
+        }
         super.update(elapsed);
     }
 
@@ -130,7 +135,11 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         strumGroup.cameras = this.cameras;
         notes.cameras = this.cameras;
         
-        drawStuff(getNotePositions());
+        try {
+            drawStuff(getNotePositions());
+        } catch(e) {
+            trace(e);
+        }
         //draw notes to screen
     }
 
@@ -321,14 +330,23 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     {
         if (noteData.alpha <= 0)
             return;
+        var changeX:Bool = noteData.z != 0;
         var strumNote = strumGroup.members[noteData.index];
-        var thisNotePos = ModchartUtil.calculatePerspective(new Vector3D(noteData.x+(strumNote.width/2), noteData.y+(strumNote.height/2), noteData.z*0.001), 
-        ModchartUtil.defaultFOV*(Math.PI/180), -(strumNote.width/2), -(strumNote.height/2));
+        var thisNotePos;
+        if (changeX)
+            thisNotePos = ModchartUtil.calculatePerspective(new Vector3D(noteData.x+(strumNote.width/2), noteData.y+(strumNote.height/2), noteData.z*0.001), 
+            ModchartUtil.defaultFOV*(Math.PI/180), -(strumNote.width/2), -(strumNote.height/2));
+        else
+            thisNotePos = new Vector3D(noteData.x, noteData.y, 0);
 
+        var skewX = ModchartUtil.getStrumSkew(strumNote, false);
+        var skewY = ModchartUtil.getStrumSkew(strumNote, true);
         noteData.x = thisNotePos.x;
         noteData.y = thisNotePos.y;
-        noteData.scaleX *= (1/-thisNotePos.z);
-        noteData.scaleY *= (1/-thisNotePos.z);
+        if (changeX) {
+            noteData.scaleX *= (1/-thisNotePos.z);
+            noteData.scaleY *= (1/-thisNotePos.z);
+        }
         // noteData.skewX = skewX + noteData.skewX;
         // noteData.skewY = skewY + noteData.skewY;
 
@@ -341,14 +359,23 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     {
         if (noteData.alpha <= 0)
             return;
+        var changeX:Bool = noteData.z != 0;
         var daNote = notes.members[noteData.index];
-        var thisNotePos = ModchartUtil.calculatePerspective(new Vector3D(noteData.x+(daNote.width/2)+ModchartUtil.getNoteOffsetX(daNote, instance), noteData.y+(daNote.height/2), noteData.z*0.001), 
-        ModchartUtil.defaultFOV*(Math.PI/180), -(daNote.width/2), -(daNote.height/2));
+        var thisNotePos;
+        if (changeX)
+            thisNotePos = ModchartUtil.calculatePerspective(new Vector3D(noteData.x+(daNote.width/2)+ModchartUtil.getNoteOffsetX(daNote, instance), noteData.y+(daNote.height/2), noteData.z*0.001), 
+            ModchartUtil.defaultFOV*(Math.PI/180), -(daNote.width/2), -(daNote.height/2));
+        else
+            thisNotePos = new Vector3D(noteData.x, noteData.y, 0);
 
+        var skewX = ModchartUtil.getNoteSkew(daNote, false);
+        var skewY = ModchartUtil.getNoteSkew(daNote, true);
         noteData.x = thisNotePos.x;
         noteData.y = thisNotePos.y;
-        noteData.scaleX *= (1/-thisNotePos.z);
-        noteData.scaleY *= (1/-thisNotePos.z);
+        if (changeX) {
+            noteData.scaleX *= (1/-thisNotePos.z);
+            noteData.scaleY *= (1/-thisNotePos.z);
+        }
         // noteData.skewX = skewX + noteData.skewX;
         // noteData.skewY = skewY + noteData.skewY;
         //set note position using the position data
@@ -489,6 +516,20 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         tween.manager = tweenManager;
         return tween;
     }
+    
+    public function createBezierPathTween(Object:Dynamic, Values:Dynamic, Duration:Float, ?Options:TweenOptions):FlxTween
+        {
+            var tween:FlxTween = tweenManager.bezierPathTween(Object, Values, Duration, Options);
+            tween.manager = tweenManager;
+            return tween;
+        }
+    
+    public function createBezierPathNumTween(Points:Array<Float>, Duration:Float, ?Options:TweenOptions, ?TweenFunction:Float->Void):FlxTween
+        {
+            var tween:FlxTween = tweenManager.bezierPathNumTween(Points, Duration, Options,TweenFunction);
+            tween.manager = tweenManager;
+            return tween;
+        }
 
     override public function destroy()
     {

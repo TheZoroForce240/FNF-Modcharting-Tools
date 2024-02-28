@@ -1850,37 +1850,67 @@ class ShakyNotesModifier extends Modifier
     }
 }
 
-// class ShakeNotesModifier extends Modifier
-// {
-//     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
-//     {
-//         noteData.x += FlxMath.fastSin(1)*(currentValue * FlxG.random.int(1, 20));
-//         noteData.y += FlxMath.fastSin(1)*(currentValue * FlxG.random.int(1, 20));
-//     }
-//     override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
-//     {
-//         noteMath(noteData, lane, 0, pf);
-//     }
-// }
+class ShakeNotesModifier extends Modifier
+{
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        noteData.x += FlxMath.fastSin(0.1)*(currentValue * FlxG.random.int(1, 20));
+        noteData.y += FlxMath.fastSin(0.1)*(currentValue * FlxG.random.int(1, 20));
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteMath(noteData, lane, 0, pf);
+    }
+}
     
-// class TordnadoModifier extends Modifier
-// {
-//     override function setupSubValues()
-//     {
-//         subValues.set('speed', new ModifierSubValue(1.0));
-//     }
-//     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
-//     {
-//         // thank you 4mbr0s3 & andromeda for the modifier lol
-//         var playerColumn = lane % NoteMovement.keyCount;
-//         var columnPhaseShift = playerColumn * Math.PI / 3;
-//         var phaseShift = lane / 135;
-//         var returnReceptorToZeroOffsetX = (-Math.cos(-columnPhaseShift) + 1) / 2 * Note.swagWidth * 3;
-//         var offsetX = (Math.cos(phaseShift - columnPhaseShift) + 1) / 2 * Note.swagWidth * 3 - returnReceptorToZeroOffsetX;
+class TordnadoModifier extends Modifier
+{
+    override function setupSubValues()
+    {
+        subValues.set('speed', new ModifierSubValue(1.0));
+    }
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+
+        // thank you 4mbr0s3 & andromeda for the modifier lol -- LETS GOOOO FINALLY I FIGURED IT OUT
+        var playerColumn = lane % NoteMovement.keyCount;
+        var columnPhaseShift = playerColumn * Math.PI / 3;
+        var phaseShift = (curPos / 135 ) * subValues.get('speed').value * 0.2;
+        var returnReceptorToZeroOffsetX = (-Math.cos(-columnPhaseShift) + 1) / 2 * Note.swagWidth * 3;
+        var offsetX = (-Math.cos((phaseShift - columnPhaseShift)) + 1) / 2 * Note.swagWidth * 3 - returnReceptorToZeroOffsetX;
         
-//         noteData.x += FlxMath.fastSin(offsetX + (curPos*0.004))*(NoteMovement.arrowSizes[lane] * currentValue*0.5); //idk if tornado will do shit but ig i tried?
-//     }
-// }
+        noteData.x += offsetX * currentValue;
+    }
+}
+
+class ZigZagModifier extends Modifier
+{
+    override function setupSubValues()
+    {
+        baseValue = 0.0;
+        currentValue = 1.0;
+        subValues.set('amplitude', new ModifierSubValue(1.0));
+        subValues.set('longitude', new ModifierSubValue(1.0));
+    }
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        // thank you an ammar for the math LOL
+
+        var d = subValues.get('amplitude').value;
+        var c = subValues.get('longitude').value;
+
+        var a = c * (-1+2 * mod(Math.floor((d*curPos)),2));
+        var b = -c * mod(Math.floor((d*curPos)),2);
+        var x = ((d*curPos)-Math.floor((d*curPos))) * a+b+(c/2);
+
+        noteData.x += x*currentValue;
+
+    }
+    function mod(a:Float, b:Float):Float
+    {
+        return (a/b);
+    }
+}
 
 //OH MY FUCKING GOD, thanks to @noamlol for the code of this thing//
 class ArrowPath extends Modifier {

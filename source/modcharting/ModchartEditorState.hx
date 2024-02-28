@@ -228,7 +228,7 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
         StealthModifier, NoteStealthModifier, LaneStealthModifier,
         SuddenModifier, HiddenModifier, VanishModifier, BlinkModifier,
         //Path Modifiers
-        IncomingAngleModifier, InvertSineModifier, DizzyModifier,
+        IncomingAngleModifier, InvertSineModifier, DizzyModifier, TordnadoModifier,
         EaseCurveModifier, EaseCurveXModifier, EaseCurveYModifier, EaseCurveZModifier, EaseCurveAngleModifier,
         BounceXModifier, BounceYModifier, BounceZModifier, BumpyModifier, BeatXModifier, BeatYModifier, BeatZModifier, 
         ShrinkModifier,
@@ -2038,6 +2038,8 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
         explainString = "Modifier similar to TanWave but in angle";
             case 'ShakyNotesModifier':
         explainString = "Modifier used to make notes shake in their on possition";
+            case 'TordnadoModifier':
+        explainString = "Modifier similar to invertSine, but notes will do their own path instead";
             case 'ArrowPath':
         explainString = "This modifier its able to make custom paths for the mods so this should be a very helpful tool";
         }
