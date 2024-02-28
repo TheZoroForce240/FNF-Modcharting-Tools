@@ -330,14 +330,12 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     {
         if (noteData.alpha <= 0)
             return;
-        var changeX:Bool = noteData.z != 0;
+        var changeX:Bool = ((noteData.z > 0 || noteData.z < 0 ) && noteData.z != 0);
         var strumNote = strumGroup.members[noteData.index];
-        var thisNotePos;
-        if (changeX)
-            thisNotePos = ModchartUtil.calculatePerspective(new Vector3D(noteData.x+(strumNote.width/2), noteData.y+(strumNote.height/2), noteData.z*0.001), 
-            ModchartUtil.defaultFOV*(Math.PI/180), -(strumNote.width/2), -(strumNote.height/2));
-        else
-            thisNotePos = new Vector3D(noteData.x, noteData.y, 0);
+        var thisNotePos = ? changeX
+            ModchartUtil.calculatePerspective(new Vector3D(noteData.x+(strumNote.width/2), noteData.y+(strumNote.height/2), noteData.z*0.001), 
+            ModchartUtil.defaultFOV*(Math.PI/180), -(strumNote.width/2), -(strumNote.height/2))
+            : new Vector3D(noteData.x, noteData.y, 0);
         
         noteData.x = thisNotePos.x;
         noteData.y = thisNotePos.y;
@@ -357,14 +355,12 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     {
         if (noteData.alpha <= 0)
             return;
-        var changeX:Bool = noteData.z != 0;
+        var changeX:Bool = ((noteData.z > 0 || noteData.z < 0 ) && noteData.z != 0);
         var daNote = notes.members[noteData.index];
-        var thisNotePos;
-        if (changeX)
-            thisNotePos = ModchartUtil.calculatePerspective(new Vector3D(noteData.x+(daNote.width/2)+ModchartUtil.getNoteOffsetX(daNote, instance), noteData.y+(daNote.height/2), noteData.z*0.001), 
-            ModchartUtil.defaultFOV*(Math.PI/180), -(daNote.width/2), -(daNote.height/2));
-        else
-            thisNotePos = new Vector3D(noteData.x, noteData.y, 0);
+        var thisNotePos = changeX ?
+            ModchartUtil.calculatePerspective(new Vector3D(noteData.x+(daNote.width/2)+ModchartUtil.getNoteOffsetX(daNote, instance), noteData.y+(daNote.height/2), noteData.z*0.001), 
+            ModchartUtil.defaultFOV*(Math.PI/180), -(daNote.width/2), -(daNote.height/2))
+            : new Vector3D(noteData.x, noteData.y, 0);
 
         noteData.x = thisNotePos.x;
         noteData.y = thisNotePos.y;
