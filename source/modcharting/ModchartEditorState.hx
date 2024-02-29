@@ -1126,8 +1126,8 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
         Conductor.bpm = songData.bpm;
 
         #if (PSYCH && PSYCHVERSION >= "0.7.3")
-        var boyfriendVocals:String = loadCharacterFile(PlayState.SONG.player1).vocals_file;
-		var dadVocals:String = loadCharacterFile(PlayState.SONG.player2).vocals_file;
+        var boyfriendVocals:String = getVocalFromCharacter(PlayState.SONG.player1);
+		var dadVocals:String = getVocalFromCharacter(PlayState.SONG.player2);
         #end
 
         vocals = new FlxSound();
@@ -1144,17 +1144,17 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
 
                 #if SCEModchartingTools
                 var normalVocals = Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), songData.song, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''));
-				var playerVocals = Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), songData.song, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''), (boyfriendVocals == null || boyfriendVocals.length < 1) ? '' : boyfriendVocals);
+				var playerVocals = Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), songData.song, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''), (boyfriendVocals == null || boyfriendVocals.length < 1) ? 'Player' : boyfriendVocals);
 				vocals.loadEmbedded(playerVocals != null ? playerVocals : normalVocals);
 
-                var oppVocals = Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), songData.song, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''), (dadVocals == null || dadVocals.length < 1) ? '' : dadVocals);
+                var oppVocals = Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), songData.song, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''), (dadVocals == null || dadVocals.length < 1) ? 'Opponent' : dadVocals);
                 if(oppVocals != null) opponentVocals.loadEmbedded(oppVocals);
                 #elseif (PSYCH && PSYCHVERSION >= "0.7.3" && !SCEModchartingTools)
                 var normalVocals = Paths.voices(songData.song);
-				var playerVocals = Paths.voices(songData.song, (boyfriendVocals == null || boyfriendVocals.length < 1) ? '' : boyfriendVocals);
+				var playerVocals = Paths.voices(songData.song, (boyfriendVocals == null || boyfriendVocals.length < 1) ? 'Player' : boyfriendVocals);
 				vocals.loadEmbedded(playerVocals != null ? playerVocals : normalVocals);
 
-                var oppVocals = Paths.voices(songData.song, (dadVocals == null || dadVocals.length < 1) ? '' : dadVocals);
+                var oppVocals = Paths.voices(songData.song, (dadVocals == null || dadVocals.length < 1) ? 'Opponent' : dadVocals);
                 if(oppVocals != null) opponentVocals.loadEmbedded(oppVocals);
                 #end
             }
@@ -1621,29 +1621,19 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
 
     
     #if (PSYCH && PSYCHVERSION >= "0.7.3")
-    function loadCharacterFile(char:String):objects.Character.CharacterFile {
-		var characterPath:String = #if SCEModchartingTools 'data/characters/' + char + '.json' #else 'characters/' + char + '.json' #end;
-		#if MODS_ALLOWED
-		var path:String = Paths.modFolders(characterPath);
-		if (!FileSystem.exists(path)) {
-			path = Paths.getSharedPath(characterPath);
-		}
-
-		if (!FileSystem.exists(path))
-		#else
-		var path:String = Paths.getSharedPath(characterPath);
-		if (!OpenFlAssets.exists(path))
-		#end
+	function getVocalFromCharacter(char:String)
+	{
+		try
 		{
-			path = Paths.getSharedPath(#if SCEModchartingTools 'data/characters/' + objects.Character.DEFAULT_CHARACTER + '.json' #else 'characters/' + objects.Character.DEFAULT_CHARACTER + '.json'#end); //If a character couldn't be found, change him to BF just to prevent a crash
+			var path:String = Paths.getPath( #if SCEModchartingTools 'data/characters/$char.json' #else 'characters/$char.json' #end , TEXT, null, true);
+			#if MODS_ALLOWED
+			var character:Dynamic = Json.parse(File.getContent(path));
+			#else
+			var character:Dynamic = Json.parse(Assets.getText(path));
+			#end
+			return character.vocals_file;
 		}
-
-		#if MODS_ALLOWED
-		var rawJson = File.getContent(path);
-		#else
-		var rawJson = OpenFlAssets.getText(path);
-		#end
-		return cast Json.parse(rawJson);
+		return null;
 	}
     #end
 
