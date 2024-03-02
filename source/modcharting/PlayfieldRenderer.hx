@@ -101,7 +101,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         //fix stupid crash because the renderer in playstate is still technically null at this point and its needed for json loading
         instance.playfieldRenderer = this;
 
-        tweenManager = new FlxTweenManager();
+        tweenManager = new TweenManager();
         timerManager = new FlxTimerManager();
         eventManager = new ModchartEventManager(this);
         modifierTable = new ModTable(instance, this);
