@@ -353,12 +353,21 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
 	var dataStuff:Float = 0;
     #end
 
+    #if (!SCEModchartingTools && (PSYCH && PSYCHVERSION >= "0.7.1"))
+    var backupGpu:Bool;
+    #end
+
     override public function new()
     {
         super();
     }
     override public function create()
     {	
+	//SCE Ed's and mine's engine already fixes this without this code.
+	#if (!SCEModchartingTools && (PSYCH && PSYCHVERSION >= "0.7.1"))
+	backupGpu = ClientPrefs.data.cacheOnGPU;
+	ClientPrefs.data.cacheOnGPU = false;
+	#end
 	#if PSYCH
 	Paths.clearStoredMemory();
 	Paths.clearUnusedMemory();
@@ -579,6 +588,12 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
 
         
     }
+    #if (!SCEModchartingTools && (PSYCH && PSYCHVERSION >= "0.7.1"))
+    override public function destroy() {
+        ClientPrefs.data.cacheOnGPU = backupGpu;
+        super.destroy();
+    }
+    #end
     var dirtyUpdateNotes:Bool = false;
     var dirtyUpdateEvents:Bool = false;
     var dirtyUpdateModifiers:Bool = false;
