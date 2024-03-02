@@ -305,11 +305,12 @@ class ModchartFile
                     if(file.endsWith('.hx')) //custom mods!!!!
                     {
                         var scriptStr = File.getContent(folderShit + file);
-                        var justFilePlace = folderShit + file;
                         var scriptInit:Dynamic = null;
-                        //Only for SCE Ill add support for the editor later....
-                        #if HScriptImproved
-                        if (justFilePlace.contains('--HSI'))
+			#if (HScriptImproved && SCEModchartingTools)
+			//Only for SCE Ill add support for the editor later....
+			var justFilePlace = folderShit + file;
+                        var useHSI:Bool = (PlayState.SONG != null && PlayState.SONG.usesHSIScripts);
+                        if (useHSI)
                         {
                             scriptInit = codenameengine.scripting.Script.create(folderShit + file);
                             if (states.PlayState.instance == flixel.FlxG.state)
