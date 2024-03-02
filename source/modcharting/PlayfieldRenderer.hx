@@ -20,6 +20,7 @@ import flixel.FlxG;
 import modcharting.Modifier;
 import managers.*;
 import flixel.system.FlxAssets.FlxShader;
+import managers.TweenManager;
 
 #if LEATHER
 import states.PlayState;
@@ -68,7 +69,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
 
     public var eventManager:ModchartEventManager;
     public var modifierTable:ModTable;
-    public var tweenManager:FlxTweenManager = null;
+    public var tweenManager:TweenManager = null;
     public var timerManager:FlxTimerManager = null;
 
     public var modchart:ModchartFile;
