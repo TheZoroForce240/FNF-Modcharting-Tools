@@ -32,7 +32,7 @@ Still very WIP and not everything is supported yet!
 - [Edwhak_KB](https://github.com/EdwhakKB) - Added some modifiers and fixed stuff + skewNotes
 - [Glowsoony](https://github.com/glowsoony) - Help with some 0.7.X stuff! + skewNotes too
 - [Slushi_Github](https://github.com/Slushi-Github) - Help with reorganisation with haxelib edition
-- [2JENO](https://github.com/2JENO) - Help with the Import.hx thing (fixes some things so thanks!)
+- [2JENO](https://github.com/2JENO) - Help with the Import.hx, GPU thing (fixes some things so thanks!)
 
 ## Installation 
 1. You need the most recent version of HaxeFlixel for it to work. (5.5.0 as of writing)
