@@ -9,6 +9,18 @@ import flixel.tweens.misc.*;
 
 class TweenManager extends FlxTweenManager
 {
+	public function bezierPathTween(Object:Dynamic, Values:Dynamic<Array<Float>>, Duration:Float = 1, ?Options:TweenOptions):BezierPathTween{
+		@:privateAccess{
+			var tween = new BezierPathTween(Options, this);
+			tween.tween(Object, Values, Duration);
+			return add(tween);
+		}
+	}
+	public function bezierPathNumTween(Points:Array<Float>, Duration:Float = 1, ?Options:TweenOptions,?TweenFunction:Float->Void):BezierPathNumTween{
+		var tween = new BezierPathNumTween(Options, this);
+		tween.tween(Points, Duration, TweenFunction);
+		return add(tween);
+	}
 	/**
 	 * Tweens numeric public properties of an Object. Shorthand for creating a VarTween, starting it and adding it to the TweenManager.
 	 *
@@ -271,7 +283,6 @@ class TweenManager extends FlxTweenManager
 	 * @param	Duration	Duration of the tween in seconds.
 	 * @param	Options		A structure with tween options.
 	 * @return	The added BezierPathTween object.
-	 * @since   4.2.0
 	 */
 	public function createBezierPathTween(Object:Dynamic, Values:Dynamic<Array<Float>>, Duration:Float = 1, ?Options:TweenOptions):BezierPathTween
 	{
