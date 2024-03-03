@@ -42,7 +42,6 @@ Still very WIP and not everything is supported yet!
 2. Now you only need to make a few small additions to get everything working,
 - In MusicBeatState.hx:
 ```haxe
-
 class MusicBeatState extends modcharting.ModchartMusicBeatState
 {
   
@@ -55,21 +54,22 @@ import modcharting.PlayfieldRenderer;
   
 ```
 ```haxe
-
 override public function create()
 {
-
-  //Add this before camfollow stuff and after strumLineNotes and notes have been made
-  playfieldRenderer = new PlayfieldRenderer(strumLineNotes, notes, this);
-  playfieldRenderer.cameras = [camHUD];
-  add(playfieldRenderer);
-  add(grpNoteSplashes); /*place splashes in front (add this if the engine has splashes).
-  If you have added this: remove(or something) the add(grpNoteSplashes); which is by default below the add(strumLineNotes);*/
-
-  //if you use PSYCH 0.6.3 use this code
-  ModchartFuncs.loadLuaFunctions(); //add this if you want lua functions in scripts
-  //being used in psych engine as an example
-
+	//Add this before function create() (For Psych 0.7.1+)
+	var backupGpu:Bool;
+	//Add this before generateSong(); (For Psych 0.7.1+)
+	backupGpu = ClientPrefs.data.cacheOnGPU;
+	ClientPrefs.data.cacheOnGPU = false;
+	//Add this before camfollow stuff and after strumLineNotes and notes have been made
+	playfieldRenderer = new PlayfieldRenderer(strumLineNotes, notes, this);
+	playfieldRenderer.cameras = [camHUD];
+	add(playfieldRenderer);
+	add(grpNoteSplashes); /*place splashes in front (add this if the engine has splashes).
+	If you have added this: remove(or something) the add(grpNoteSplashes); which is by default below the add(strumLineNotes);*/
+	//if you use PSYCH 0.6.3 use this code
+	ModchartFuncs.loadLuaFunctions(); //add this if you want lua functions in scripts
+	//being used in psych engine as an example
 callOnLuas('onCreatePost', []);
       
   //Find this line and then add it
@@ -80,30 +80,29 @@ public function startCountdown():Void
   
   //add after generating strums
   NoteMovement.getDefaultStrumPos(this);
+//Find this line and then add it (For Psych 0.7.1+)
+override function destroy() {
+	ClientPrefs.data.cacheOnGPU = backupGpu;
 ```
 
 - In StrumNote.hx:
 ```haxe
 //Import FlxSkewedSprite at the top
 import flixel.addons.effects.FlxSkewedSprite;
-
 //change "FlxSprite" to "FlxSkewedSprite"
 class StrumNote extends FlxSkewedSprite
-
 ```
 
 - In Note.hx:
 ```haxe
 //Import FlxSkewedSprite at the top
 import flixel.addons.effects.FlxSkewedSprite;
-
 //change "FlxSprite" to "FlxSkewedSprite"
 class Note extends FlxSkewedSprite
 {
   //add these 2 variables for the renderer
   public var mesh:modcharting.SustainStrip = null;
   public var z:Float = 0;
-
 ```
 
 - In ModchartUtilities.hx (Leather Exclusive):
@@ -115,9 +114,7 @@ import modcharting.ModchartFuncs; //to fix any crash lmao
 #if desktop DiscordClient.addLuaCallbacks(this); #end
 ModchartFuncs.loadLuaFunctions(this); //add this if you want lua functions in scripts
 //being used in leather engine as an example
-
 callOnLuas('onCreate', []);
-
 ```
 
 - In FunkinLua.hx (Found in psychlua folder) (0.7.X exclusive!):
@@ -131,14 +128,11 @@ class FunkinLua
     #if desktop DiscordClient.addLuaCallbacks(this); #end
     ModchartFuncs.loadLuaFunctions(this); //add this if you want lua functions in scripts
     being used in psych engine as an example
-
-
 ```
 - In HScript (Found in psychlua folder) (0.7.X exclusive!)
 ``` haxe
 //under the function (PRESET!)
 //copy and paste this code if you use under SScript 6.1.80
-
 override function preset()
 {
 	set('Math', Math);
@@ -161,9 +155,7 @@ override function preset()
 	set('SustainStrip', modcharting.SustainStrip);
 	
 	modcharting.ModchartFuncs.loadHScriptFunctions(this);
-
 //--(else if you use SScript above or equal to version 6.1.80)--
-
 override function preset()
 {
 	set('Math', Math);
@@ -183,17 +175,13 @@ override function preset()
 	setClass(modcharting.PlayfieldRenderer);
 	setClass(modcharting.SimpleQuaternion);
 	setClass(modcharting.SustainStrip);
-
 	modcharting.ModchartFuncs.loadHScriptFunctions(this);
-
 //Function initMod -- Init's the mods functions for Hscript (found in psychlua)
 //Place this function anywhere in the HScript class!
-
 public function initMod(mod:modcharting.Modifier)
 {
 	call("initMod", [mod]);
 }
-
 ```
 - In Import.hx, you should copy what mine adds and paste it there
 
@@ -223,4 +211,3 @@ leave it as another value to use 0.6.3 edition
 
 
 3. Now if your game compiles successfully then you should be all good to go.
-
