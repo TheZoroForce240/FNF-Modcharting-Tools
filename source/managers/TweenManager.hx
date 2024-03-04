@@ -17,9 +17,11 @@ class TweenManager extends FlxTweenManager
 		}
 	}
 	public function bezierPathNumTween(Points:Array<Float>, Duration:Float = 1, ?Options:TweenOptions,?TweenFunction:Float->Void):BezierPathNumTween{
-		var tween = new BezierPathNumTween(Options, this);
-		tween.tween(Points, Duration, TweenFunction);
-		return add(tween);
+		@:privateAccess{
+			var tween = new BezierPathNumTween(Options, this);
+			tween.tween(Points, Duration, TweenFunction);
+			return add(tween);
+		}
 	}
 	/**
 	 * Tweens numeric public properties of an Object. Shorthand for creating a VarTween, starting it and adding it to the TweenManager.
