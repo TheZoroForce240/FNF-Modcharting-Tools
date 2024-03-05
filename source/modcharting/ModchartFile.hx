@@ -306,15 +306,15 @@ class ModchartFile
                     {
                         var scriptStr = File.getContent(folderShit + file);
                         var scriptInit:Dynamic = null;
-			#if (HScriptImproved && SCEModchartingTools)
+			#if HScriptImproved
 			//Only for SCE Ill add support for the editor later....
 			var justFilePlace = folderShit + file;
-                        var useHSI:Bool = (PlayState.SONG != null && PlayState.SONG.usesHSIScripts);
+                        var useHSI:Bool = #if SCEModchartingTools (PlayState.SONG != null && PlayState.SONG.usesHSIScripts) #else true #end;
                         if (useHSI)
                         {
                             scriptInit = codenameengine.scripting.Script.create(folderShit + file);
-                            if (states.PlayState.instance == flixel.FlxG.state)
-                                states.PlayState.instance.scripts.add(scriptInit);
+                            if (PlayState.instance == flixel.FlxG.state)
+                               PlayState.instance.scripts.add(scriptInit);
                             scriptInit.load();
                             hasImproved = true;
                         }else{
@@ -323,7 +323,7 @@ class ModchartFile
                         #else
                         scriptInit = #if (HSCRIPT_ALLOWED && PSYCH && PSYCHVERSION >= "0.7") new FunkinHScript(null, scriptStr) #else new CustomModifierScript(scriptStr) #end;
                         #end
-                        customModifiers.set(file.replace(".hx", "").replace("--HSI", ""), scriptInit);
+                        customModifiers.set(file.replace(".hx", ""), scriptInit);
                         trace('loaded custom mod: ' + file);
                     }
                 }
