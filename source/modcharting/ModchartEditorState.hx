@@ -1284,31 +1284,16 @@ class ModchartEditorState extends #if SCEModchartingTools states.MusicBeatState 
 
                 unspawnNotes.push(swagNote);
 
-		#if !SCEModchartingTools
-                var susLength:Float = swagNote.sustainLength;
-
-                susLength = susLength / Conductor.stepCrochet;
+                final susLength:Float = swagNote.sustainLength / Conductor.stepCrochet;
 				final floorSus:Int = Math.floor(susLength);
 
 				if(floorSus > 0) {
 					for (susNote in 0...floorSus + 1)
 					{
 						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
-		#else
-		var anotherCrochet:Float = Conductor.crochet;
-		var anotherStepCrochet:Float = anotherCrochet / 4;
-		var susLength:Float = swagNote.sustainLength;
-
-		susLength = susLength / anotherStepCrochet;
-
-				if(susLength > 0) {
-					for (susNote in 0...Std.int(Math.max(susLength, 2)))
-					{
-						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
-		#end
 
                         #if PSYCH
-						var sustainNote:Note = new Note(daStrumTime + #if !SCEModchartingTools (Conductor.stepCrochet #else (anotherStepCrochet #end * susNote), daNoteData, oldNote, true #if SCEModchartingTools , PlayState.SONG.arrowSkin  #end);
+						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote), daNoteData, oldNote, true #if SCEModchartingTools , PlayState.SONG.arrowSkin  #end);
                         sustainNote.mustPress = gottaHitNote;
                         #else 
                         var sustainNote:Note = new Note(daStrumTime + (Std.int(Conductor.stepCrochet) * susNote) + Std.int(Conductor.stepCrochet), daNoteData, oldNote, true, 0, songNotes[4], null, [0], gottaHitNote);
