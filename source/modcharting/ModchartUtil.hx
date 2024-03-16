@@ -75,6 +75,15 @@ class ModchartUtil
         #end
     }
 
+    public static function getIsPixelNotes(instance:ModchartMusicBeatState)
+    {
+        if (instance == null)
+            return false;
+        #if SCEModchartingTools
+        return PlayState.isPixelNotes;
+        #end
+    }
+
 
     public static function getIsPixelStage(instance:ModchartMusicBeatState)
     {

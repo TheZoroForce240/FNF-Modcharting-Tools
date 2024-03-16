@@ -149,7 +149,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     {
         strum.x = strumData.x;
         strum.y = strumData.y;
-        //strum.z = strumData.z;
+        strum.z = strumData.z;
         strum.angle = strumData.angle;
         strum.alpha = strumData.alpha;
         strum.scale.x = strumData.scaleX;
@@ -167,7 +167,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         var strumScaleY = NoteMovement.defaultScale[i];
         var strumSkewX = NoteMovement.defaultSkewX[i];
         var strumSkewY = NoteMovement.defaultSkewY[i];
-        if (ModchartUtil.getIsPixelStage(instance))
+        if (ModchartUtil.getIsPixelStage(instance) || ModchartUtil.getIsPixelNotes(instance))
         {
             //work on pixel stages
             strumScaleX = 1*PlayState.daPixelZoom;
@@ -205,17 +205,9 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         var noteSkewX = notes.members[noteIndex].skew.x;
         var noteSkewY = notes.members[noteIndex].skew.y;
 
-        var noteAlpha:Float = 1;
-        #if PSYCH
-            noteAlpha = notes.members[noteIndex].multAlpha;
-        #else 
-        if (notes.members[noteIndex].isSustainNote)
-            noteAlpha = 0.6;
-        else 
-            noteAlpha = 1;
-        #end
+        var noteAlpha:Float = #if PSYCH notes.members[noteIndex].multAlpha; #else notes.members[noteIndex].isSustainNote ? 0.6 : 1; #end
 
-        if (ModchartUtil.getIsPixelStage(instance))
+        if (ModchartUtil.getIsPixelStage(instance) || ModchartUtil.getIsPixelNotes(instance))
         {
             //work on pixel stages
             noteScaleX = 1*PlayState.daPixelZoom;
