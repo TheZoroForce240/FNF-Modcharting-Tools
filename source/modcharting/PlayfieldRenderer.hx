@@ -149,7 +149,9 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     {
         strum.x = strumData.x;
         strum.y = strumData.y;
+        #if SCEModchartingTools //Add Z to your StrumNote and take the #if out if you want it youself!
         strum.z = strumData.z;
+        #end
         strum.angle = strumData.angle;
         strum.alpha = strumData.alpha;
         strum.scale.x = strumData.scaleX;

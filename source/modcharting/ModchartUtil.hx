@@ -81,6 +81,8 @@ class ModchartUtil
             return false;
         #if SCEModchartingTools
         return PlayState.isPixelNotes;
+        #else
+        return false;
         #end
     }
 
