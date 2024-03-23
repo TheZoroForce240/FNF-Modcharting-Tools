@@ -1919,7 +1919,11 @@ class ArrowPath extends Modifier {
 
     override public function noteMath(noteData: NotePositionData, lane: Int, curPos: Float, pf: Int) {
         #if PSYCH 
-        if (Paths.fileExists("data/"+PlayState.SONG.song.toLowerCase()+"/customMods/path.txt", TEXT))
+	#if SCEModchartingTools
+        if (Paths.fileExists("data/songs/"+PlayState.SONG.song.toLowerCase()+"/customMods/path.txt", TEXT))
+	#else
+	if (Paths.fileExists("data/"+PlayState.SONG.song.toLowerCase()+"/customMods/path.txt", TEXT))
+	#end
         #elseif LEATHER 
         if (openfl.utils.Assets.exists(Paths.txt(PlayState.SONG.song.toLowerCase()+"/customMods/path")))
         #end
@@ -1946,9 +1950,19 @@ class ArrowPath extends Modifier {
             currentValue = 1.0; //the code that stop the mod from running gets confused when it resets in the editor i guess??
         }
     public function loadPath() {
-        var file = CoolUtil.coolTextFile(Paths#if PSYCH .modFolders #else .txt#end(#if PSYCH "data/"+#end PlayState.SONG.song.toLowerCase()+"/customMods/path"#if PSYCH +".txt"#end));
+        var file = null;
+	#if !SCEModchartingTools
+	file = CoolUtil.coolTextFile(Paths#if PSYCH .modFolders #else .txt#end(#if PSYCH "data/"+#end PlayState.SONG.song.toLowerCase()+"/customMods/path"#if PSYCH +".txt"#end));
+	#else			     
+	file = CoolUtil.coolTextFile(Paths.modFolders("data/songs/"+PlayState.SONG.song.toLowerCase()+"/customMods/path.txt"));
+	#end
         @:privateAccess
-        var file2 = CoolUtil.coolTextFile(#if (PSYCH && PSYCHVERSION >= "0.7.3") Paths.getSharedPath #else Paths.getPreloadPath #end("data/"+PlayState.SONG.song.toLowerCase()+"/customMods/path.txt"));
+        var file2 = null;
+	#if !SCEModchartingTools
+	file2 = CoolUtil.coolTextFile(#if (PSYCH && PSYCHVERSION >= "0.7.3") Paths.getSharedPath #else Paths.getPreloadPath #end("data/"+PlayState.SONG.song.toLowerCase()+"/customMods/path.txt"));
+	#else
+	file2 = CoolUtil.coolTextFile(Paths.getSharedPath("data/songs/"+PlayState.SONG.song.toLowerCase()+"/customMods/path.txt"));
+	#end
 
         var filePath = null;
         if (file != null) {
