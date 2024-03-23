@@ -5,7 +5,6 @@ import flixel.util.FlxPool;
 
 class NotePositionData implements IFlxDestroyable
 {
-
     static var pool:FlxPool<NotePositionData> = new FlxPool(NotePositionData);
 
     public var x:Float;
@@ -15,6 +14,8 @@ class NotePositionData implements IFlxDestroyable
     public var alpha:Float;
     public var scaleX:Float;
     public var scaleY:Float;
+    public var skewX:Float;
+    public var skewY:Float;
     public var curPos:Float;
     public var noteDist:Float;
     public var lane:Int;
@@ -31,15 +32,17 @@ class NotePositionData implements IFlxDestroyable
         return pool.get();
     }
 
-    public function setupStrum(x:Float, y:Float, z:Float, lane:Int, scaleX:Float, scaleY:Float, pf:Int)
+    public function setupStrum(x:Float, y:Float, z:Float, lane:Int, scaleX:Float, scaleY:Float, skewX:Float, skewY:Float, pf:Int)
     {
         this.x = x;
-        this.y =  y;
+        this.y = y;
         this.z = z;
         this.angle = 0;
         this.alpha = 1;
         this.scaleX = scaleX; 
         this.scaleY = scaleY; 
+        this.skewX = skewX; 
+        this.skewY = skewY; 
         this.index = lane;
         this.playfieldIndex = pf;
         this.lane = lane;
@@ -51,15 +54,17 @@ class NotePositionData implements IFlxDestroyable
         this.strumTime = 0;
     }
 
-    public function setupNote(x:Float, y:Float, z:Float, lane:Int, scaleX:Float, scaleY:Float, pf:Int, alpha:Float, curPos:Float, noteDist:Float, iaX:Float, iaY:Float, strumTime:Float, index:Int)
+    public function setupNote(x:Float, y:Float, z:Float, lane:Int, scaleX:Float, scaleY:Float, skewX:Float, skewY:Float, pf:Int, alpha:Float, curPos:Float, noteDist:Float, iaX:Float, iaY:Float, strumTime:Float, index:Int)
     {
         this.x = x;
-        this.y =  y;
+        this.y = y;
         this.z = z;
         this.angle = 0;
         this.alpha = alpha;
         this.scaleX = scaleX; 
         this.scaleY = scaleY; 
+        this.skewX = skewX; 
+        this.skewY = skewY; 
         this.index = index;
         this.playfieldIndex = pf;
         this.lane = lane;

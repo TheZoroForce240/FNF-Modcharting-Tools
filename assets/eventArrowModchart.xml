@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TextureAtlas imagePath="eventArrowModchart.png">
+<SubTexture name="idle0000" x="0" y="0" width="128" height="126" frameX="-3" frameY="-5" frameWidth="135" frameHeight="135" />
+</TextureAtlas>

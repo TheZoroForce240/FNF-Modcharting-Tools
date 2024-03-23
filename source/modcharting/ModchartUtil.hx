@@ -10,7 +10,10 @@ import flixel.FlxG;
 import states.PlayState;
 import game.Note;
 import game.Conductor;
-#else 
+#elseif (PSYCH && PSYCHVERSION >= "0.7")
+import states.PlayState;
+import objects.Note;
+#else
 import PlayState;
 import Note;
 #end
@@ -23,8 +26,10 @@ class ModchartUtil
     {
         //need to test each engine
         //not expecting all to work
-        #if PSYCH 
+        #if (PSYCH && !(PSYCHVERSION >= "0.7"))
         return ClientPrefs.downScroll;
+        #elseif (PSYCH && PSYCHVERSION >= "0.7")
+        return ClientPrefs.data.downScroll;
         #elseif LEATHER
         return utilities.Options.getData("downscroll");
         #elseif ANDROMEDA //dunno why youd use this on andromeda but whatever, already got its own cool modchart system
@@ -43,8 +48,10 @@ class ModchartUtil
     }
     public static function getMiddlescroll(instance:ModchartMusicBeatState)
     {
-        #if PSYCH 
+        #if (PSYCH && !(PSYCHVERSION >= "0.7"))
         return ClientPrefs.middleScroll;
+        #elseif (PSYCH && PSYCHVERSION >= "0.7")
+        return ClientPrefs.data.middleScroll;
         #elseif LEATHER
         return utilities.Options.getData("middlescroll");
         #else 
@@ -65,6 +72,17 @@ class ModchartUtil
         return PlayStateChangeables.scrollSpeed == 1 ? PlayState.SONG.speed : PlayStateChangeables.scrollSpeed;
         #else 
         return PlayState.SONG.speed; //most engines just use this
+        #end
+    }
+
+    public static function getIsPixelNotes(instance:ModchartMusicBeatState)
+    {
+        if (instance == null)
+            return false;
+        #if SCEModchartingTools
+        return PlayState.isPixelNotes;
+        #else
+        return false;
         #end
     }
 
@@ -119,7 +137,6 @@ class ModchartUtil
         return (daNote.isSustainNote ? 37 : 0); //the magic number
         #end
     }
-    
 
     static var currentFakeCrochet:Float = -1;
     static var lastBpm:Float = -1;

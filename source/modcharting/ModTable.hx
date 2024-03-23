@@ -64,7 +64,8 @@ class ModTable
         add(new YModifier('y'));
         add(new ZModifier('z'));
         add(new ConfusionModifier('confusion'));
-        for (i in 0...((NoteMovement.keyCount+NoteMovement.playerKeyCount)))
+    
+        for (i in 0...(NoteMovement.keyCount+NoteMovement.playerKeyCount))
         {
             add(new XModifier('x'+i, ModifierType.LANESPECIFIC));
             add(new YModifier('y'+i, ModifierType.LANESPECIFIC));
@@ -169,7 +170,7 @@ class ModTable
                 return;
             }
             time /= renderer.speed;
-            var tween = renderer.tweenManager.tween(modifiers.get(modifier), {currentValue: val}, time, {ease: easefunc,
+            var tween = renderer.createTween(modifiers.get(modifier), {currentValue: val}, time, {ease: easefunc,
                 onComplete: function(twn:FlxTween) {
     
                 }
@@ -204,7 +205,7 @@ class ModTable
                     return;
                 }
                 time /= renderer.speed;
-                var tween = renderer.tweenManager.num(startValue, val, time, {ease: easefunc,
+                var tween = renderer.createTweenNum(startValue, val, time, {ease: easefunc,
                     onComplete: function(twn:FlxTween) {
                         if (modifiers.exists(modifier))
                             modifiers.get(modifier).subValues.get(subValue).value = val;
